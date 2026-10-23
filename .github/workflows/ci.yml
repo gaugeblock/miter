@@ -40,8 +40,11 @@ jobs:
       - name: cargo clippy --workspace --all-targets --all-features -- -D warnings
         run: cargo clippy --workspace --all-targets --all-features -- -D warnings
 
-      - name: cargo test --workspace --all-targets
-        run: cargo test --workspace --all-targets
+      - name: Install nextest
+        uses: taiki-e/install-action@nextest
+
+      - name: cargo nextest run --workspace --all-targets --profile ci
+        run: cargo nextest run --workspace --all-targets --profile ci
 
       # nextest runs no doctests, so the doc examples are a separate pass rather than a gap.
       - name: cargo test --doc --workspace

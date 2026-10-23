@@ -48,3 +48,7 @@ slow-timeout = { period = "600s", terminate-after = 2 }
 # binary and forgets to reap it would otherwise be reported as leaky only after the default
 # timeout expires.
 leak-timeout = "200ms"
+
+[profile.ci]
+junit = { path = "target/nextest/junit.xml" }
+failure-output = "immediate-final"
