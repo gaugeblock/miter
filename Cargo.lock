@@ -304,7 +304,7 @@ dependencies = [
  "fnv",
  "hcl-primitives",
  "vecmap-rs",
- "winnow 0.7.15",
+ "winnow",
 ]
 
 [[package]]
@@ -729,11 +729,11 @@ dependencies = [
 
 [[package]]
 name = "serde_spanned"
-version = "1.1.2"
+version = "0.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e7523beb55eece201a2356bee0bbca0d1ab466c14c07703b2e0ee6d42cb0c2c"
+checksum = "bf41e0cfaf7226dca15e8197172c295a782857fcb97fad1808a166870dee75a3"
 dependencies = [
- "serde_core",
+ "serde",
 ]
 
 [[package]]
@@ -949,42 +949,44 @@ dependencies = [
 
 [[package]]
 name = "toml"
-version = "1.1.8+spec-1.1.0"
+version = "0.8.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20489e00e4d8741d6be680764cc12e270655e375a20d1011e844a9c3379e678d"
+checksum = "dc1beb996b9d83529a9e75c17a1686767d148d70663143c7854d8b4a09ced362"
 dependencies = [
- "indexmap",
- "serde_core",
+ "serde",
  "serde_spanned",
  "toml_datetime",
- "toml_parser",
- "toml_writer",
- "winnow 1.0.4",
+ "toml_edit",
 ]
 
 [[package]]
 name = "toml_datetime"
-version = "1.1.2+spec-1.1.0"
+version = "0.6.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b86d767906c6c42421dcba507eb9d203e779497710a47782a224bb871653053"
+checksum = "22cddaf88f4fbc13c51aebbf5f8eceb5c7c5a9da2ac40a13519eb5b0a0e8f11c"
 dependencies = [
- "serde_core",
+ "serde",
 ]
 
 [[package]]
-name = "toml_parser"
-version = "1.1.5+spec-1.1.0"
+name = "toml_edit"
+version = "0.22.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "baa693a8032d7e1cada7d0041e96126df243179ff061456783ac7f12bda4744c"
+checksum = "41fe8c660ae4257887cf66394862d21dbca4a6ddd26f04a3560410406a2f819a"
 dependencies = [
- "winnow 1.0.4",
+ "indexmap",
+ "serde",
+ "serde_spanned",
+ "toml_datetime",
+ "toml_write",
+ "winnow",
 ]
 
 [[package]]
-name = "toml_writer"
-version = "1.1.3+spec-1.1.0"
+name = "toml_write"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06bdbd8cfc056b8d2e2e85f29b56a3bdbecb527cef81eb39e3e7b98af4652770"
+checksum = "5d99f8c9a7727884afe522e9bd5edbfc91a3312b36a77b5fb8926e4c31a41801"
 
 [[package]]
 name = "tracing"
@@ -1279,13 +1281,127 @@ dependencies = [
 ]
 
 [[package]]
-name = "winnow"
-version = "1.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23b97319f7b8343df12cc98938e5c3eb436064524c8d2b4e30a1d3a36eecdf81"
-
-[[package]]
 name = "zmij"
 version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b"
+
+[[patch.unused]]
+name = "batten"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "batten-cli"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "batten-core"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "batten-mcp"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "benchwork"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "benchwork-cli"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "benchwork-core"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "benchwork-mcp"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "chalkline"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "chalkline-cli"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "chalkline-core"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "chalkline-mcp"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "dado"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "dado-cli"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "dado-core"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "dado-mcp"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "joiner"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "joiner-cli"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "joiner-core"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "joiner-mcp"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "rabbet"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "rabbet-cli"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "rabbet-core"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "sawhorse"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "sawhorse-cli"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "sawhorse-core"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "storypole"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "storypole-cli"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "storypole-core"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "storypole-mcp"
+version = "0.1.0-beta.1"
