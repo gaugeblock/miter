@@ -486,6 +486,7 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "sqlparser",
+ "thiserror 2.0.21",
  "toml",
  "tree-sitter",
 ]

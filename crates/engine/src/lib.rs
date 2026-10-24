@@ -10,6 +10,7 @@ pub mod codec;
 pub mod config;
 pub mod hydrate;
 pub mod ingest;
+pub mod inventory;
 pub mod persist;
 pub mod polyglot;
 pub mod security;
@@ -38,6 +39,11 @@ pub use hydrate::{
     hydrate_symbol_context, hydrate_symbol_context_with,
 };
 pub use ingest::PolyglotIngest;
+pub use inventory::{
+    CliArgInventory, CliCommandInventory, CrateInventory, GitInventory, InventoryError,
+    PublicTypeInventory, ToolchainInventory, WorkspaceInventory, extract_cargo_inventory,
+    extract_cli_inventory, extract_git_inventory, extract_public_types, inspect_workspace,
+};
 pub use miter_ast::{FunctionSymbol, Language};
 pub use miter_storage::{
     ReferenceEntry, ReferenceKind, StorageError, WorkspaceStore, default_db_path,
