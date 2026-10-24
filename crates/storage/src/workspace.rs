@@ -36,19 +36,28 @@ pub const WORKSPACE_DIR: &str = ".miter";
 /// The database inside [`WORKSPACE_DIR`].
 pub const INDEX_FILE: &str = "miter.redb";
 
-/// The database path for a workspace root: `<workspace_root>/.miter/miter.redb`.
+/// The database path for a workspace root: `<workspace_root>/.gaugeblock/miter/miter.redb` (preferred)
+/// or `<workspace_root>/.miter/miter.redb` (legacy fallback).
 #[must_use]
 pub fn default_db_path(workspace_root: &Path) -> PathBuf {
-    workspace_root.join(WORKSPACE_DIR).join(INDEX_FILE)
+    let unified = workspace_root.join(".gaugeblock").join("miter").join(INDEX_FILE);
+    let legacy = workspace_root.join(WORKSPACE_DIR).join(INDEX_FILE);
+    if unified.exists() {
+        unified
+    } else if legacy.exists() {
+        legacy
+    } else if workspace_root.join(".gaugeblock").is_dir() {
+        unified
+    } else {
+        legacy
+    }
 }
 
 /// The markers an upward search accepts.
 ///
-/// `.miter` outranks `.git` *at the same level*: a repository that has been initialized keeps its
-/// own root even if the surrounding tree is also a repository. The order is not a preference
-/// between the two across levels — the nearest marker of either kind wins, which is what makes a
-/// nested checkout its own workspace.
-pub const ROOT_MARKERS: [&str; 2] = [WORKSPACE_DIR, ".git"];
+/// `.gaugeblock` and `.miter` outrank `.git` *at the same level*: a repository that has been initialized keeps its
+/// own root even if the surrounding tree is also a repository.
+pub const ROOT_MARKERS: [&str; 3] = [".gaugeblock", WORKSPACE_DIR, ".git"];
 
 /// Walks up from `start_dir` to the nearest directory that looks like a project root.
 ///

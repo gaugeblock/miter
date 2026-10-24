@@ -73,11 +73,36 @@ impl MiterConfig {
     /// Loads configuration from the workspace root.
     ///
     /// Precedence:
-    /// 1. `<workspace_root>/.miter/config.toml`
-    /// 2. `<workspace_root>/miter.toml`
-    /// 3. Default fallback
+    /// 1. `<workspace_root>/.gaugeblock/config.toml` (`[miter]` section)
+    /// 2. `<workspace_root>/.gaugeblock/miter/config.toml`
+    /// 3. `<workspace_root>/.miter/config.toml`
+    /// 4. `<workspace_root>/miter.toml`
+    /// 5. Default fallback
     #[must_use]
     pub fn load_from_workspace(workspace_root: &Path) -> Self {
+        let unified_config = workspace_root.join(".gaugeblock").join("config.toml");
+        if unified_config.is_file()
+            && let Ok(content) = std::fs::read_to_string(&unified_config)
+        {
+            #[derive(serde::Deserialize)]
+            struct Unified {
+                miter: Option<MiterConfig>,
+            }
+            if let Ok(u) = toml::from_str::<Unified>(&content)
+                && let Some(c) = u.miter
+            {
+                return c;
+            }
+        }
+
+        let gb_miter = workspace_root.join(".gaugeblock").join("miter").join("config.toml");
+        if gb_miter.is_file()
+            && let Ok(content) = std::fs::read_to_string(&gb_miter)
+            && let Ok(config) = toml::from_str(&content)
+        {
+            return config;
+        }
+
         let dot_miter = workspace_root.join(".miter").join("config.toml");
         if dot_miter.is_file()
             && let Ok(content) = std::fs::read_to_string(&dot_miter)
