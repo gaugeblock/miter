@@ -445,7 +445,7 @@ dependencies = [
 
 [[package]]
 name = "miter-ast"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.3"
 dependencies = [
  "indicatif",
  "tree-sitter",
@@ -456,7 +456,7 @@ dependencies = [
 
 [[package]]
 name = "miter-cli"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.3"
 dependencies = [
  "clap",
  "indicatif",
@@ -473,7 +473,7 @@ dependencies = [
 
 [[package]]
 name = "miter-engine"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.3"
 dependencies = [
  "dockerfile-parser",
  "globset",
@@ -493,7 +493,7 @@ dependencies = [
 
 [[package]]
 name = "miter-harness"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.3"
 dependencies = [
  "serde",
  "serde_json",
@@ -504,7 +504,7 @@ dependencies = [
 
 [[package]]
 name = "miter-mcp"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.3"
 dependencies = [
  "miter-engine",
  "miter-harness",
@@ -517,7 +517,7 @@ dependencies = [
 
 [[package]]
 name = "miter-storage"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.3"
 dependencies = [
  "redb",
  "serde",
@@ -1220,120 +1220,120 @@ checksum = "29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b"
 
 [[patch.unused]]
 name = "batten"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "batten-cli"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "batten-core"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "batten-mcp"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "benchwork"
-version = "0.1.0-beta.2"
+version = "0.1.0-beta.3"
 
 [[patch.unused]]
 name = "benchwork-cli"
-version = "0.1.0-beta.2"
+version = "0.1.0-beta.3"
 
 [[patch.unused]]
 name = "benchwork-core"
-version = "0.1.0-beta.2"
+version = "0.1.0-beta.3"
 
 [[patch.unused]]
 name = "benchwork-mcp"
-version = "0.1.0-beta.2"
+version = "0.1.0-beta.3"
 
 [[patch.unused]]
 name = "chalkline"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "chalkline-cli"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "chalkline-core"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "chalkline-mcp"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "dado"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "dado-cli"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "dado-core"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "dado-mcp"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "joiner"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "joiner-cli"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "joiner-core"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "joiner-mcp"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "rabbet"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "rabbet-cli"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "rabbet-core"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "sawhorse"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "sawhorse-cli"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "sawhorse-core"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "storypole"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "storypole-cli"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "storypole-core"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "storypole-mcp"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
