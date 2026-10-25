@@ -8,6 +8,7 @@
 //! - Toolchain definitions (`rust-toolchain.toml`, `package.json`)
 
 pub mod cargo_extractor;
+pub mod cargo_parser;
 pub mod clap_extractor;
 pub mod error;
 pub mod git_extractor;

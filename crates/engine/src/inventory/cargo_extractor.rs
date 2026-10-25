@@ -1,9 +1,9 @@
 //! Cargo workspace and package manifest extractor.
 
-use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use crate::inventory::cargo_parser::{collect_member_crates, parse_single_crate};
 use crate::inventory::error::InventoryError;
 use crate::inventory::toolchain_extractor::extract_toolchain;
 use crate::inventory::types::{CrateInventory, ToolchainInventory};
@@ -23,10 +23,7 @@ pub struct CargoExtraction {
 pub fn extract_cargo_inventory(root_dir: &Path) -> Result<CargoExtraction, InventoryError> {
     let manifest_path = root_dir.join("Cargo.toml");
     if !manifest_path.is_file() {
-        return Err(InventoryError::InvalidWorkspace(format!(
-            "Missing Cargo.toml at {}",
-            root_dir.display()
-        )));
+        return discover_multi_repo_cargo(root_dir);
     }
 
     let manifest_str = fs::read_to_string(&manifest_path)?;
@@ -109,122 +106,48 @@ pub fn extract_cargo_inventory(root_dir: &Path) -> Result<CargoExtraction, Inven
     })
 }
 
-fn collect_member_crates(
-    root: &Path,
-    pattern: &str,
-    ws_version: Option<&str>,
-    ws_license: Option<&str>,
-    crates: &mut Vec<CrateInventory>,
-) -> Result<(), InventoryError> {
-    if pattern.ends_with("/*") {
-        let parent = pattern.trim_end_matches("/*");
-        let parent_path = root.join(parent);
-        if parent_path.is_dir() {
-            for entry in fs::read_dir(parent_path)? {
-                let entry = entry?;
-                let path = entry.path();
-                let manifest = path.join("Cargo.toml");
-                if manifest.is_file() {
-                    let rel = path
-                        .strip_prefix(root)
-                        .map_err(|e| InventoryError::InvalidWorkspace(e.to_string()))?;
-                    if let Ok(c) = read_crate_manifest(root, rel, ws_version, ws_license) {
-                        crates.push(c);
-                    }
+fn discover_multi_repo_cargo(root_dir: &Path) -> Result<CargoExtraction, InventoryError> {
+    let mut all_crates = Vec::new();
+    let mut toolchain = ToolchainInventory::default();
+
+    let entries = fs::read_dir(root_dir).map_err(|_| {
+        InventoryError::InvalidWorkspace(format!("Missing Cargo.toml at {}", root_dir.display()))
+    })?;
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() && path.join("Cargo.toml").is_file() {
+            let child_name = entry.file_name();
+            let child_rel = PathBuf::from(&child_name);
+            if let Ok(sub_ext) = extract_cargo_inventory(&path) {
+                if toolchain.rust_edition.is_none() && sub_ext.toolchain.rust_edition.is_some() {
+                    toolchain = sub_ext.toolchain;
+                }
+                for mut cr in sub_ext.crates {
+                    cr.relative_path = child_rel.join(&cr.relative_path);
+                    all_crates.push(cr);
                 }
             }
         }
-    } else {
-        let path = root.join(pattern);
-        let manifest = path.join("Cargo.toml");
-        if manifest.is_file() {
-            let rel = Path::new(pattern);
-            if let Ok(c) = read_crate_manifest(root, rel, ws_version, ws_license) {
-                crates.push(c);
-            }
-        }
-    }
-    Ok(())
-}
-
-fn read_crate_manifest(
-    root: &Path,
-    rel: &Path,
-    ws_version: Option<&str>,
-    ws_license: Option<&str>,
-) -> Result<CrateInventory, InventoryError> {
-    let full_path = root.join(rel).join("Cargo.toml");
-    let content = fs::read_to_string(full_path)?;
-    let parsed: toml::Value = toml::from_str(&content)?;
-
-    let pkg = parsed
-        .get("package")
-        .ok_or_else(|| InventoryError::InvalidWorkspace("missing [package]".into()))?;
-
-    Ok(parse_single_crate(
-        root,
-        rel,
-        pkg,
-        parsed.get("dependencies"),
-        ws_version,
-        ws_license,
-    ))
-}
-
-fn parse_single_crate(
-    root: &Path,
-    rel: &Path,
-    pkg: &toml::Value,
-    deps_val: Option<&toml::Value>,
-    ws_version: Option<&str>,
-    ws_license: Option<&str>,
-) -> CrateInventory {
-    let name = pkg
-        .get("name")
-        .and_then(|n| n.as_str())
-        .unwrap_or("unknown")
-        .to_string();
-
-    let version = pkg
-        .get("version")
-        .and_then(|v| v.as_str())
-        .or(ws_version)
-        .unwrap_or("0.0.0")
-        .to_string();
-
-    let description = pkg
-        .get("description")
-        .and_then(|d| d.as_str())
-        .map(String::from);
-    let license = pkg
-        .get("license")
-        .and_then(|l| l.as_str())
-        .or(ws_license)
-        .map(String::from);
-
-    let mut dependencies = HashMap::new();
-    if let Some(deps) = deps_val.and_then(|d| d.as_table()) {
-        for (dep_name, dep_info) in deps {
-            let ver = if let Some(s) = dep_info.as_str() {
-                s.to_string()
-            } else if let Some(v) = dep_info.get("version").and_then(|v| v.as_str()) {
-                v.to_string()
-            } else {
-                "workspace".to_string()
-            };
-            dependencies.insert(dep_name.clone(), ver);
-        }
     }
 
-    let has_binary = root.join(rel).join("src").join("main.rs").is_file();
-
-    CrateInventory {
-        name,
-        version,
-        relative_path: PathBuf::from(rel),
-        description,
-        license,
-        dependencies,
-        has_binary,
+    if all_crates.is_empty() {
+        return Err(InventoryError::InvalidWorkspace(format!(
+            "Missing Cargo.toml at {}",
+            root_dir.display()
+        )));
     }
+
+    all_crates.sort_by(|a, b| a.name.cmp(&b.name));
+    all_crates.dedup_by(|a, b| a.name == b.name);
+
+    let workspace_name = root_dir
+        .file_name()
+        .map(|n| n.to_string_lossy().to_string());
+
+    Ok(CargoExtraction {
+        workspace_name,
+        crates: all_crates,
+        toolchain,
+    })
 }
