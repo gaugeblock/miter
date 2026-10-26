@@ -445,7 +445,7 @@ dependencies = [
 
 [[package]]
 name = "miter-ast"
-version = "0.1.0-alpha.4"
+version = "0.1.0-beta.1"
 dependencies = [
  "indicatif",
  "tree-sitter",
@@ -456,7 +456,7 @@ dependencies = [
 
 [[package]]
 name = "miter-cli"
-version = "0.1.0-alpha.4"
+version = "0.1.0-beta.1"
 dependencies = [
  "clap",
  "indicatif",
@@ -473,7 +473,7 @@ dependencies = [
 
 [[package]]
 name = "miter-engine"
-version = "0.1.0-alpha.4"
+version = "0.1.0-beta.1"
 dependencies = [
  "dockerfile-parser",
  "globset",
@@ -493,7 +493,7 @@ dependencies = [
 
 [[package]]
 name = "miter-harness"
-version = "0.1.0-alpha.4"
+version = "0.1.0-beta.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -504,7 +504,7 @@ dependencies = [
 
 [[package]]
 name = "miter-mcp"
-version = "0.1.0-alpha.4"
+version = "0.1.0-beta.1"
 dependencies = [
  "miter-engine",
  "miter-harness",
@@ -517,7 +517,7 @@ dependencies = [
 
 [[package]]
 name = "miter-storage"
-version = "0.1.0-alpha.4"
+version = "0.1.0-beta.1"
 dependencies = [
  "redb",
  "serde",
@@ -1236,19 +1236,19 @@ version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "benchwork"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "benchwork-cli"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "benchwork-core"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "benchwork-mcp"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "chalkline"
