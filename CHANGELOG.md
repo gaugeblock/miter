@@ -18,6 +18,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `miter-engine`: discover member workspaces in multi-repo meta-harness layout (GB-42)
 
+## [v0.1.0-alpha.3] - 2026-10-24
+
+### Added
+- `miter-storage`: support unified `.gaugeblock/miter` database and config resolution (GB-36).
+- `miter-engine`: implement `WorkspaceInventory` AST and Cargo extractors for 9-document architecture (GB-18).
+
+### Changed
+- Refactored dependencies: upgraded `redb` to 4.4, `toml` to 1.1, `indicatif` to 0.18, and `hcl-rs` to 0.19.
+- Harmonized `clap` (4.5) and `tokio` (1.43) across workspace.
+
 ## [0.1.0-alpha.2] - 2026-10-14
 
 ### Fixed
