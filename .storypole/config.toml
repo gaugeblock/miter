@@ -1,0 +1,5 @@
+ticket_prefix = "MTR"
+allowed_repos = []
+allowed_crates = []
+claim_ttl_minutes = 60
+verification_commands = []
