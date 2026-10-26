@@ -445,7 +445,7 @@ dependencies = [
 
 [[package]]
 name = "miter-ast"
-version = "0.1.0-alpha.3"
+version = "0.1.0-alpha.4"
 dependencies = [
  "indicatif",
  "tree-sitter",
@@ -456,7 +456,7 @@ dependencies = [
 
 [[package]]
 name = "miter-cli"
-version = "0.1.0-alpha.3"
+version = "0.1.0-alpha.4"
 dependencies = [
  "clap",
  "indicatif",
@@ -473,7 +473,7 @@ dependencies = [
 
 [[package]]
 name = "miter-engine"
-version = "0.1.0-alpha.3"
+version = "0.1.0-alpha.4"
 dependencies = [
  "dockerfile-parser",
  "globset",
@@ -493,7 +493,7 @@ dependencies = [
 
 [[package]]
 name = "miter-harness"
-version = "0.1.0-alpha.3"
+version = "0.1.0-alpha.4"
 dependencies = [
  "serde",
  "serde_json",
@@ -504,7 +504,7 @@ dependencies = [
 
 [[package]]
 name = "miter-mcp"
-version = "0.1.0-alpha.3"
+version = "0.1.0-alpha.4"
 dependencies = [
  "miter-engine",
  "miter-harness",
@@ -517,7 +517,7 @@ dependencies = [
 
 [[package]]
 name = "miter-storage"
-version = "0.1.0-alpha.3"
+version = "0.1.0-alpha.4"
 dependencies = [
  "redb",
  "serde",
@@ -1299,6 +1299,22 @@ name = "joiner-mcp"
 version = "0.1.0-beta.2"
 
 [[patch.unused]]
+name = "outfeed"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "outfeed-cli"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "outfeed-core"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
+name = "outfeed-mcp"
+version = "0.1.0-beta.1"
+
+[[patch.unused]]
 name = "rabbet"
 version = "0.1.0-beta.2"
 
@@ -1312,15 +1328,15 @@ version = "0.1.0-beta.2"
 
 [[patch.unused]]
 name = "sawhorse"
-version = "0.1.0-beta.2"
+version = "0.1.0-beta.3"
 
 [[patch.unused]]
 name = "sawhorse-cli"
-version = "0.1.0-beta.2"
+version = "0.1.0-beta.3"
 
 [[patch.unused]]
 name = "sawhorse-core"
-version = "0.1.0-beta.2"
+version = "0.1.0-beta.3"
 
 [[patch.unused]]
 name = "storypole"
