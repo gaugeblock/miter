@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.1.0-beta.3] - 2026-05-09
+
+### Added
+- No changes.
+
+### Fixed
+- No changes.
+
+### Changed
+- miter: Standardized the README and established the 9-doc architecture for consistent project documentation.
+
+### Maintenance
+- miter: Aligned documentation structure and maintenance guidance across the repository.
+
 ### Documentation
 - Standardize README to 9-section template and establish AST-grounded 9-document architecture
 
