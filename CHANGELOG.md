@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+
+## [v0.1.0-beta.2] - 2026-10-27
+
+### Maintenance
+- `storypole`: migrate scoped tasks and design plans
+- `storypole`: initialize local backlog store with prefix MTR
+- `changelog`: update release history with alpha and beta milestones
+
 ## [v0.1.0-beta.1] - 2026-10-26
 
 ### Changed
