@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [Unreleased]
+
+### Documentation
+- Standardize README to 9-section template and establish AST-grounded 9-document architecture
+
 ## [v0.1.0-beta.2] - 2026-10-27
 
 ### Maintenance

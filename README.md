@@ -1,4 +1,13 @@
-# miter
+# `miter` — AST Slicing, Cross-Language Contracts & Verification Engine
+
+[![Version](https://img.shields.io/badge/version-0.1.0--beta.2-blue.svg)](https://gaugeblock.dev)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
+[![gaugeblock](https://img.shields.io/badge/suite-gaugeblock-orange.svg)](https://github.com/gaugeblock)
+[![Documentation](https://img.shields.io/badge/docs-9--doc%20topology-green.svg)](ARCHITECTURE.md)
+
+Part of the **[`gaugeblock`](https://gaugeblock.dev)** neurosymbolic code synthesis ecosystem.
+
+> In fine woodworking, a **miter** joint joins two workpieces at precise complementary angles, demanding exact tolerances and flawless alignment. In the `gaugeblock` suite, `miter` establishes precise architectural boundaries: it slices ASTs, indexes lexical scopes, audits line-count ceilings, redact secrets, and verifies compiler error diagnostics before code is committed.
 
 **Give your AI coding agent X-ray vision instead of `grep`.**
 
@@ -399,6 +408,17 @@ always applied on top of the configured patterns.
   symbol that does not exist is `NotFound`; a record with the wrong magic or version is refused.
 - **Files stay small.** No source file exceeds 250 lines; `miter audit` enforces it and modules are
   decomposed before they reach it.
+
+---
+
+## Repository Documentation
+
+`miter` adheres strictly to the canonical **9-Document Architecture**:
+* **[`CONTRIBUTING.md`](./CONTRIBUTING.md):** Local toolchain setup, developer prerequisites, and test execution.
+* **[`ARCHITECTURE.md`](./ARCHITECTURE.md):** Internal sub-crate topologies, redb storage engine, and query pipelines.
+* **[`SPEC.md`](./SPEC.md):** Behavioral invariants, wire schemas, redb table layouts, and error codes.
+* **[`AGENTS.md`](./AGENTS.md):** Non-negotiable engineering directives, file-size ceilings, and verification gates.
+* **[`CHANGELOG.md`](./CHANGELOG.md):** Chronological historical release entries and unreleased changes.
 
 ---
 
