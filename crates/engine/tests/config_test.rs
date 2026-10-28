@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Tests for `miter` workspace configuration, inheritance, precedence, and glob matching.
 
 use miter_engine::config::{MiterConfig, is_path_excluded};

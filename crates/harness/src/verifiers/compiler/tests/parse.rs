@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! The diagnostic parsers, against captured compiler output.
 
 use super::super::span::offset_of;

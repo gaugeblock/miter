@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Unit tests for Polyglot Contract Bridge.
 
 use super::contracts::{

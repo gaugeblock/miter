@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! The canonical table definitions: the names are the on-disk contract, and the layouts are the
 //! ones `engine` has always written.
 //!

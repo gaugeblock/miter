@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Shared fixtures: one throwaway repository per test.
 
 use std::path::{Path, PathBuf};

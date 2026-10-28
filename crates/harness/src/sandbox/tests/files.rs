@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! The file surface: writing a patch, reading it back, diffing and merging.
 
 use std::path::Path;

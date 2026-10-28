@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! What a Rust source file yields: names, parameters, return types and provenance.
 
 use std::path::Path;

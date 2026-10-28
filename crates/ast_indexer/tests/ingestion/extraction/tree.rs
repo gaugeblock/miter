@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Walking a real directory tree: depths, discovery and the encoding budget.
 
 use std::path::{Path, PathBuf};

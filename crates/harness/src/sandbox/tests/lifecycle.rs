@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! The worktree lifecycle: create, retire, refuse.
 
 use super::fixtures::{fixture_repo, remove_repo, unique_dir};

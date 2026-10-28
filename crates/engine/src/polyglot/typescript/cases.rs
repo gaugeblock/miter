@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 #[cfg(test)]
 mod typescript_tests {
     use super::super::*;

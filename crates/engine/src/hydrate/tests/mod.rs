@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Hydration tests: the context, its neighbourhood, its refusals and its scoped forms.
 //!
 //! The corpus and the engine builder are shared by every module below.

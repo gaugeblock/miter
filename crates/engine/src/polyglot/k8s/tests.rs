@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Kubernetes, Compose and Litestream extraction, including secret redaction.
 
 use std::path::Path;

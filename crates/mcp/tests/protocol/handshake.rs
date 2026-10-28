@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! The JSON-RPC envelope: initialize, tools/list and the stdio loop.
 
 use std::path::PathBuf;

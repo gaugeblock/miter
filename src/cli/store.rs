@@ -34,6 +34,8 @@ pub(crate) fn load(path: &Path) -> Result<Engine, CliError> {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unwrap_used, clippy::expect_used)]
+
     use super::*;
     use std::path::PathBuf;
 

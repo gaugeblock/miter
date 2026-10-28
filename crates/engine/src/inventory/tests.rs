@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Unit tests for workspace inventory extraction.
 
 use std::fs;

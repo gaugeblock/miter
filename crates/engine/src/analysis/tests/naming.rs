@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Candidate naming, root retention and comment elevation.
 
 use std::path::Path;

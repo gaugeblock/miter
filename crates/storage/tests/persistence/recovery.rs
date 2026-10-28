@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! The schema handshake and its recovery.
 //!
 //! Three files, three outcomes:

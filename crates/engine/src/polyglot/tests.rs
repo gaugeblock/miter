@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 use crate::polyglot::*;
 use std::path::Path;
 

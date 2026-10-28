@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Fixtures: captured tool output, and a crate that does not compile.
 
 use std::path::PathBuf;

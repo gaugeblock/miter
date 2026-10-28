@@ -13,14 +13,15 @@ version = "0.1.0-beta.4"
 edition = "2024"
 rust-version = "1.90"
 license = "Apache-2.0"
-authors = ["Colin Wolff"]
+authors = ["Colin Wolff <1562545+colinwolff@users.noreply.github.com>"]
 description = "Deterministic AST co-processor and Model Context Protocol (MCP) server"
 keywords = ["ast", "mcp", "tree-sitter", "refactoring", "code-analysis"]
 categories = ["development-tools", "command-line-utilities"]
 # `repository`/`homepage` are what `cargo publish` looks for when it warns that a manifest
 # "has no documentation, homepage or repository"; both name the canonical remote.
-repository = "https://github.com/colinwolff/miter"
-homepage = "https://github.com/colinwolff/miter"
+repository = "https://github.com/gaugeblock/miter"
+homepage = "https://gaugeblock.dev"
+readme = "README.md"
 
 [workspace.dependencies]
 miter-ast = { path = "crates/ast_indexer", version = "0.1.0-alpha.3" }
@@ -69,6 +70,10 @@ toml = "1.1"
 unsafe_code = "deny"
 missing_debug_implementations = "warn"
 unreachable_pub = "warn"
+
+[workspace.lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
 
 [package]
 # The *crate* is `miter-cli`: the bare name `miter` is taken on crates.io. The *binary* it

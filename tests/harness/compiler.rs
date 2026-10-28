@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! The compiler check, end to end, against a real `cargo check`.
 
 use std::sync::Arc;

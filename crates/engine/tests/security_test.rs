@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Automated tests for AST-aware secret protection and egress sanitization.
 
 use miter_engine::{

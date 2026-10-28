@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! The line-count auditor, against a real temporary tree.
 
 use std::fs;

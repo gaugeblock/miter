@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Workspace root resolution and the database inside it.
 //!
 //! The criteria: an upward search finds the *nearest* marker, `.miter/` outranks a `.git/` at the

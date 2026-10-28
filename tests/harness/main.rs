@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! The verification suite: `miter verify` end to end.
 //!
 //! One binary. The unit suites inside `crates/harness` test the diagnostic parsers and the

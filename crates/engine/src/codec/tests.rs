@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Round-trip and refusal tests for both record shapes.
 
 mod symbol_tests {

@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! The seam slicer: blueprints, candidate naming and symbol retention.
 
 use std::path::Path;

@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! TypeScript ingestion.
 //!
 //! This module proves the TS half of the crate's extraction contract end to end.

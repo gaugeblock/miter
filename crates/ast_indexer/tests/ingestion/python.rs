@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Python ingestion.
 //!
 //! This module proves the parameter shapes the grammar presents are read into a name

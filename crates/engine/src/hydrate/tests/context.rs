@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! The hydrated context: facts, members and the rendered sections.
 
 use super::*;

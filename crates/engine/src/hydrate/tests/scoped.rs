@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Module- and package-scoped hydration.
 
 use super::*;

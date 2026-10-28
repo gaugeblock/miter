@@ -1,6 +1,6 @@
 # `miter` — AST Slicing, Cross-Language Contracts & Verification Engine
 
-[![Version](https://img.shields.io/badge/version-0.1.0--beta.2-blue.svg)](https://gaugeblock.dev)
+[![Version](https://img.shields.io/badge/version-0.1.0--beta.4-blue.svg)](https://gaugeblock.dev)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![gaugeblock](https://img.shields.io/badge/suite-gaugeblock-orange.svg)](https://github.com/gaugeblock)
 [![Documentation](https://img.shields.io/badge/docs-9--doc%20topology-green.svg)](ARCHITECTURE.md)
@@ -200,7 +200,7 @@ and every route below installs a binary called **`miter`**.
 ### Pre-built binaries (GitHub Releases)
 
 Download the archive for your platform from the
-[Releases page](https://github.com/colinwolff/miter/releases), check it against the `.sha256`
+[Releases page](https://github.com/gaugeblock/miter/releases), check it against the `.sha256`
 published beside it, and put `miter` (or `miter.exe`) on your `$PATH`:
 
 | Platform | Archive |

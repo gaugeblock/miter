@@ -160,12 +160,14 @@ fn strongconnect(
                     neighbor, adj, index, indices, lowlink, on_stack, stack, sccs,
                 );
                 let neighbor_low = lowlink[neighbor];
-                let current_low = lowlink.get_mut(node).unwrap();
-                *current_low = (*current_low).min(neighbor_low);
+                if let Some(current_low) = lowlink.get_mut(node) {
+                    *current_low = (*current_low).min(neighbor_low);
+                }
             } else if on_stack.contains(neighbor) {
                 let neighbor_index = indices[neighbor];
-                let current_low = lowlink.get_mut(node).unwrap();
-                *current_low = (*current_low).min(neighbor_index);
+                if let Some(current_low) = lowlink.get_mut(node) {
+                    *current_low = (*current_low).min(neighbor_index);
+                }
             }
         }
     }

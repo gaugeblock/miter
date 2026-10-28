@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Rust ingestion: extraction correctness, provenance and depth.
 //!
 //! The assertions cover the contract: *parse functions, inputs and return types*, with the

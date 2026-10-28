@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 use super::resolve::{is_scaffolding, name_affinity};
 use super::*;
 use crate::polyglot::Language;

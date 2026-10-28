@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Enforce the suite clippy floor (`unwrap_used = "deny"`, `expect_used = "deny"`) across the workspace; the two library-path unwraps in the cycle and clone analysers were replaced with guarded lookups and a NaN-safe comparison (GB-98).
+- Point `repository`/`homepage` at `gaugeblock/miter` and `https://gaugeblock.dev`, add the suite author email and an explicit `readme` key (GB-98).
+
+### Documentation
+- Refresh the README version badge to `0.1.0-beta.4` and repoint release links at the `gaugeblock` organization (GB-98).
+
 ## [v0.1.0-beta.4] - 2026-05-09
 
 ### Maintenance

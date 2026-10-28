@@ -100,6 +100,7 @@ fn declaration(
 
 #[cfg(test)]
 mod cases {
+    #![allow(clippy::unwrap_used, clippy::expect_used)]
     use super::*;
     use crate::polyglot::SymbolKind;
 

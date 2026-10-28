@@ -161,7 +161,12 @@ pub fn find_clones(
         }
     }
 
-    clone_pairs.sort_by(|a, b| b.similarity.partial_cmp(&a.similarity).unwrap());
+    // INVARIANT: similarity is clamped to 0.0..=1.0, so `partial_cmp` never sees a NaN.
+    clone_pairs.sort_by(|a, b| {
+        b.similarity
+            .partial_cmp(&a.similarity)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
     CloneDetectionReport {
         functions_analyzed: fingerprints.len(),
         clone_pairs,

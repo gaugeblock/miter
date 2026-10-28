@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! The neighbourhood: ordering, the band, and the token budget.
 
 use super::resolve::name_affinity;

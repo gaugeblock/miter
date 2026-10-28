@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! Shared scaffolding for the storage suite: a throwaway directory, and the two ways a file from
 //! *another* build is forged.
 //!

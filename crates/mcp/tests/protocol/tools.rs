@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
 //! One test per tool, against a real index built in a temporary directory.
 
 use std::path::PathBuf;
