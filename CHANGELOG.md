@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.1.0-beta.4] - 2026-05-09
+
+### Maintenance
+
+- miter: elevate 9-document architecture to gold standard (GB-108).
+
 ## [v0.1.0-beta.3] - 2026-05-09
 
 ### Added
