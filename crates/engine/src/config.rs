@@ -95,7 +95,10 @@ impl MiterConfig {
             }
         }
 
-        let gb_miter = workspace_root.join(".gaugeblock").join("miter").join("config.toml");
+        let gb_miter = workspace_root
+            .join(".gaugeblock")
+            .join("miter")
+            .join("config.toml");
         if gb_miter.is_file()
             && let Ok(content) = std::fs::read_to_string(&gb_miter)
             && let Ok(config) = toml::from_str(&content)

@@ -334,6 +334,7 @@ MCP tools, so a client never has to shell out.
 | `contracts` | Cross-language SQL / Rust / TypeScript schema verification. | — |
 | `clones` | Standalone 128-bit SimHash AST clone detection. | — |
 | `verify` | Subprocess compiler diagnostic verification (`--sandbox` for an ephemeral worktree). | `miter_verify` |
+| `scaffold` | Test and documentation scaffolding inspection (see `chalkline scaffold` for 9-doc scaffolding). | — |
 | `mcp` | Model Context Protocol stdio server. | — |
 
 Add `--json` (or `--format json`) to any analysis command for a machine-readable document. Exit

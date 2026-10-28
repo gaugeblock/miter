@@ -69,7 +69,8 @@ fn parse_cli_file(content: &str, binary_name: &str, commands: &mut Vec<CliComman
             let open_braces = trimmed.chars().filter(|c| *c == '{').count() as i32;
             let close_braces = trimmed.chars().filter(|c| *c == '}').count() as i32;
 
-            if (enum_depth == 1 || (enum_depth == 0 && open_braces > 0)) && is_enum_variant(trimmed) {
+            if (enum_depth == 1 || (enum_depth == 0 && open_braces > 0)) && is_enum_variant(trimmed)
+            {
                 let variant_name = extract_variant_name(trimmed);
                 let kebab_name = to_kebab_case(&variant_name);
                 let description = if doc_lines.is_empty() {

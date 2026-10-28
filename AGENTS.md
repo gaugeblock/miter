@@ -106,11 +106,24 @@ Cargo workspace. Do not blur crate responsibilities:
 
 - **Tier 1 (per task)**: `cargo check --workspace --all-targets` plus a targeted
   `cargo test -p <crate> <module>` for the unit under edit.
-- **Tier 2 (milestone)**: `cargo nextest run --workspace --lib`.
+- **Tier 2 (milestone / commit gate)**:
+  1. `cargo fmt --check -p <crate>`
+  2. `cargo clippy -p <crate> --all-targets -- -D warnings`
+  3. `cargo nextest run -p <crate>` (or `--workspace --lib`)
+  4. `chalkline docs check -d miter` (enforces 9-doc compliance and AST drift invariance).
 - **Tier 3 (release gate, once per version bump)**:
   1. `./scripts/test.sh`
   2. `cargo clippy --workspace --all-targets --all-features -- -D warnings`
+  3. `miter contracts` (validates cross-language wire schemas)
+  4. `chalkline docs check --workspace`
 - In a sandbox where `sccache` cannot run, prefix with `RUSTC_WRAPPER=""`.
+
+### 9. Zero Inline Scope Creep (storypole defer)
+
+When executing any task, agents must never fix out-of-scope defects inline. Record unexpected bugs,
+edge cases, missing AST patterns, or refactorings immediately via
+`storypole defer --kind <bug|tech-debt|enhancement> --symbols <crate::path> <title>` to maintain
+absolute focus and complete traceability.
 
 ## Common Commands
 

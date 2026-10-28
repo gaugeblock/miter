@@ -120,7 +120,19 @@ pub trait Runner {
 
     let types = extract_public_types(root, &[Path::new("src")]);
     assert_eq!(types.len(), 3);
-    assert!(types.iter().any(|t| t.type_name == "Config" && t.kind == "struct"));
-    assert!(types.iter().any(|t| t.type_name == "Status" && t.kind == "enum"));
-    assert!(types.iter().any(|t| t.type_name == "Runner" && t.kind == "trait"));
+    assert!(
+        types
+            .iter()
+            .any(|t| t.type_name == "Config" && t.kind == "struct")
+    );
+    assert!(
+        types
+            .iter()
+            .any(|t| t.type_name == "Status" && t.kind == "enum")
+    );
+    assert!(
+        types
+            .iter()
+            .any(|t| t.type_name == "Runner" && t.kind == "trait")
+    );
 }
