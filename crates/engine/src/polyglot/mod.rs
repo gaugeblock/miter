@@ -68,6 +68,8 @@ mod symbol;
 pub mod css;
 pub mod html;
 
+mod contracts;
+
 pub use css::extract_css_symbols;
 pub use dispatch::{
     declarative_symbols, is_declarative_source, parse, parse_declarative, parse_detected,

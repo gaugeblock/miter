@@ -276,6 +276,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "gaugeblock-contracts"
+version = "0.1.0-beta.1"
+dependencies = [
+ "serde",
+ "serde_json",
+ "uuid",
+]
+
+[[package]]
 name = "globset"
 version = "0.4.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -476,6 +485,7 @@ name = "miter-engine"
 version = "0.1.0-beta.4"
 dependencies = [
  "dockerfile-parser",
+ "gaugeblock-contracts",
  "globset",
  "hcl-rs",
  "miter-ast",
@@ -1119,6 +1129,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 
 [[package]]
+name = "uuid"
+version = "1.29.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4a0e2d11620c50695fe12bbbfde96b3477fe606e7284c22d505c12ce51214514"
+dependencies = [
+ "js-sys",
+ "serde_core",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "vecmap-rs"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1220,136 +1241,140 @@ checksum = "29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b"
 
 [[patch.unused]]
 name = "batten"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "batten-cli"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "batten-core"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "batten-mcp"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "benchwork"
-version = "0.1.0-beta.6"
+version = "0.1.0-beta.7"
 
 [[patch.unused]]
 name = "benchwork-cli"
-version = "0.1.0-beta.6"
+version = "0.1.0-beta.7"
 
 [[patch.unused]]
 name = "benchwork-core"
-version = "0.1.0-beta.6"
+version = "0.1.0-beta.7"
 
 [[patch.unused]]
 name = "benchwork-mcp"
-version = "0.1.0-beta.6"
+version = "0.1.0-beta.7"
 
 [[patch.unused]]
 name = "chalkline"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "chalkline-cli"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "chalkline-core"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "chalkline-mcp"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "dado"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "dado-cli"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "dado-core"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "dado-mcp"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
+
+[[patch.unused]]
+name = "gaugeblock-common"
+version = "0.1.0-beta.1"
 
 [[patch.unused]]
 name = "joiner"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "joiner-cli"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "joiner-core"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "joiner-mcp"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "outfeed"
-version = "0.1.0-beta.6"
+version = "0.1.0-beta.7"
 
 [[patch.unused]]
 name = "outfeed-cli"
-version = "0.1.0-beta.6"
+version = "0.1.0-beta.7"
 
 [[patch.unused]]
 name = "outfeed-core"
-version = "0.1.0-beta.6"
+version = "0.1.0-beta.7"
 
 [[patch.unused]]
 name = "outfeed-mcp"
-version = "0.1.0-beta.6"
+version = "0.1.0-beta.7"
 
 [[patch.unused]]
 name = "rabbet"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "rabbet-cli"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "rabbet-core"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 
 [[patch.unused]]
 name = "sawhorse"
-version = "0.1.0-beta.5"
+version = "0.1.0-beta.6"
 
 [[patch.unused]]
 name = "sawhorse-cli"
-version = "0.1.0-beta.5"
+version = "0.1.0-beta.6"
 
 [[patch.unused]]
 name = "sawhorse-core"
-version = "0.1.0-beta.5"
+version = "0.1.0-beta.6"
 
 [[patch.unused]]
 name = "storypole"
-version = "0.1.0-beta.4"
+version = "0.1.0-beta.5"
 
 [[patch.unused]]
 name = "storypole-cli"
-version = "0.1.0-beta.4"
+version = "0.1.0-beta.5"
 
 [[patch.unused]]
 name = "storypole-core"
-version = "0.1.0-beta.4"
+version = "0.1.0-beta.5"
 
 [[patch.unused]]
 name = "storypole-mcp"
-version = "0.1.0-beta.4"
+version = "0.1.0-beta.5"

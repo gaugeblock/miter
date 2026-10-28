@@ -29,6 +29,8 @@ miter-engine = { path = "crates/engine", version = "0.1.0-alpha.3" }
 miter-storage = { path = "crates/storage", version = "0.1.0-alpha.3" }
 miter-harness = { path = "crates/harness", version = "0.1.0-alpha.3" }
 miter-mcp = { path = "crates/mcp", version = "0.1.0-alpha.3" }
+# Shared wire contracts (GB-143): the wire `Language` this engine converts to and from.
+gaugeblock-contracts = "0.1.0-beta.1"
 
 # Parallel query pipeline.
 rayon = "1.12"
