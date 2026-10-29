@@ -39,7 +39,7 @@ pub enum Command {
     Index {
         /// Directory (or file) to index.
         path: PathBuf,
-        /// Database file to write (defaults to `<workspace_root>/.miter/miter.redb`).
+        /// Database file to write (defaults to `<workspace_root>/.gaugeblock/miter/miter.redb`).
         #[arg(long)]
         db: Option<PathBuf>,
         /// Incremental dirty-file indexing mode driven by mtime and git status.
@@ -53,7 +53,7 @@ pub enum Command {
     Lookup {
         /// Declaration name, or a qualified path such as `miter_engine::store::Engine`.
         symbol: String,
-        /// Database file to read (defaults to `<workspace_root>/.miter/miter.redb`).
+        /// Database file to read (defaults to `<workspace_root>/.gaugeblock/miter/miter.redb`).
         #[arg(long)]
         db: Option<PathBuf>,
         /// Print the hydrated neighbourhood rather than the bare identity.
@@ -72,7 +72,7 @@ pub enum Command {
     /// `miter_skeleton`, `miter_references`, `miter_lookup`, `miter_slice`, `miter_verify`,
     /// `miter_impact`.
     Mcp {
-        /// Database file to read (defaults to `<workspace_root>/.miter/miter.redb`).
+        /// Database file to read (defaults to `<workspace_root>/.gaugeblock/miter/miter.redb`).
         #[arg(long)]
         db: Option<PathBuf>,
     },
@@ -111,7 +111,7 @@ pub enum Command {
     References {
         /// Target symbol name to find references for.
         symbol: String,
-        /// Database file to read (defaults to `<workspace_root>/.miter/miter.redb`).
+        /// Database file to read (defaults to `<workspace_root>/.gaugeblock/miter/miter.redb`).
         #[arg(long)]
         db: Option<PathBuf>,
         /// Maximum number of reference records to return.
@@ -128,7 +128,7 @@ pub enum Command {
         /// Maximum reverse traversal depth hops (default: 4).
         #[arg(long, default_value_t = 4)]
         depth: usize,
-        /// Database file to read (defaults to `<workspace_root>/.miter/miter.redb`).
+        /// Database file to read (defaults to `<workspace_root>/.gaugeblock/miter/miter.redb`).
         #[arg(long)]
         db: Option<PathBuf>,
         /// Output format (`table` or `json`).
@@ -137,7 +137,7 @@ pub enum Command {
     },
     /// Verify polyglot schema contracts across SQL, Rust, and TypeScript.
     Contracts {
-        /// Database file to read (defaults to `<workspace_root>/.miter/miter.redb`).
+        /// Database file to read (defaults to `<workspace_root>/.gaugeblock/miter/miter.redb`).
         #[arg(long)]
         db: Option<PathBuf>,
         /// Output format (`table` or `json`).
@@ -155,6 +155,9 @@ pub enum Command {
         /// Minimum structural similarity threshold in 0.0..=1.0 (default: 0.90).
         #[arg(long, default_value_t = 0.90)]
         similarity: f32,
+        /// Also analyse test code (excluded by default, because test bodies dominate the report).
+        #[arg(long)]
+        include_tests: bool,
         /// Output format (`table` or `json`).
         #[arg(long, default_value = "table")]
         format: String,

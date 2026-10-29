@@ -45,6 +45,13 @@ pub struct CloneDetectionReport {
     pub clone_pairs: Vec<StructuralClonePair>,
 }
 
+/// Smallest accepted length ratio between the two sides of a clone pair.
+///
+/// The shorter function body must be at least this fraction of the longer one. Without it the
+/// scale-invariant fingerprint reports pairs whose sizes differ by 4x (observed: 22 lines against
+/// 96 lines at 90.6%), which no reviewer would act on.
+const MIN_SIZE_RATIO: f32 = 0.75;
+
 /// Computes bitwise Hamming distance between two 128-bit fingerprints.
 #[must_use]
 pub fn hamming_distance(a: (u64, u64), b: (u64, u64)) -> u32 {
@@ -145,6 +152,18 @@ pub fn find_clones(
 
             // Only compare across different files
             if f1.file_path == f2.file_path {
+                continue;
+            }
+
+            // A SimHash fingerprint is scale-invariant: structural shape alone cannot tell a
+            // 22-line helper from a 96-line orchestrator. Require the shorter body to be at least
+            // `MIN_SIZE_RATIO` of the longer one, so only pairs a reviewer would call a clone survive.
+            let (short, long) = if f1.line_count <= f2.line_count {
+                (f1.line_count, f2.line_count)
+            } else {
+                (f2.line_count, f1.line_count)
+            };
+            if long > 0 && (short as f32) < (long as f32) * MIN_SIZE_RATIO {
                 continue;
             }
 

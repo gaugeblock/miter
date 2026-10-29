@@ -62,8 +62,9 @@ use clap::Parser;
 /// Resolves the workspace database path for one invocation.
 ///
 /// An explicit `--db` wins. Otherwise the command works in the root of the current directory —
-/// the nearest `.miter/` or `.git/` marker at or above it — and opens
-/// `<root>/.miter/miter.redb`. There is one root and one database per invocation: nothing is
+/// the nearest `.gaugeblock/` or `.git/` marker at or above it — and opens
+/// `<root>/.gaugeblock/miter/miter.redb` (legacy `<root>/.miter/miter.redb` is still read).
+/// There is one root and one database per invocation: nothing is
 /// registered, attached or kept alive between runs.
 #[must_use]
 pub fn resolve_db(explicit: Option<std::path::PathBuf>) -> std::path::PathBuf {
@@ -144,11 +145,13 @@ pub fn execute(cli: Cli) -> Result<(), CliError> {
             path,
             min_lines,
             similarity,
+            include_tests,
             format,
         } => clones::run_clones(
             &path,
             min_lines,
             similarity,
+            include_tests,
             clones::ClonesFormat::parse(&format),
         ),
         Command::Verify {

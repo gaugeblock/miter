@@ -34,10 +34,11 @@ pub fn run_clones(
     root: &Path,
     min_lines: usize,
     min_similarity: f32,
+    include_tests: bool,
     format: ClonesFormat,
 ) -> Result<(), CliError> {
     let mut fingerprints = Vec::new();
-    collect_fingerprints(root, min_lines, &mut fingerprints)?;
+    collect_fingerprints(root, min_lines, include_tests, &mut fingerprints)?;
 
     let report = find_clones(&fingerprints, min_similarity);
 
@@ -49,11 +50,31 @@ pub fn run_clones(
     Ok(())
 }
 
+/// True for paths that hold test code: a `tests/` directory, `tests.rs`, `_tests.rs` or the
+/// `tests_*.rs` convention this suite uses for module-local test files.
+fn is_test_path(path: &Path) -> bool {
+    let text = path.to_string_lossy();
+    let name = path
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or_default();
+    name == "tests"
+        || text.contains("/tests/")
+        || text.ends_with("/tests")
+        || name == "tests.rs"
+        || name.ends_with("_tests.rs")
+        || name.starts_with("tests_")
+}
+
 fn collect_fingerprints(
     dir: &Path,
     min_lines: usize,
+    include_tests: bool,
     out: &mut Vec<FunctionFingerprint>,
 ) -> Result<(), CliError> {
+    if is_test_path(dir) && !include_tests {
+        return Ok(());
+    }
     if dir.is_file() {
         if dir.extension().and_then(|e| e.to_str()) == Some("rs")
             && let Ok(content) = fs::read_to_string(dir)
@@ -75,6 +96,9 @@ fn collect_fingerprints(
             let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
             if name.starts_with('.') || matches!(name, "target" | "node_modules" | "dist" | "build")
             {
+                continue;
+            }
+            if is_test_path(&path) && !include_tests {
                 continue;
             }
             if path.is_dir() {
@@ -107,6 +131,16 @@ fn render_table(report: &CloneDetectionReport, min_similarity: f32) {
     println!("\n{:<6} {:<34} {:<34}", "SIM", "FUNCTION A", "FUNCTION B");
     println!("{}", "-".repeat(80));
 
+    let test_pairs = report
+        .clone_pairs
+        .iter()
+        .filter(|p| {
+            is_test_path(Path::new(&p.first.file_path))
+                && is_test_path(Path::new(&p.second.file_path))
+        })
+        .count();
+    let production_pairs = report.clone_pairs.len() - test_pairs;
+
     for pair in &report.clone_pairs {
         let f1 = format!(
             "{}:{} ({})",
@@ -118,12 +152,17 @@ fn render_table(report: &CloneDetectionReport, min_similarity: f32) {
         );
         println!("{:<5.1}% {:<34} {:<34}", pair.similarity * 100.0, f1, f2);
     }
+
+    println!(
+        "
+Production pairs: {production_pairs}   Test pairs: {test_pairs}"
+    );
 }
 
 fn render_json(report: &CloneDetectionReport) {
     let pairs_json = report.clone_pairs.iter().map(|p| {
         Json::object([
-            ("similarity", Json::string(format!("{:.4}", p.similarity))),
+            ("similarity", Json::Number(format!("{:.4}", p.similarity))),
             (
                 "hamming_distance",
                 Json::Unsigned(p.hamming_distance as u64),
