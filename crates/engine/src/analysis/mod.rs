@@ -10,6 +10,7 @@ pub mod clones;
 pub mod cluster;
 pub mod contracts;
 pub mod cycles;
+pub mod deps;
 pub mod dirty;
 pub mod hygiene;
 pub mod impact;
@@ -39,6 +40,11 @@ pub use contracts::{
     canonical_entity_name, normalize_identifier, verify_contracts_from_symbols,
 };
 pub use cycles::{CycleDetectionReport, DependencyCycle, FileDependencyGraph};
+pub use deps::{
+    CrateDependencyReport, CrateEdge, DeclaredCrate, DepsError, ImportSite, UnusedDependency,
+    analyze_dependencies, assemble_report, collect_crate_imports, crate_ident,
+    import_roots_in_source,
+};
 pub use dirty::{DirtyScan, detect_dirty_files, ingest_dirty};
 pub use hygiene::{DeadSymbol, HygieneReport, VisibilityCandidate, analyze_hygiene};
 pub use impact::{

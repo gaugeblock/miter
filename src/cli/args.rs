@@ -162,6 +162,21 @@ pub enum Command {
         #[arg(long, default_value = "table")]
         format: String,
     },
+    /// Map crate-to-crate import edges, declared-but-unused dependencies and proof of use.
+    Deps {
+        /// Workspace root to analyse (defaults to current dir).
+        #[arg(long, default_value = ".")]
+        path: PathBuf,
+        /// Show every import site that proves use of this crate.
+        #[arg(long)]
+        why: Option<String>,
+        /// Only report declared dependencies that no source file imports.
+        #[arg(long)]
+        unused: bool,
+        /// Output format (`table` or `json`).
+        #[arg(long, default_value = "table")]
+        format: String,
+    },
     /// Run isolated compiler verification on the workspace or crate.
     Verify {
         /// Target path to verify (defaults to current directory).

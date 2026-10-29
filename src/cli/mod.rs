@@ -10,6 +10,7 @@
 //! miter audit [--path <PATH>] [--threshold <N>] [--format table|json]
 //! miter contracts [--db <DB_PATH>] [--format table|json]
 //! miter clones [--path <PATH>] [--min-lines <N>] [--similarity <F>] [--format table|json]
+//! miter deps [--path <PATH>] [--why <CRATE>] [--unused] [--format table|json]
 //! miter verify [--path <PATH>] [--sandbox] [--task-id <ID>] [--timeout-ms <N>] [--json]
 //! miter mcp [--db <DB_PATH>]
 //! ```
@@ -32,7 +33,7 @@
 //! | [`error`] | `CliError` and its exit-code mapping |
 //! | [`ingest`] | `index` — the command that writes an index |
 //! | [`lookup`] | `lookup` — symbol hydration |
-//! | [`skeleton`], [`references`], [`impact`], [`mod@slice`], [`audit`], [`contracts`], [`clones`] | one analysis command each |
+//! | [`skeleton`], [`references`], [`impact`], [`mod@slice`], [`audit`], [`contracts`], [`clones`], [`deps`] | one analysis command each |
 //! | [`verify`] | the compiler verification command |
 //! | [`mcp`] | the Model Context Protocol stdio server |
 //! | [`json`] | the hand-rolled JSON writer the commands emit |
@@ -41,6 +42,7 @@ pub mod args;
 pub mod audit;
 pub mod clones;
 pub mod contracts;
+pub mod deps;
 pub mod error;
 pub mod impact;
 pub mod ingest;
@@ -153,6 +155,17 @@ pub fn execute(cli: Cli) -> Result<(), CliError> {
             similarity,
             include_tests,
             clones::ClonesFormat::parse(&format),
+        ),
+        Command::Deps {
+            path,
+            why,
+            unused,
+            format,
+        } => deps::run_deps(
+            &path,
+            why.as_deref(),
+            unused,
+            deps::DepsFormat::parse(&format),
         ),
         Command::Verify {
             path,
