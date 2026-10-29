@@ -4,7 +4,7 @@ use std::path::Path;
 
 use super::{
     Language, PolyglotError, UniversalSymbol, css, docker, env, hcl, html, k8s, markdown, python,
-    rust, sql, typescript,
+    rust, sql, syntax, typescript,
 };
 
 /// Parses `source` with a tree-sitter grammar and returns every declaration in it.
@@ -24,25 +24,7 @@ pub fn parse(
     source: &str,
     language: Language,
 ) -> Result<Vec<UniversalSymbol>, PolyglotError> {
-    let Some(index_language) = language.index_language() else {
-        return Err(PolyglotError::Unsupported { language });
-    };
-    let mut parser = tree_sitter::Parser::new();
-    let grammar = miter_ast::grammar_for(index_language).map_err(|error| match error {
-        miter_ast::IndexError::UnsupportedLanguage { .. } => {
-            PolyglotError::Unsupported { language }
-        }
-        other => PolyglotError::Grammar {
-            language,
-            message: other.to_string(),
-        },
-    })?;
-    parser
-        .set_language(&grammar)
-        .map_err(|error| PolyglotError::Grammar {
-            language,
-            message: error.to_string(),
-        })?;
+    let mut parser = syntax::parser_for(language)?;
     let tree = parser.parse(source, None).ok_or(PolyglotError::Parse {
         language,
         path: Some(path.to_path_buf()),

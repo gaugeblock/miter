@@ -55,6 +55,7 @@ pub mod k8s;
 pub mod python;
 pub mod rust;
 pub mod sql;
+pub mod syntax;
 pub mod typescript;
 
 mod dispatch;
@@ -81,6 +82,7 @@ pub use language::{EXTENSIONS, Language, PolyglotLanguage};
 pub use markdown::extract_markdown_symbols;
 pub use redact::redacted_value;
 pub use symbol::UniversalSymbol;
+pub use syntax::{SyntaxDiagnostic, SyntaxDiagnosticKind, span_within_node, syntax_diagnostics};
 
 #[cfg(test)]
 mod tests;
