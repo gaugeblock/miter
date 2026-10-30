@@ -5,13 +5,23 @@
 //! proof of use lives for a given crate. Tier 2 (extraction simulation, layering fitness, budgets)
 //! and tier 3 (feature inventory, per-feature cost) build on this report rather than re-parsing.
 
+mod allowlist;
 mod imports;
+mod layers;
 mod strip;
+
+#[cfg(test)]
+mod layers_tests;
 
 #[cfg(test)]
 mod tests;
 
+pub use allowlist::{AllowlistEntry, LayerAllowlist, load_allowlist};
 pub use imports::{ImportSite, collect_crate_imports, declared_modules, import_roots_in_source};
+pub use layers::{
+    EdgeKind, Layer, LayerEdge, LayerReport, assess_edge, build_layer_report, classify_crate,
+    classify_edge, family,
+};
 
 use crate::inventory::{InventoryError, extract_cargo_inventory};
 use serde::{Deserialize, Serialize};
@@ -73,6 +83,10 @@ pub enum DepsError {
     /// The workspace manifests could not be read.
     #[error("workspace manifest inventory failed: {0}")]
     Inventory(#[from] InventoryError),
+
+    /// The layer allowlist exists but cannot be read or parsed.
+    #[error("layer allowlist is unusable: {0}")]
+    Allowlist(String),
 }
 
 /// Builds the report from declared crates and the imports collected per crate.

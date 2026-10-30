@@ -10,7 +10,7 @@
 //! miter audit [--path <PATH>] [--threshold <N>] [--format table|json]
 //! miter contracts [--db <DB_PATH>] [--format table|json]
 //! miter clones [--path <PATH>] [--min-lines <N>] [--similarity <F>] [--format table|json]
-//! miter deps [--path <PATH>] [--why <CRATE>] [--unused] [--format table|json]
+//! miter deps [--path <PATH>] [--why <CRATE>] [--unused] [--layers [--check]] [--format table|json]
 //! miter verify [--path <PATH>] [--sandbox] [--task-id <ID>] [--timeout-ms <N>] [--json]
 //! miter mcp [--db <DB_PATH>]
 //! ```
@@ -43,6 +43,7 @@ pub mod audit;
 pub mod clones;
 pub mod contracts;
 pub mod deps;
+pub mod deps_layers;
 pub mod error;
 pub mod impact;
 pub mod ingest;
@@ -160,13 +161,22 @@ pub fn execute(cli: Cli) -> Result<(), CliError> {
             path,
             why,
             unused,
+            layers,
+            check,
+            allowlist,
             format,
-        } => deps::run_deps(
-            &path,
-            why.as_deref(),
-            unused,
-            deps::DepsFormat::parse(&format),
-        ),
+        } => {
+            if layers || check {
+                deps_layers::run_deps_layers(&path, check, allowlist.as_deref(), &format)
+            } else {
+                deps::run_deps(
+                    &path,
+                    why.as_deref(),
+                    unused,
+                    deps::DepsFormat::parse(&format),
+                )
+            }
+        }
         Command::Verify {
             path,
             sandbox,

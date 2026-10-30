@@ -173,6 +173,15 @@ pub enum Command {
         /// Only report declared dependencies that no source file imports.
         #[arg(long)]
         unused: bool,
+        /// Classify every edge as foundation / domain / integrator instead of listing edges.
+        #[arg(long)]
+        layers: bool,
+        /// Fail when a lateral edge is unallowlisted or an edge points at a higher layer.
+        #[arg(long)]
+        check: bool,
+        /// Layer allowlist path (default: `<path>/.gaugeblock/miter/layers-allowlist.toml`).
+        #[arg(long)]
+        allowlist: Option<PathBuf>,
         /// Output format (`table` or `json`).
         #[arg(long, default_value = "table")]
         format: String,

@@ -41,9 +41,10 @@ pub use contracts::{
 };
 pub use cycles::{CycleDetectionReport, DependencyCycle, FileDependencyGraph};
 pub use deps::{
-    CrateDependencyReport, CrateEdge, DeclaredCrate, DepsError, ImportSite, UnusedDependency,
-    analyze_dependencies, assemble_report, collect_crate_imports, crate_ident,
-    import_roots_in_source,
+    AllowlistEntry, CrateDependencyReport, CrateEdge, DeclaredCrate, DepsError, EdgeKind,
+    ImportSite, Layer, LayerAllowlist, LayerEdge, LayerReport, UnusedDependency,
+    analyze_dependencies, assemble_report, build_layer_report, classify_crate, classify_edge,
+    collect_crate_imports, crate_ident, import_roots_in_source, load_allowlist,
 };
 pub use dirty::{DirtyScan, detect_dirty_files, ingest_dirty};
 pub use hygiene::{DeadSymbol, HygieneReport, VisibilityCandidate, analyze_hygiene};
