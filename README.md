@@ -333,6 +333,7 @@ MCP tools, so a client never has to shell out.
 | `audit` | Line ceiling, dead-code/visibility hygiene and Tarjan file cycles. | `miter_audit` |
 | `contracts` | Cross-language SQL / Rust / TypeScript schema verification. | — |
 | `clones` | Standalone 128-bit SimHash AST clone detection. | — |
+| `deps` | Crate-to-crate import edges, `--why` proof of use, and `--unused` declared-but-unreferenced dependencies. | — |
 | `verify` | Subprocess compiler diagnostic verification (`--sandbox` for an ephemeral worktree). | `miter_verify` |
 | `scaffold` | Test and documentation scaffolding inspection (see `chalkline scaffold` for 9-doc scaffolding). | — |
 | `mcp` | Model Context Protocol stdio server. | — |

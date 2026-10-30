@@ -85,7 +85,12 @@ stateDiagram-v2
 - **`error::CliError`** (`enum`): Failures reported by the CLI, mapped to process exit code 1.
 - **`clones::CloneDetectionReport`** (`struct`): Summary report of detected AST structural clones via 128-bit SimHash.
 - **`clones::ClonesFormat`** (`enum`): Output format choice for `miter clones` (`Table`, `Json`).
-- **`args::Command`** (`enum`): Top-level subcommand variants (`Index`, `Lookup`, `Mcp`, `Audit`, `Slice`, `Skeleton`, `References`, `Impact`, `Contracts`, `Clones`, `Verify`).
+- **`deps::CrateDependencyReport`** (`struct`): Declared-versus-imported crate graph: crate-to-crate edges with proving sites, plus declared dependencies no source references.
+- **`deps::CrateEdge`** (`struct`): One workspace crate importing another, carrying every `file:line` that proves it.
+- **`deps::UnusedDependency`** (`struct`): A dependency declared in a crate manifest that no source file of that crate references.
+- **`deps::ImportSite`** (`struct`): A single workspace-relative `file` and 1-based `line` where a crate root is referenced.
+- **`deps::DepsError`** (`enum`): Failures from dependency analysis; today only a manifest-inventory failure, since unreadable source is skipped rather than fatal.
+- **`args::Command`** (`enum`): Top-level subcommand variants (`Index`, `Lookup`, `Mcp`, `Audit`, `Slice`, `Skeleton`, `References`, `Impact`, `Contracts`, `Clones`, `Deps`, `Verify`).
 - **`tests::Commands`** (`enum`): Test harness CLI subcommand fixture.
 - **`contracts::ContractDrift`** (`struct`): Detected discrepancy across SQL, Rust, and TypeScript definitions.
 - **`contracts::ContractReport`** (`struct`): Comprehensive multi-language entity schema verification report.
