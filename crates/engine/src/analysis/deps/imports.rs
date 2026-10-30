@@ -108,6 +108,24 @@ fn path_roots_in_line(line: &str) -> Vec<&str> {
     roots
 }
 
+/// Whether a local module name should hide a reference to that name.
+///
+/// `mod regex;` and the `regex` crate can coexist, and `regex::escape` then means the crate: a
+/// module's own name is not in scope inside itself. Filtering by name alone made a live dependency
+/// look dead, and a purge attempt on that report failed to compile (`GB-232`). When the name is a
+/// declared dependency the reference is counted; a genuinely local module named like a dependency is
+/// rare enough that preferring the dependency is the safer error.
+pub(crate) fn masks_a_dependency(
+    ident: &str,
+    own_modules: &BTreeSet<String>,
+    declared_dependencies: &BTreeSet<String>,
+) -> bool {
+    if !own_modules.contains(ident) {
+        return false;
+    }
+    !declared_dependencies.contains(ident)
+}
+
 /// Returns the part of a statement that follows the `use` / `extern crate` keyword.
 fn use_body(line: &str) -> Option<&str> {
     if let Some(rest) = line.strip_prefix("pub use ") {
@@ -174,7 +192,11 @@ pub fn declared_modules(source: &str) -> Vec<String> {
 /// are skipped rather than failing the run: the report is an inventory, and a partial answer beats
 /// no answer when one vendored path is unreadable.
 #[must_use]
-pub fn collect_crate_imports(root: &Path, crate_rel: &Path) -> BTreeMap<String, Vec<ImportSite>> {
+pub fn collect_crate_imports(
+    root: &Path,
+    crate_rel: &Path,
+    declared_dependencies: &BTreeSet<String>,
+) -> BTreeMap<String, Vec<ImportSite>> {
     let mut files: Vec<(String, String)> = Vec::new();
     let mut queue = vec![root.join(crate_rel)];
 
@@ -219,7 +241,7 @@ pub fn collect_crate_imports(root: &Path, crate_rel: &Path) -> BTreeMap<String, 
     let mut imports: BTreeMap<String, Vec<ImportSite>> = BTreeMap::new();
     for (rel, content) in &files {
         for (root_ident, line) in import_roots_in_source(content) {
-            if own_modules.contains(&root_ident) {
+            if masks_a_dependency(&root_ident, &own_modules, declared_dependencies) {
                 continue;
             }
             imports.entry(root_ident).or_default().push(ImportSite {

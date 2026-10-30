@@ -6,7 +6,7 @@
 //! and tier 3 (feature inventory, per-feature cost) build on this report rather than re-parsing.
 
 mod allowlist;
-mod imports;
+pub(crate) mod imports;
 mod layers;
 mod strip;
 
@@ -167,9 +167,16 @@ pub fn analyze_dependencies(root: &Path) -> Result<CrateDependencyReport, DepsEr
 
     let mut imports = BTreeMap::new();
     for krate in &cargo.crates {
+        // Hand the collector the declared names so a local module cannot hide a dependency of the
+        // same name (`GB-232`).
+        let declared_names: std::collections::BTreeSet<String> = krate
+            .dependencies
+            .keys()
+            .map(|name| crate_ident(name))
+            .collect();
         imports.insert(
             krate.name.clone(),
-            collect_crate_imports(root, &krate.relative_path),
+            collect_crate_imports(root, &krate.relative_path, &declared_names),
         );
     }
 
