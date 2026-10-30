@@ -1,5 +1,6 @@
 //! Import-root collection: which identifiers a crate's source actually references.
 
+use super::strip::{StripState, code_only};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
@@ -36,9 +37,12 @@ const NOT_A_DEPENDENCY: [&str; 8] = [
 #[must_use]
 pub fn import_roots_in_source(source: &str) -> Vec<(String, usize)> {
     let mut roots = Vec::new();
+    let mut state = StripState::default();
     for (index, raw) in source.lines().enumerate() {
-        let line = raw.trim_start();
-        if line.starts_with("//") {
+        // Literals and comments are data, not references (GB-199).
+        let stripped = code_only(raw, &mut state);
+        let line = stripped.trim_start();
+        if line.is_empty() {
             continue;
         }
         let mut found: Vec<&str> = Vec::new();
@@ -136,9 +140,11 @@ fn is_ident(value: &str) -> bool {
 #[must_use]
 pub fn declared_modules(source: &str) -> Vec<String> {
     let mut modules = Vec::new();
+    let mut state = StripState::default();
     for raw in source.lines() {
-        let line = raw.trim_start();
-        if line.starts_with("//") {
+        let stripped = code_only(raw, &mut state);
+        let line = stripped.trim_start();
+        if line.is_empty() {
             continue;
         }
         let body = line

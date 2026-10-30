@@ -195,3 +195,38 @@ pub mod outfeed;\nmod storypole;\npub(crate) mod sawhorse;\nmod inline { }\npub 
         "a crate module must be known so its re-export is not read as a dependency"
     );
 }
+
+#[test]
+fn test_import_looking_content_inside_strings_is_not_a_reference() {
+    let source = "\
+let fixture = \"pub mod outfeed;\\nuse storypole_core::model::TaskNode;\\n\";\nlet raw = r\"use sawhorse_core::InferenceRequest;\";\nlet hashed = r#\"use chalkline_core::SpecGraph;\"#;\n";
+    assert!(
+        import_roots_in_source(source).is_empty(),
+        "string literals are data, not dependency proof (GB-199)"
+    );
+    assert!(
+        declared_modules(source).is_empty(),
+        "a fixture must not register a module either"
+    );
+}
+
+#[test]
+fn test_a_multiline_raw_string_swallows_the_lines_it_covers() {
+    let source = "let spec = r#\"\nuse dado_core::Pattern;\n\"#;\nuse batten_core::Grammar;\n";
+    assert_eq!(
+        import_roots_in_source(source),
+        vec![("batten_core".to_string(), 4)],
+        "only the line after the raw string closes is real code"
+    );
+}
+
+#[test]
+fn test_comments_hide_imports_but_real_code_after_a_block_comment_still_counts() {
+    let source = "\
+// use commented::Out;\n/* use block_commented::Out; */ use real_crate::Thing;\n";
+    assert_eq!(
+        import_roots_in_source(source),
+        vec![("real_crate".to_string(), 2)],
+        "a trailing block comment must not swallow the statement before it"
+    );
+}

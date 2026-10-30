@@ -6,6 +6,7 @@
 //! and tier 3 (feature inventory, per-feature cost) build on this report rather than re-parsing.
 
 mod imports;
+mod strip;
 
 #[cfg(test)]
 mod tests;
