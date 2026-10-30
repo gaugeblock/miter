@@ -37,7 +37,9 @@ pub fn run_audit(
     let threshold = config.max_lines;
     let auditor = WorkspaceAuditor::with_config(config);
 
-    let violations = auditor.audit_root(&root).map_err(CliError::Io)?;
+    let violations = auditor
+        .audit_root_with_members(&root)
+        .map_err(CliError::Io)?;
 
     match format {
         AuditFormat::Json => {
@@ -48,7 +50,14 @@ pub fn run_audit(
         }
     }
 
-    Ok(())
+    if violations.is_empty() {
+        return Ok(());
+    }
+    Err(CliError::Rejected(format!(
+        "{} file(s) exceed the {}-line threshold",
+        violations.len(),
+        threshold
+    )))
 }
 
 fn audit_json(violations: &[AuditViolation], threshold: usize, root: &Path) -> Json {
@@ -72,7 +81,7 @@ fn audit_json(violations: &[AuditViolation], threshold: usize, root: &Path) -> J
 fn render_audit_table(violations: &[AuditViolation], threshold: usize, root: &Path) {
     if violations.is_empty() {
         println!(
-            "AUDIT PASSED: No files exceed {} lines in {}.",
+            "AUDIT PASSED: No files exceed {} lines in {}",
             threshold,
             root.display()
         );
