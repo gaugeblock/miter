@@ -8,6 +8,7 @@
 mod allowlist;
 pub(crate) mod imports;
 mod layers;
+pub(crate) mod resolution;
 mod strip;
 
 #[cfg(test)]
@@ -15,6 +16,9 @@ mod layers_tests;
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod tests_references;
 
 pub use allowlist::{AllowlistEntry, LayerAllowlist, load_allowlist};
 pub use imports::{ImportSite, collect_crate_imports, declared_modules, import_roots_in_source};
