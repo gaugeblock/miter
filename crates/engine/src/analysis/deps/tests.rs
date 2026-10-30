@@ -230,3 +230,19 @@ fn test_comments_hide_imports_but_real_code_after_a_block_comment_still_counts()
         "a trailing block comment must not swallow the statement before it"
     );
 }
+
+#[test]
+fn test_a_string_continued_with_a_trailing_backslash_does_not_leak_code() {
+    // The exact shape that produced the phantom edge: a fixture string continued onto the next
+    // physical line with a trailing backslash (GB-199).
+    let source = "let source = \"\\\npub mod outfeed;\\nuse storypole_core::x;\\n\";\nuse real_crate::Thing;\n";
+    assert_eq!(
+        import_roots_in_source(source),
+        vec![("real_crate".to_string(), 3)],
+        "the continued fixture line is data; only the following statement is code"
+    );
+    assert!(
+        !declared_modules(source).contains(&"outfeed".to_string()),
+        "a continued fixture must not register a module"
+    );
+}

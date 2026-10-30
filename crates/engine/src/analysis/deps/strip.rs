@@ -9,6 +9,7 @@
 #[derive(Debug, Default)]
 pub(super) struct StripState {
     in_block_comment: bool,
+    in_normal_string: bool,
     raw_hashes: Option<usize>,
 }
 
@@ -29,6 +30,14 @@ pub(super) fn code_only(line: &str, state: &mut StripState) -> String {
             }
             None => return String::new(),
         }
+    }
+    if state.in_normal_string {
+        let (end, closed) = skip_string(&chars, 0);
+        if !closed {
+            return String::new();
+        }
+        index = end;
+        state.in_normal_string = false;
     }
     if state.in_block_comment {
         match find_seq(&chars, index, "*/") {
@@ -57,7 +66,13 @@ pub(super) fn code_only(line: &str, state: &mut StripState) -> String {
             }
         }
         if chars[index] == '"' {
-            index = skip_string(&chars, index + 1);
+            let (end, closed) = skip_string(&chars, index + 1);
+            if !closed {
+                // A `\` at end of line continues an ordinary string onto the next line.
+                state.in_normal_string = true;
+                return out;
+            }
+            index = end;
             out.push(' ');
             continue;
         }
@@ -90,18 +105,18 @@ pub(super) fn code_only(line: &str, state: &mut StripState) -> String {
 }
 
 /// End index just past the closing quote of an ordinary string, honouring backslash escapes.
-fn skip_string(chars: &[char], mut index: usize) -> usize {
+fn skip_string(chars: &[char], mut index: usize) -> (usize, bool) {
     while index < chars.len() {
         if chars[index] == '\\' {
             index += 2;
             continue;
         }
         if chars[index] == '"' {
-            return index + 1;
+            return (index + 1, true);
         }
         index += 1;
     }
-    chars.len()
+    (chars.len(), false)
 }
 
 /// End index just past `"` followed by `hashes` `#` characters.
