@@ -68,6 +68,7 @@ stateDiagram-v2
 ### Boundary Models, Wire Types & Enums
 
 - **`impact::AffectedTest`** (`struct`): An affected unit test or integration test detected in the reverse blast radius.
+- **`allowlist::AllowlistEntry`** (`struct`): One lateral crate edge the layer gate permits, carrying the ticket that owes its burn-down so an exception is always attributed debt.
 - **`indexer::AstIndexer`** (`struct`): Turns polyglot source code into encoded `FunctionSymbol` records across supported tree-sitter grammars.
 - **`slicer::Attention`** (`struct`): AST token attention weighting for candidate modular extraction clusters.
 - **`mod::AuditArgs`** (`struct`): Command-line and MCP arguments parsed for the `miter_audit` tool.
@@ -88,8 +89,12 @@ stateDiagram-v2
 - **`deps::CrateDependencyReport`** (`struct`): Declared-versus-imported crate graph: crate-to-crate edges with proving sites, plus declared dependencies no source references.
 - **`deps::CrateEdge`** (`struct`): One workspace crate importing another, carrying every `file:line` that proves it.
 - **`deps::UnusedDependency`** (`struct`): A dependency declared in a crate manifest that no source file of that crate references.
+- **`layers::EdgeKind`** (`enum`): Verdict for one crate edge - `Downward`, `Lateral`, `Upward`, or `Internal` for same-layer edges that are structurally expected rather than debt.
 - **`deps::ImportSite`** (`struct`): A single workspace-relative `file` and 1-based `line` where a crate root is referenced.
 - **`deps::DepsError`** (`enum`): Failures from dependency analysis; today only a manifest-inventory failure, since unreadable source is skipped rather than fatal.
+- **`layers::Layer`** (`enum`): Where a crate sits in the suite layering - `Foundation`, `Domain` or `Integrator` - derived from its package name so the map cannot drift from the workspace.
+- **`layers::LayerEdge`** (`struct`): A lateral or upward edge with its proving site count, whether an allowlist entry covers it, and which ticket carries the debt.
+- **`layers::LayerReport`** (`struct`): The layer assignment plus every edge needing attention: `is_clean()` is true when nothing points upward and every lateral edge carries a ticket.
 - **`args::Command`** (`enum`): Top-level subcommand variants (`Index`, `Lookup`, `Mcp`, `Audit`, `Slice`, `Skeleton`, `References`, `Impact`, `Contracts`, `Clones`, `Deps`, `Verify`).
 - **`tests::Commands`** (`enum`): Test harness CLI subcommand fixture.
 - **`contracts::ContractDrift`** (`struct`): Detected discrepancy across SQL, Rust, and TypeScript definitions.
