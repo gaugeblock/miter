@@ -554,15 +554,14 @@ dependencies = [
  "gaugeblock-git",
  "gaugeblock-workspace",
  "globset",
- "hcl-rs",
  "miter-ast",
+ "miter-polyglot",
+ "miter-security",
  "miter-storage",
  "rayon",
  "redb",
  "serde",
  "serde_json",
- "serde_yaml",
- "sqlparser",
  "thiserror 2.0.21",
  "toml",
  "tree-sitter",
@@ -592,6 +591,25 @@ dependencies = [
  "tokio",
  "tracing",
 ]
+
+[[package]]
+name = "miter-polyglot"
+version = "0.1.0-beta.4"
+dependencies = [
+ "dockerfile-parser",
+ "gaugeblock-contracts",
+ "hcl-rs",
+ "miter-ast",
+ "miter-security",
+ "serde",
+ "serde_yaml",
+ "sqlparser",
+ "tree-sitter",
+]
+
+[[package]]
+name = "miter-security"
+version = "0.1.0-beta.4"
 
 [[package]]
 name = "miter-storage"

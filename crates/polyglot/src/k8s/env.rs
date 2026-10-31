@@ -15,7 +15,7 @@ use serde_yaml::{Mapping, Value};
 
 use super::super::{Language, SymbolKind, UniversalSymbol, common};
 use super::take_line;
-use crate::polyglot::redact::redacted_value;
+use crate::redact::redacted_value;
 
 /// Records every environment variable declared anywhere under `value`.
 pub(super) fn push_env(

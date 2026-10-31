@@ -3,7 +3,7 @@
 #[cfg(test)]
 mod python_tests {
     use super::super::*;
-    use crate::polyglot::parse;
+    use crate::parse;
 
     /// A module with a decorated method, a class docstring, annotated signatures, a splat, a
     /// private helper and an inner definition.

@@ -3,7 +3,7 @@
 #[cfg(test)]
 mod typescript_tests {
     use super::super::*;
-    use crate::polyglot::parse;
+    use crate::parse;
 
     /// The four declaration shapes a TypeScript project always has: an interface with two
     /// kinds of member, an exported class with a method, a property and a function-valued

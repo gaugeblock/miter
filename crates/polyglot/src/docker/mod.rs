@@ -147,7 +147,7 @@ pub(super) fn member(
 /// The extractors redact the values they *know* are sensitive; this is the belt-and-braces pass
 /// that catches a credential sitting in a value that looked ordinary.
 pub(super) fn scrub(signature: String) -> String {
-    crate::security::scrub_source_text(&signature)
+    miter_security::scrub_source_text(&signature)
 }
 
 /// The one-based line a byte offset sits on.

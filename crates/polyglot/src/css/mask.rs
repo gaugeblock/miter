@@ -9,7 +9,7 @@
 //! are values, not selectors, and the selector reader skips them explicitly.
 
 /// The source with `/* … */` and `// …` comments blanked to spaces, newlines preserved.
-pub(crate) fn mask_comments(source: &str) -> String {
+pub fn mask_comments(source: &str) -> String {
     let bytes = source.as_bytes();
     let mut out = bytes.to_vec();
     let mut index = 0usize;

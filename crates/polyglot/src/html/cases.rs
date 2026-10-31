@@ -5,7 +5,7 @@
 use std::path::Path;
 
 use super::extract_html_symbols;
-use crate::polyglot::SymbolKind;
+use crate::SymbolKind;
 
 const PAGE: &str = r#"<!DOCTYPE html>
 <html>
@@ -52,7 +52,7 @@ fn ids_and_custom_elements_become_declarations() {
     assert_eq!(by_name("user-card").signature, "ELEMENT <user-card>");
     assert_eq!(by_name("main").kind, SymbolKind::Module);
     assert_eq!(by_name("main").signature, "LANDMARK <main>");
-    assert_eq!(by_name("email").language, crate::polyglot::Language::Html);
+    assert_eq!(by_name("email").language, crate::Language::Html);
 }
 
 #[test]

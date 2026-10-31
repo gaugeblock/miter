@@ -9,7 +9,7 @@ use std::path::Path;
 use dockerfile_parser::{ArgInstruction, EnvInstruction};
 
 use super::{UniversalSymbol, line_of, member};
-use crate::polyglot::redact::redacted_value;
+use crate::redact::redacted_value;
 
 /// Records an `ARG` declaration.
 pub(super) fn push_arg(
@@ -93,7 +93,7 @@ fn declaration(
         line_of(content, start),
         (start, end),
     );
-    symbol.path = crate::polyglot::common::dotted_path(module, &[], key);
+    symbol.path = crate::common::dotted_path(module, &[], key);
     symbol.name = key.to_owned();
     symbol
 }
@@ -102,7 +102,7 @@ fn declaration(
 mod cases {
     #![allow(clippy::unwrap_used, clippy::expect_used)]
     use super::*;
-    use crate::polyglot::SymbolKind;
+    use crate::SymbolKind;
 
     const SOURCE: &str = "\
 FROM rust:1.80 AS builder
@@ -115,7 +115,7 @@ ENV PORT=8080 LOG_LEVEL=debug
     #[test]
     fn args_and_envs_are_declared_by_key() {
         let symbols =
-            crate::polyglot::docker::extract_docker_symbols(Path::new("Dockerfile"), SOURCE);
+            crate::docker::extract_docker_symbols(Path::new("Dockerfile"), SOURCE);
         let names: Vec<&str> = symbols.iter().map(|s| s.name.as_str()).collect();
         assert_eq!(
             names,
@@ -136,7 +136,7 @@ ENV PORT=8080 LOG_LEVEL=debug
     #[test]
     fn secret_values_never_reach_the_signature() {
         let symbols =
-            crate::polyglot::docker::extract_docker_symbols(Path::new("Dockerfile"), SOURCE);
+            crate::docker::extract_docker_symbols(Path::new("Dockerfile"), SOURCE);
         let by_name = |name: &str| symbols.iter().find(|s| s.name == name).expect("declared");
 
         let token = by_name("TOKEN");

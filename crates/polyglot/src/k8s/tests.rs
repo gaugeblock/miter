@@ -5,7 +5,7 @@
 use std::path::Path;
 
 use super::extract_yaml_symbols;
-use crate::polyglot::SymbolKind;
+use crate::SymbolKind;
 
 const MANIFEST: &str = "\
 apiVersion: v1

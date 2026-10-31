@@ -3,7 +3,7 @@
 use std::path::Path;
 
 use super::extract_docker_symbols;
-use crate::polyglot::SymbolKind;
+use crate::SymbolKind;
 
 #[test]
 fn a_multi_stage_build_yields_one_scope_per_stage() {

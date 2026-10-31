@@ -2,7 +2,7 @@
 mod tests {
     use super::super::comments::strip_comment_markers;
     use super::super::*;
-    use crate::polyglot::SymbolKind;
+    use crate::SymbolKind;
 
     #[test]
     fn a_module_is_read_off_the_path() {

@@ -3,7 +3,7 @@
 //!
 //! A language visitor is a recursive walk over the concrete syntax tree that knows
 //! *which* node kinds declare something and *which* level they sit at
-//! ([`crate::polyglot::rust`] is the reference). Everything else — reading a node's
+//! ([`crate::rust`] is the reference). Everything else — reading a node's
 //! text, collapsing it onto one line, computing a level, building the dotted path,
 //! reading the comment block above a declaration — is here, so the three visitors
 //! differ only in their node-kind table and never in a rule.
@@ -41,8 +41,8 @@ use tree_sitter::Node;
 pub const MAX_LEVEL: usize = 4;
 
 /// The level a declaration of `kind` sits at, before enclosing functions are counted.
-pub(crate) const fn base_level(kind: crate::polyglot::SymbolKind) -> usize {
-    use crate::polyglot::SymbolKind;
+pub(crate) const fn base_level(kind: crate::SymbolKind) -> usize {
+    use crate::SymbolKind;
     match kind {
         // A heading's own depth is its `#` count, which the Markdown extractor sets directly;
         // the floor here only keeps the table total.

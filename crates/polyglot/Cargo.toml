@@ -1,0 +1,27 @@
+[package]
+name = "miter-polyglot"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Polyglot extraction: one universal symbol model across Rust, TypeScript, SQL, HCL, Docker, Kubernetes, CSS, HTML and Python"
+readme = "../../README.md"
+keywords.workspace = true
+categories.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+miter-ast.workspace = true
+gaugeblock-contracts.workspace = true
+miter-security = { path = "../security", version = "0.1.0-beta.4" }
+tree-sitter.workspace = true
+sqlparser.workspace = true
+hcl.workspace = true
+dockerfile-parser.workspace = true
+serde_yaml.workspace = true
+serde = { workspace = true }
+
+[lints]
+workspace = true

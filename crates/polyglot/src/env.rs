@@ -4,7 +4,7 @@
 //! while never persisting raw RHS values (always redacted).
 
 use super::{Language, SymbolKind, UniversalSymbol, common};
-use crate::security::REDACTED_SECRET;
+use miter_security::REDACTED_SECRET;
 use std::path::Path;
 
 /// Checks if a file path is an environment variable configuration file (`.env` or `.env.*`).

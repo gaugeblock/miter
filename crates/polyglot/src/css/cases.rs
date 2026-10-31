@@ -5,7 +5,7 @@
 use std::path::Path;
 
 use super::extract_css_symbols;
-use crate::polyglot::{Language, SymbolKind};
+use crate::{Language, SymbolKind};
 
 const SHEET: &str = "\
 :root {

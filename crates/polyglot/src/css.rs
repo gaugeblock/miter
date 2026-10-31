@@ -15,7 +15,7 @@ use super::{Language, SymbolKind, UniversalSymbol, common};
 
 mod mask;
 
-pub(crate) use mask::mask_comments;
+pub use mask::mask_comments;
 use mask::{skip_quoted, skip_url, url_open_at};
 
 /// Extracts the names a stylesheet declares.
@@ -30,7 +30,7 @@ pub fn extract_css_symbols(path: &Path, source: &str) -> Vec<UniversalSymbol> {
     for (offset, name, value) in custom_properties(&masked, source) {
         let signature = format!(
             "{name}: {}",
-            crate::security::scrub_source_text(value.trim())
+            miter_security::scrub_source_text(value.trim())
         );
         declared.entry(name.to_owned()).or_insert((
             common::line_at(source, offset),

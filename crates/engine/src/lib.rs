@@ -12,11 +12,14 @@ pub mod hydrate;
 pub mod ingest;
 pub mod inventory;
 pub mod persist;
-pub mod polyglot;
-pub mod security;
 pub mod store;
 
 use miter_ast::IndexError;
+
+// The polyglot model and the redaction it depends on now live in their own crates; the engine keeps
+// the same paths for every caller by re-exporting them (GB-203 step 1).
+pub use miter_polyglot as polyglot;
+pub use miter_security as security;
 
 pub use analysis::{
     AffectedTest, AuditConfig, AuditSeverity, AuditViolation, CloneDetectionReport,
