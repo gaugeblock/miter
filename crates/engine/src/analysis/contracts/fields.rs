@@ -147,7 +147,12 @@ fn collect_fields(
         out.push(EntityField {
             raw_name: dotted.clone(),
             canonical_name: canonical_field_path(&dotted),
-            type_hint: child.return_type.clone(),
+            // A property record does not always carry its annotation, but the signature it was read
+            // from still does - and without it a named nested type can never be followed.
+            type_hint: child
+                .return_type
+                .clone()
+                .or_else(|| type_from_signature(&child.signature)),
         });
     }
 
@@ -202,4 +207,10 @@ fn last_type_name(annotation: &str) -> Option<String> {
     } else {
         Some(bare.to_string())
     }
+}
+
+/// The declared type read off a property's signature, for records that carry no annotation field.
+fn type_from_signature(signature: &str) -> Option<String> {
+    let (_, after) = signature.rsplit_once(':')?;
+    last_type_name(after.trim().trim_end_matches(',').trim_end_matches(';'))
 }
