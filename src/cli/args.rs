@@ -140,6 +140,9 @@ pub enum Command {
         /// Database file to read (defaults to `<workspace_root>/.gaugeblock/miter/miter.redb`).
         #[arg(long)]
         db: Option<PathBuf>,
+        /// Fail when any cross-language drift is detected.
+        #[arg(long)]
+        check: bool,
         /// Output format (`table` or `json`).
         #[arg(long, default_value = "table")]
         format: String,

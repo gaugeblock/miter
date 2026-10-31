@@ -27,7 +27,11 @@ impl ContractsFormat {
 }
 
 /// Runs the `miter contracts` command.
-pub fn run_contracts(db: &Path, format: ContractsFormat) -> Result<(), CliError> {
+///
+/// `check` turns the report into a verdict. Without it the command describes what it found and succeeds,
+/// which is what a person inspecting drift wants; with it, drift is a failure, because a gate that prints
+/// thirty-two drift lines and exits 0 is not a gate (`GB-223`).
+pub fn run_contracts(db: &Path, format: ContractsFormat, check: bool) -> Result<(), CliError> {
     if !db.exists() {
         return Err(CliError::MissingIndex(db.to_path_buf()));
     }
@@ -43,7 +47,27 @@ pub fn run_contracts(db: &Path, format: ContractsFormat) -> Result<(), CliError>
         ContractsFormat::Json => render_json(&report),
     }
 
-    Ok(())
+    verdict(&report, check)
+}
+
+/// Whether a report should fail the command.
+///
+/// Split out because the interesting part is a decision, not printing: the report can be rendered in two
+/// formats and the verdict must not depend on which one was chosen.
+fn verdict(report: &ContractReport, check: bool) -> Result<(), CliError> {
+    if !check || report.drifts.is_empty() {
+        return Ok(());
+    }
+    let fields: usize = report
+        .drifts
+        .iter()
+        .map(|drift| drift.missing_fields.len())
+        .sum();
+    Err(CliError::Rejected(format!(
+        "contract drift: {} entit{} across {fields} field(s)",
+        report.drifts.len(),
+        if report.drifts.len() == 1 { "y" } else { "ies" }
+    )))
 }
 
 fn render_table(report: &ContractReport) {
@@ -107,4 +131,66 @@ fn render_json(report: &ContractReport) {
     ]);
 
     println!("{}", doc.render());
+}
+
+#[cfg(test)]
+mod tests {
+    #![allow(clippy::expect_used)]
+
+    use super::*;
+    use miter_engine::{ContractDrift, MissingFieldDrift};
+
+    fn report(drifts: Vec<ContractDrift>) -> ContractReport {
+        ContractReport {
+            verified_entities: 3,
+            drifts,
+        }
+    }
+
+    fn drift(entity: &str, fields: &[&str]) -> ContractDrift {
+        ContractDrift {
+            entity: entity.to_string(),
+            sources: vec!["rust".to_string(), "typescript".to_string()],
+            missing_fields: fields
+                .iter()
+                .map(|field| MissingFieldDrift {
+                    field_name: (*field).to_string(),
+                    present_in: vec!["rust".to_string()],
+                    missing_in: vec!["typescript".to_string()],
+                })
+                .collect(),
+        }
+    }
+
+    #[test]
+    fn test_drift_is_described_without_check_and_rejected_with_it() {
+        let drifted = report(vec![
+            drift("chat_message", &["content", "timestamp_ms"]),
+            drift("typed_hole", &["kind"]),
+        ]);
+
+        // Describing is not failing: a person inspecting drift asks for the report, not a verdict.
+        assert!(verdict(&drifted, false).is_ok());
+
+        // With `--check` the same report is a failure, which is what a gate needs.
+        let error = verdict(&drifted, true).expect_err("drift must fail the check");
+        let message = error.to_string();
+        assert!(message.contains("2 entities"), "got {message}");
+        assert!(message.contains("3 field(s)"), "got {message}");
+    }
+
+    #[test]
+    fn test_a_clean_report_passes_the_check() {
+        let clean = report(Vec::new());
+        assert!(verdict(&clean, true).is_ok());
+    }
+
+    #[test]
+    fn test_a_single_entity_is_not_pluralised() {
+        let one = report(vec![drift("chat_message", &["content"])]);
+        let message = verdict(&one, true)
+            .expect_err("drift must fail")
+            .to_string();
+        assert!(message.contains("1 entity"), "got {message}");
+    }
 }

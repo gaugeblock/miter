@@ -141,9 +141,11 @@ pub fn execute(cli: Cli) -> Result<(), CliError> {
             &resolve_db(db),
             impact::ImpactFormat::parse(&format),
         ),
-        Command::Contracts { db, format } => {
-            contracts::run_contracts(&resolve_db(db), contracts::ContractsFormat::parse(&format))
-        }
+        Command::Contracts { db, check, format } => contracts::run_contracts(
+            &resolve_db(db),
+            contracts::ContractsFormat::parse(&format),
+            check,
+        ),
         Command::Clones {
             path,
             min_lines,

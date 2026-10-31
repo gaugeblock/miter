@@ -22,7 +22,7 @@ pub use analysis::{
     AffectedTest, AuditConfig, AuditSeverity, AuditViolation, CloneDetectionReport, ContractDrift,
     ContractReport, CycleDetectionReport, DeadSymbol, DependencyCycle, DirtyScan,
     EntrypointHandler, ExtractionBlueprint, FileDependencyGraph, FunctionFingerprint,
-    HygieneReport, ImpactAnalysis, SeamSlicer, SkeletonOptions, SkeletonResult,
+    HygieneReport, ImpactAnalysis, MissingFieldDrift, SeamSlicer, SkeletonOptions, SkeletonResult,
     StructuralClonePair, TransitiveCaller, VisibilityCandidate, WorkspaceAuditor, analyze_hygiene,
     canonical_entity_name, compute_impact, detect_dirty_files, extract_fingerprints_from_rust,
     extract_references, extract_skeleton, find_clones, ingest_dirty, normalize_identifier,
