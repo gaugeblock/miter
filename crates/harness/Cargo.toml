@@ -13,6 +13,7 @@ repository.workspace = true
 homepage.workspace = true
 
 [dependencies]
+gaugeblock-git = "0.1.0-beta.1"
 # The outcome type crosses a process boundary (a JSON report on stdout, a verdict the CLI
 # persists), so it has to be serialisable, and every failure has to be a variant a caller can
 # branch on rather than a formatted string.

@@ -1,8 +1,6 @@
 //! Git repository metadata extractor.
 
-use std::fs;
 use std::path::Path;
-use std::process::Command;
 
 use crate::inventory::types::GitInventory;
 
@@ -25,77 +23,46 @@ pub fn extract_git_inventory(root_dir: &Path) -> Option<GitInventory> {
     })
 }
 
-fn get_current_branch(root_dir: &Path) -> Option<String> {
-    if let Ok(output) = Command::new("git")
-        .args(["rev-parse", "--abbrev-ref", "HEAD"])
-        .current_dir(root_dir)
-        .output()
-        && output.status.success()
-    {
-        let branch = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        if !branch.is_empty() {
-            return Some(branch);
-        }
-    }
+/// Opens the repository, or `None` when the directory is not one.
+fn open(root_dir: &Path) -> Option<gaugeblock_git::Repository> {
+    gaugeblock_git::Repository::discover(root_dir).ok()
+}
 
-    let head_file = root_dir.join(".git").join("HEAD");
-    if let Ok(content) = fs::read_to_string(head_file)
-        && let Some(rest) = content.trim().strip_prefix("ref: refs/heads/")
-    {
-        return Some(rest.to_string());
-    }
-    None
+fn get_current_branch(root_dir: &Path) -> Option<String> {
+    // The crate reports an unborn HEAD's branch too, which is what the old `.git/HEAD` fallback was
+    // reconstructing by hand.
+    open(root_dir)?.current_branch().ok().flatten()
 }
 
 fn get_head_commit(root_dir: &Path) -> Option<String> {
-    if let Ok(output) = Command::new("git")
-        .args(["rev-parse", "HEAD"])
-        .current_dir(root_dir)
-        .output()
-        && output.status.success()
-    {
-        let hash = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        if !hash.is_empty() {
-            return Some(hash);
-        }
-    }
-    None
+    open(root_dir)?.head_sha().ok()
 }
 
 fn get_latest_tag(root_dir: &Path) -> Option<String> {
-    if let Ok(output) = Command::new("git")
-        .args(["describe", "--tags", "--abbrev=0"])
-        .current_dir(root_dir)
-        .output()
-        && output.status.success()
-    {
-        let tag = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        if !tag.is_empty() {
-            return Some(tag);
-        }
-    }
-    None
+    // No tags is the normal state for a young repository, so git's refusal becomes `None`.
+    open(root_dir)?.describe_tags().ok()
 }
 
 fn get_unreleased_commits(root_dir: &Path, latest_tag: Option<&str>) -> Vec<String> {
-    let rev_range = if let Some(tag) = latest_tag {
-        format!("{tag}..HEAD")
-    } else {
-        "HEAD~20..HEAD".to_string()
+    let rev_range = match latest_tag {
+        Some(tag) => format!("{tag}..HEAD"),
+        None => "HEAD~20..HEAD".to_string(),
     };
-
-    if let Ok(output) = Command::new("git")
-        .args(["log", &rev_range, "--oneline"])
-        .current_dir(root_dir)
-        .output()
-        && output.status.success()
-    {
-        let log = String::from_utf8_lossy(&output.stdout);
-        return log
-            .lines()
-            .map(|line| line.trim().to_string())
-            .filter(|line| !line.is_empty())
-            .collect();
+    let Some(repo) = open(root_dir) else {
+        return Vec::new();
+    };
+    // `--oneline` was sha-then-summary; the crate's Commit is the same pair, so the shape survives.
+    match repo.commits_between(&rev_range) {
+        Ok(commits) => commits
+            .into_iter()
+            .map(|commit| {
+                format!(
+                    "{} {}",
+                    &commit.sha[..7.min(commit.sha.len())],
+                    commit.summary
+                )
+            })
+            .collect(),
+        Err(_) => Vec::new(),
     }
-    Vec::new()
 }

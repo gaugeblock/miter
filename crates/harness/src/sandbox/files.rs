@@ -39,9 +39,15 @@ impl SandboxEnvironment {
     ///
     /// [`HarnessError::Git`] when `git status` fails.
     pub fn changed_files(&self) -> Result<Vec<PathBuf>, HarnessError> {
-        let output = self.git(&["status", "--porcelain"])?;
+        let lines = gaugeblock_git::Repository::discover(self.root())
+            .and_then(|repo| repo.status_porcelain())
+            .map_err(|e| HarnessError::Git {
+                subcommand: "status --porcelain".into(),
+                status: "failed".into(),
+                stderr: e.to_string(),
+            })?;
         let mut changed = Vec::new();
-        for line in String::from_utf8_lossy(&output.stdout).lines() {
+        for line in lines.iter().map(String::as_str) {
             // Porcelain v1: two status characters, a space, then the path. A rename reads
             // `R  old -> new`, and the new path is the one the working tree now holds.
             if line.len() < 4 {

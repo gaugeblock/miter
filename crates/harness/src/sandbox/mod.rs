@@ -71,8 +71,13 @@ impl SandboxEnvironment {
         if self.retired {
             return Ok(());
         }
-        let root = self.root.to_string_lossy().into_owned();
-        let result = self.git(&["worktree", "remove", "--force", &root]);
+        let result = gaugeblock_git::Repository::discover(&self.root)
+            .and_then(|repo| repo.remove_worktree(&self.root, true))
+            .map_err(|e| HarnessError::Git {
+                subcommand: "worktree remove --force".into(),
+                status: "failed".into(),
+                stderr: e.to_string(),
+            });
         // `git worktree remove` refuses a directory it no longer tracks (a test that already
         // deleted it by hand, a crashed earlier run). The sandbox is gone either way, which is
         // what the caller asked for, so an untracked directory is success and only a directory
@@ -97,28 +102,6 @@ impl SandboxEnvironment {
     #[must_use]
     pub fn is_retired(&self) -> bool {
         self.retired
-    }
-
-    /// Resolves a proposal path against the jail, refusing anything that escapes.
-    /// Runs `git` inside the sandbox and captures its output.
-    pub(super) fn git(&self, args: &[&str]) -> Result<std::process::Output, HarnessError> {
-        let output = std::process::Command::new("git")
-            .arg("-C")
-            .arg(&self.root)
-            .args(args)
-            .output()
-            .map_err(|e| HarnessError::Spawn {
-                tool: "git".into(),
-                detail: e.to_string(),
-            })?;
-        if !output.status.success() {
-            return Err(HarnessError::Git {
-                subcommand: args.join(" "),
-                status: output.status.to_string(),
-                stderr: String::from_utf8_lossy(&output.stderr).trim().to_owned(),
-            });
-        }
-        Ok(output)
     }
 }
 impl Drop for SandboxEnvironment {

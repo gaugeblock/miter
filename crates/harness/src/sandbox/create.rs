@@ -50,24 +50,16 @@ impl SandboxEnvironment {
             std::fs::create_dir_all(parent_dir).map_err(|e| HarnessError::io(parent_dir, e))?;
         }
 
-        let output = std::process::Command::new("git")
-            .arg("-C")
-            .arg(&base_repo)
-            .args(["worktree", "add", "--detach", "--quiet"])
-            .arg(&root)
-            .arg("HEAD")
-            .output()
-            .map_err(|e| HarnessError::Spawn {
-                tool: "git".into(),
-                detail: e.to_string(),
-            })?;
-        if !output.status.success() {
-            let stderr = String::from_utf8_lossy(&output.stderr).trim().to_owned();
+        // Detached on purpose: a sandbox is not a branch, so a failed verification leaves no
+        // branch behind (the crate's add_worktree_detached says the same thing from its side).
+        let created = gaugeblock_git::Repository::discover(&base_repo)
+            .and_then(|repo| repo.add_worktree_detached(&root, "HEAD"));
+        if let Err(error) = created {
             let _ = std::fs::remove_dir_all(&root);
             return Err(HarnessError::Git {
-                subcommand: "worktree add".into(),
-                status: output.status.to_string(),
-                stderr,
+                subcommand: "worktree add --detach".into(),
+                status: "failed".into(),
+                stderr: error.to_string(),
             });
         }
 

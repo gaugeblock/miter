@@ -13,6 +13,7 @@ repository.workspace = true
 homepage.workspace = true
 
 [dependencies]
+gaugeblock-git = "0.1.0-beta.1"
 miter-ast.workspace = true
 gaugeblock-contracts.workspace = true
 # The canonical redb tables and the schema handshake: the record layer here is *built on*

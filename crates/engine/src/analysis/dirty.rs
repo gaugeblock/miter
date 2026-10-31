@@ -4,7 +4,6 @@
 
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 use std::time::SystemTime;
 
 use miter_storage::IndexedFileRecord;
@@ -31,16 +30,11 @@ pub fn detect_dirty_files(root: &Path, indexed_files: &[(String, IndexedFileReco
 
     // 1. Try git status --porcelain for ultra-fast delta detection in git repositories.
     if root.join(".git").exists() {
-        let output_res = Command::new("git")
-            .args(["status", "--porcelain"])
-            .current_dir(root)
-            .output();
-        if let Ok(output) = output_res {
-            if !output.status.success() {
-                // Command failed or non-zero status
-            } else {
-                let stdout = String::from_utf8_lossy(&output.stdout);
-                for line in stdout.lines() {
+        let status_lines =
+            gaugeblock_git::Repository::discover(root).and_then(|repo| repo.status_porcelain());
+        if let Ok(lines) = status_lines {
+            {
+                for line in lines {
                     if line.len() < 4 {
                         continue;
                     }
