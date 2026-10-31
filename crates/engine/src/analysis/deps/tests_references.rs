@@ -41,3 +41,39 @@ fn test_a_local_module_does_not_mask_a_dependency_of_the_same_name() {
         "serde", &own, &deps
     ));
 }
+
+#[test]
+fn test_a_char_literal_holding_a_quote_does_not_eat_the_file() {
+    // GB-233: a char literal whose value is a double quote. The stripper treated that quote as
+    // opening a string and blanked every line after it, so a real dependency further down the file
+    // was reported unused - outfeed-core/src/index_poll.rs, where reqwest sat at line 63.
+    //
+    // A raw string keeps the fixture readable: the awkward literal can appear as itself.
+    let source = r#"fn pick(line: &str) -> Option<&str> {
+    line.split('"').nth(1)
+}
+
+fn fetch(url: &str) {
+    let _ = reqwest::blocking::get(url);
+}
+"#;
+    let roots = import_roots_in_source(source);
+    assert!(
+        roots.iter().any(|(root, _)| root == "reqwest"),
+        "a dependency after a quote-holding char literal must still count; got {roots:?}"
+    );
+}
+
+#[test]
+fn test_lifetimes_are_not_char_literals() {
+    // The distinction that makes the fix safe: a lifetime must not be consumed as a literal, or the
+    // scanner would swallow a character and mis-read the rest of the line.
+    let source = r#"fn f<'a>(s: &'a str) -> &'a str { s }
+fn g() { serde_json::json!({}); }
+"#;
+    let roots = import_roots_in_source(source);
+    assert!(
+        roots.iter().any(|(root, _)| root == "serde_json"),
+        "got {roots:?}"
+    );
+}

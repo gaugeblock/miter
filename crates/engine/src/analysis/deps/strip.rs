@@ -65,6 +65,23 @@ pub(super) fn code_only(line: &str, state: &mut StripState) -> String {
                 }
             }
         }
+        if chars[index] == '\'' {
+            // A char literal, not a lifetime. This must run before the `"` branch or a literal
+            // like `'"'` opens a string that swallows the rest of the file - which is exactly how
+            // outfeed-core lost every reference after `rest.split('"')` (GB-233).
+            match skip_char_literal(&chars, index) {
+                Some(end) => {
+                    index = end;
+                    out.push(' ');
+                    continue;
+                }
+                None => {
+                    // A lifetime (`'a`, `'static`) or a lone apostrophe: not a literal.
+                    index += 1;
+                    continue;
+                }
+            }
+        }
         if chars[index] == '"' {
             let (end, closed) = skip_string(&chars, index + 1);
             if !closed {
@@ -105,6 +122,25 @@ pub(super) fn code_only(line: &str, state: &mut StripState) -> String {
 }
 
 /// End index just past the closing quote of an ordinary string, honouring backslash escapes.
+/// Consumes a char literal starting at `start`, returning the index after its closing quote.
+///
+/// Returns `None` for a lifetime or a lone apostrophe, which is what distinguishes `'a` from `'a'`.
+fn skip_char_literal(chars: &[char], start: usize) -> Option<usize> {
+    let next = *chars.get(start + 1)?;
+    if next == '\\' {
+        // Escaped: `'\n'`, `'\''`, `'\u{1F600}'`. The closing quote is within a few characters.
+        let limit = (start + 12).min(chars.len());
+        return (start + 2..limit)
+            .find(|&i| chars[i] == '\'')
+            .map(|i| i + 1);
+    }
+    // A single character followed by a quote, including the awkward `'"'`.
+    if *chars.get(start + 2).unwrap_or(&' ') == '\'' {
+        return Some(start + 3);
+    }
+    None
+}
+
 fn skip_string(chars: &[char], mut index: usize) -> (usize, bool) {
     while index < chars.len() {
         if chars[index] == '\\' {
