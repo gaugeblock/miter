@@ -94,14 +94,112 @@ pub fn fields_of(symbols: &[UniversalSymbol], sym: &UniversalSymbol) -> Vec<Enti
     if !own.is_empty() {
         return own;
     }
+    let mut fields = Vec::new();
+    collect_fields(symbols, sym, 0, &mut fields);
+    fields.sort_by(|a, b| a.canonical_name.cmp(&b.canonical_name));
+    fields.dedup_by(|a, b| a.canonical_name == b.canonical_name);
+    fields
+}
+
+/// How deep the walk follows nesting, in fields.
+///
+/// One level is enough for the shapes the suite actually has - a config record holding a small named
+/// sub-record - and a bound keeps a self-referential type from being walked forever.
+const MAX_NESTING: usize = 2;
+
+/// Collects a declaration's fields, descending into nested objects.
+///
+/// The two languages express one shape differently and the comparison has to see the same thing
+/// either way (`GB-239`). TypeScript inlines an object - `spec_docs: { primary_spec_present: bool }` -
+/// and its properties index *beneath the parent's path*, so they read as fields of the parent. Rust
+/// names a struct - `pub spec_docs: SpecDocs` - and `SpecDocs`'s fields index beneath `SpecDocs`, which
+/// is not the parent's path at all, so they were invisible. Comparing top-level fields alone therefore
+/// reported a correctly nested pair as nine or eleven missing fields.
+///
+/// Fields are emitted under a dotted path (`spec_docs.primary_spec_present`) on both sides, so depth
+/// stops mattering.
+fn collect_fields(
+    symbols: &[UniversalSymbol],
+    sym: &UniversalSymbol,
+    depth: usize,
+    out: &mut Vec<EntityField>,
+) {
+    if depth > MAX_NESTING {
+        return;
+    }
     let prefix = format!("{}.", sym.path);
-    symbols
+    for child in symbols
         .iter()
         .filter(|child| child.kind == SymbolKind::Property && child.path.starts_with(&prefix))
-        .map(|child| EntityField {
-            raw_name: child.name.clone(),
-            canonical_name: normalize_identifier(&child.name),
+    {
+        // A direct property's path is `<parent>.<name>`; a property of an inlined object is
+        // `<parent>.<field>.<name>`. Only the middle segment distinguishes them.
+        let relative = child.path.strip_prefix(&prefix).unwrap_or("");
+        let owner = relative
+            .strip_suffix(child.name.as_str())
+            .unwrap_or("")
+            .trim_end_matches('.');
+        let dotted = if owner.is_empty() {
+            child.name.clone()
+        } else {
+            format!("{owner}.{}", child.name)
+        };
+        out.push(EntityField {
+            raw_name: dotted.clone(),
+            canonical_name: canonical_field_path(&dotted),
             type_hint: child.return_type.clone(),
-        })
-        .collect()
+        });
+    }
+
+    // A named nested type is resolved by name and walked under the field that refers to it.
+    for field in out.clone() {
+        if field.raw_name.contains('.') {
+            continue;
+        }
+        let Some(type_name) = field.type_hint.as_deref().and_then(last_type_name) else {
+            continue;
+        };
+        let Some(nested) = symbols.iter().find(|candidate| {
+            matches!(candidate.kind, SymbolKind::Struct | SymbolKind::Interface)
+                && candidate.name == type_name
+                && candidate.path != sym.path
+        }) else {
+            continue;
+        };
+        let mut inner = Vec::new();
+        collect_fields(symbols, nested, depth + 1, &mut inner);
+        for mut child in inner {
+            child.raw_name = format!("{}.{}", field.raw_name, child.raw_name);
+            child.canonical_name = canonical_field_path(&child.raw_name);
+            out.push(child);
+        }
+    }
+}
+
+/// Canonicalizes a dotted path segment by segment.
+fn canonical_field_path(path: &str) -> String {
+    path.split('.')
+        .map(normalize_identifier)
+        .collect::<Vec<_>>()
+        .join(".")
+}
+
+/// The bare type name of an annotation, ignoring `Option<...>`, `Vec<...>`, `[]` and module paths.
+fn last_type_name(annotation: &str) -> Option<String> {
+    let mut text = annotation.trim();
+    if let Some(start) = text.find('<') {
+        let end = text.rfind('>')?;
+        text = &text[start + 1..end];
+    }
+    let text = text.trim().trim_end_matches("[]").trim();
+    if text.is_empty() {
+        return None;
+    }
+    let bare = text.rsplit(['.', ':']).next().unwrap_or(text).trim();
+    let is_object_shape = bare.contains('{') || bare.contains('[');
+    if bare.is_empty() || is_object_shape {
+        None
+    } else {
+        Some(bare.to_string())
+    }
 }
