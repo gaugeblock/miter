@@ -31,7 +31,12 @@ impl ContractsFormat {
 /// `check` turns the report into a verdict. Without it the command describes what it found and succeeds,
 /// which is what a person inspecting drift wants; with it, drift is a failure, because a gate that prints
 /// thirty-two drift lines and exits 0 is not a gate (`GB-223`).
-pub fn run_contracts(db: &Path, format: ContractsFormat, check: bool) -> Result<(), CliError> {
+pub fn run_contracts(
+    db: &Path,
+    format: ContractsFormat,
+    check: bool,
+    allowlist_path: &Path,
+) -> Result<(), CliError> {
     if !db.exists() {
         return Err(CliError::MissingIndex(db.to_path_buf()));
     }
@@ -40,7 +45,8 @@ pub fn run_contracts(db: &Path, format: ContractsFormat, check: bool) -> Result<
         .map_err(|e: StorageError| CliError::Usage(format!("failed to open database: {e}")))?;
     let symbols = miter_engine::load_redb_universal_from(&store)
         .map_err(|e| CliError::Usage(format!("failed to load universal symbols: {e}")))?;
-    let report = miter_engine::verify_contracts_from_symbols(&symbols);
+    let allow = miter_engine::load_contract_allowlist(allowlist_path).map_err(CliError::Usage)?;
+    let report = miter_engine::verify_contracts_with_allowlist(&symbols, &allow);
 
     match format {
         ContractsFormat::Table => render_table(&report),
@@ -78,6 +84,9 @@ fn render_table(report: &ContractReport) {
         report.verified_entities
     );
     println!("Entities with Contract Drift:     {}", report.drifts.len());
+    if report.suppressed > 0 {
+        println!("Declared non-mirrors (allowed):   {}", report.suppressed);
+    }
 
     if report.drifts.is_empty() {
         println!("\nALL CONTRACTS CONSISTENT: No cross-language schema drifts detected.");
@@ -144,6 +153,7 @@ mod tests {
         ContractReport {
             verified_entities: 3,
             drifts,
+            suppressed: 0,
         }
     }
 

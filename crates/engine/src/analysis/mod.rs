@@ -36,8 +36,9 @@ pub use clones::{
 };
 pub use cluster::{CoupledCluster, DeclarationNode};
 pub use contracts::{
-    ContractDrift, ContractReport, EntityField, MissingFieldDrift, PolyglotEntity,
-    canonical_entity_name, normalize_identifier, verify_contracts_from_symbols,
+    ContractAllowlist, ContractDrift, ContractException, ContractReport, EntityField,
+    MissingFieldDrift, PolyglotEntity, canonical_entity_name, load_contract_allowlist,
+    normalize_identifier, verify_contracts_from_symbols, verify_contracts_with_allowlist,
 };
 pub use cycles::{CycleDetectionReport, DependencyCycle, FileDependencyGraph};
 pub use deps::{

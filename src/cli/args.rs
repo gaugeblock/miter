@@ -143,6 +143,12 @@ pub enum Command {
         /// Fail when any cross-language drift is detected.
         #[arg(long)]
         check: bool,
+        /// Declared-non-mirror allowlist (default: `<path>/.gaugeblock/miter/contracts-allowlist.toml`).
+        #[arg(long)]
+        allowlist: Option<PathBuf>,
+        /// Workspace root used to locate the default allowlist.
+        #[arg(long)]
+        path: Option<PathBuf>,
         /// Output format (`table` or `json`).
         #[arg(long, default_value = "table")]
         format: String,

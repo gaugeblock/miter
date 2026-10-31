@@ -5,73 +5,19 @@
 
 use crate::polyglot::{SymbolKind, UniversalSymbol};
 use miter_storage::store::WorkspaceStore;
-use serde::{Deserialize, Serialize};
 use std::collections::{BTreeSet, HashMap};
 
+mod allowlist;
+mod compare;
 mod fields;
+mod model;
 
+pub use allowlist::{ContractAllowlist, ContractException, load as load_contract_allowlist};
+use compare::{depth_differs, is_subsumed};
 pub use fields::{
     canonical_entity_name, extract_fields_from_symbol, fields_of, normalize_identifier,
 };
-
-/// A field extracted from an entity declaration.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct EntityField {
-    /// Raw field name as written in source code.
-    pub raw_name: String,
-    /// Canonical normalized field name for cross-language matching.
-    pub canonical_name: String,
-    /// Associated type annotation if available.
-    pub type_hint: Option<String>,
-}
-
-/// A parsed cross-language entity representation.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct PolyglotEntity {
-    /// Canonical entity name (e.g. "resident_ledger").
-    pub canonical_name: String,
-    /// Language family or source kind: "sql", "rust", or "typescript".
-    pub source_kind: String,
-    /// Raw declaration name (e.g., "residents", "ResidentLedger").
-    pub raw_name: String,
-    /// Defining file path.
-    pub file_path: String,
-    /// Line number.
-    pub line: usize,
-    /// Set of fields declared on this entity.
-    pub fields: Vec<EntityField>,
-}
-
-/// Drift report for a matched cross-language entity.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct ContractDrift {
-    /// Canonical entity name.
-    pub entity: String,
-    /// Representation sources evaluated (e.g., ["sql", "rust", "typescript"]).
-    pub sources: Vec<String>,
-    /// Fields present in some representations but missing in others.
-    pub missing_fields: Vec<MissingFieldDrift>,
-}
-
-/// A missing field inconsistency across representations.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct MissingFieldDrift {
-    /// Canonical field name.
-    pub field_name: String,
-    /// Sources that define this field.
-    pub present_in: Vec<String>,
-    /// Sources that are missing this field.
-    pub missing_in: Vec<String>,
-}
-
-/// Overall polyglot contract verification report.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
-pub struct ContractReport {
-    /// Entities matched across 2 or more languages.
-    pub verified_entities: usize,
-    /// Detected contract drifts.
-    pub drifts: Vec<ContractDrift>,
-}
+pub use model::{ContractDrift, ContractReport, EntityField, MissingFieldDrift, PolyglotEntity};
 
 /// Evaluates polyglot contracts across stored universal symbols.
 pub fn verify_contracts_from_store(
@@ -84,6 +30,15 @@ pub fn verify_contracts_from_store(
 /// Evaluates polyglot contracts across a collection of `UniversalSymbol`s.
 #[must_use]
 pub fn verify_contracts_from_symbols(symbols: &[UniversalSymbol]) -> ContractReport {
+    verify_contracts_with_allowlist(symbols, &ContractAllowlist::default())
+}
+
+/// Evaluates polyglot contracts, honouring declared non-mirrors.
+#[must_use]
+pub fn verify_contracts_with_allowlist(
+    symbols: &[UniversalSymbol],
+    allow: &ContractAllowlist,
+) -> ContractReport {
     let mut entities_by_name: HashMap<String, Vec<PolyglotEntity>> = HashMap::new();
 
     for sym in symbols {
@@ -177,6 +132,10 @@ pub fn verify_contracts_from_symbols(symbols: &[UniversalSymbol]) -> ContractRep
             if is_subsumed(&field, &missing_in, &all_missing) {
                 continue;
             }
+            if allow.covers(&canonical_name, &field).is_some() {
+                report.suppressed += 1;
+                continue;
+            }
             for kind in &missing_in {
                 all_missing.push((field.clone(), kind.clone()));
             }
@@ -198,45 +157,4 @@ pub fn verify_contracts_from_symbols(symbols: &[UniversalSymbol]) -> ContractRep
 
     report.drifts.sort_by(|a, b| a.entity.cmp(&b.entity));
     report
-}
-
-/// Whether the same shape is simply nested at a different depth on each side.
-///
-/// An index does not go equally deep in every grammar - TypeScript inlines an object one level down,
-/// Rust names a struct and can be followed further - so `docs.agents` on one side and
-/// `docs.agents.path` on the other describe one field, not a missing one. Either relation settles it:
-/// the other side has something below this path, or this path is below something the other side has.
-fn depth_differs(
-    field: &str,
-    fields_by_kind: &HashMap<String, BTreeSet<String>>,
-    missing_in: &[String],
-) -> bool {
-    let below = format!("{field}.");
-    missing_in.iter().any(|kind| {
-        fields_by_kind.get(kind).is_some_and(|fields| {
-            fields.iter().any(|other| {
-                // The other side has something beneath this path, or this path sits beneath
-                // something the other side has. Either way the shape is nested, not missing.
-                other.starts_with(&below) || field.starts_with(&format!("{other}."))
-            })
-        })
-    })
-}
-
-/// Whether a nested path is already reported by its parent.
-///
-/// If `verification` is missing, then `verification.diagnostics.code` is the same omission counted
-/// eleven more times. The parent line is the one a person acts on.
-fn is_subsumed(field: &str, missing_in: &[String], all_missing: &[(String, String)]) -> bool {
-    let mut prefix = field;
-    while let Some((parent, _)) = prefix.rsplit_once('.') {
-        if missing_in
-            .iter()
-            .any(|kind| all_missing.iter().any(|(p, k)| p == parent && k == kind))
-        {
-            return true;
-        }
-        prefix = parent;
-    }
-    false
 }

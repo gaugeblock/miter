@@ -141,11 +141,23 @@ pub fn execute(cli: Cli) -> Result<(), CliError> {
             &resolve_db(db),
             impact::ImpactFormat::parse(&format),
         ),
-        Command::Contracts { db, check, format } => contracts::run_contracts(
-            &resolve_db(db),
-            contracts::ContractsFormat::parse(&format),
+        Command::Contracts {
+            db,
             check,
-        ),
+            allowlist,
+            path,
+            format,
+        } => {
+            let root = path.unwrap_or_else(|| std::env::current_dir().unwrap_or_default());
+            let allowlist_path = allowlist
+                .unwrap_or_else(|| root.join(".gaugeblock/miter/contracts-allowlist.toml"));
+            contracts::run_contracts(
+                &resolve_db(db),
+                contracts::ContractsFormat::parse(&format),
+                check,
+                &allowlist_path,
+            )
+        }
         Command::Clones {
             path,
             min_lines,

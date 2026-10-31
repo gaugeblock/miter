@@ -19,14 +19,15 @@ pub mod store;
 use miter_ast::IndexError;
 
 pub use analysis::{
-    AffectedTest, AuditConfig, AuditSeverity, AuditViolation, CloneDetectionReport, ContractDrift,
-    ContractReport, CycleDetectionReport, DeadSymbol, DependencyCycle, DirtyScan,
-    EntrypointHandler, ExtractionBlueprint, FileDependencyGraph, FunctionFingerprint,
-    HygieneReport, ImpactAnalysis, MissingFieldDrift, SeamSlicer, SkeletonOptions, SkeletonResult,
-    StructuralClonePair, TransitiveCaller, VisibilityCandidate, WorkspaceAuditor, analyze_hygiene,
-    canonical_entity_name, compute_impact, detect_dirty_files, extract_fingerprints_from_rust,
-    extract_references, extract_skeleton, find_clones, ingest_dirty, normalize_identifier,
-    verify_contracts_from_symbols,
+    AffectedTest, AuditConfig, AuditSeverity, AuditViolation, CloneDetectionReport,
+    ContractAllowlist, ContractDrift, ContractException, ContractReport, CycleDetectionReport,
+    DeadSymbol, DependencyCycle, DirtyScan, EntrypointHandler, ExtractionBlueprint,
+    FileDependencyGraph, FunctionFingerprint, HygieneReport, ImpactAnalysis, MissingFieldDrift,
+    SeamSlicer, SkeletonOptions, SkeletonResult, StructuralClonePair, TransitiveCaller,
+    VisibilityCandidate, WorkspaceAuditor, analyze_hygiene, canonical_entity_name, compute_impact,
+    detect_dirty_files, extract_fingerprints_from_rust, extract_references, extract_skeleton,
+    find_clones, ingest_dirty, load_contract_allowlist, normalize_identifier,
+    verify_contracts_from_symbols, verify_contracts_with_allowlist,
 };
 pub use codec::{
     DecodeError, MAGIC, PersistError, VERSION, decode_symbol, decode_universal, encode_symbol,
