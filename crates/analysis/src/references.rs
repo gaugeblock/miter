@@ -17,15 +17,15 @@ use miter_storage::schema::ReferenceEntry;
 #[must_use]
 pub fn extract_references(path: &Path, source: &str) -> Vec<(String, ReferenceEntry)> {
     let file_path = path.to_string_lossy().replace('\\', "/");
-    let Some(language) = crate::polyglot::Language::from_path(path) else {
+    let Some(language) = miter_polyglot::Language::from_path(path) else {
         return Vec::new();
     };
     if language.is_declarative() {
         return match language {
-            crate::polyglot::Language::Html => markup::html(&file_path, source),
-            crate::polyglot::Language::Css => markup::css(&file_path, source),
-            crate::polyglot::Language::Sql => markup::sql(&file_path, source),
-            crate::polyglot::Language::Dockerfile => markup::docker(&file_path, source),
+            miter_polyglot::Language::Html => markup::html(&file_path, source),
+            miter_polyglot::Language::Css => markup::css(&file_path, source),
+            miter_polyglot::Language::Sql => markup::sql(&file_path, source),
+            miter_polyglot::Language::Dockerfile => markup::docker(&file_path, source),
             _ => Vec::new(),
         };
     }

@@ -12,7 +12,7 @@ use miter_storage::schema::{ReferenceEntry, ReferenceKind};
 #[must_use]
 pub(super) fn html(file_path: &str, source: &str) -> Vec<(String, ReferenceEntry)> {
     let mut out = Vec::new();
-    for (offset, name, value) in crate::polyglot::html::attributes_of(source) {
+    for (offset, name, value) in miter_polyglot::html::attributes_of(source) {
         match name.to_ascii_lowercase().as_str() {
             // A class is declared in a stylesheet, where it is spelled `.card`.
             "class" => {
@@ -42,7 +42,7 @@ pub(super) fn html(file_path: &str, source: &str) -> Vec<(String, ReferenceEntry
 /// the source length.
 #[must_use]
 pub(super) fn css(file_path: &str, source: &str) -> Vec<(String, ReferenceEntry)> {
-    let masked = crate::polyglot::css::mask_comments(source);
+    let masked = miter_polyglot::css::mask_comments(source);
     let mut out = Vec::new();
     let mut index = 0usize;
     while let Some(found) = masked[index..].find("var(") {
@@ -109,7 +109,7 @@ pub(super) fn docker(file_path: &str, source: &str) -> Vec<(String, ReferenceEnt
 
 /// Builds one `Usage` entry for `name` at `offset`.
 fn entry(file_path: &str, name: String, offset: usize, source: &str) -> (String, ReferenceEntry) {
-    let line = crate::polyglot::common::line_at(source, offset);
+    let line = miter_polyglot::common::line_at(source, offset);
     let length = name.len();
     (
         name,

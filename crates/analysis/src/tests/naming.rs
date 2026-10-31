@@ -4,7 +4,7 @@
 
 use std::path::Path;
 
-use crate::analysis::slice::SeamSlicer;
+use crate::slice::SeamSlicer;
 
 #[test]
 fn test_seam_slicer_smart_candidate_naming() {

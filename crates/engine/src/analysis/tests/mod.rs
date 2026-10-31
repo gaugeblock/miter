@@ -1,5 +1,3 @@
-//! Unit tests for the workspace auditor and the seam slicer.
+//! Unit tests for the workspace auditor, which stayed beside the store it reads.
 
 mod audit;
-mod naming;
-mod slicer;

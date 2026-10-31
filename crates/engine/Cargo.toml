@@ -21,6 +21,7 @@ gaugeblock-contracts.workspace = true
 # this crate's tables rather than declaring its own.
 miter-storage.workspace = true
 # Extracted in GB-203 step 1; the engine re-exports both so no caller changes a path.
+miter-analysis = { path = "../analysis", version = "0.1.0-beta.4" }
 miter-polyglot = { path = "../polyglot", version = "0.1.0-beta.4" }
 miter-security = { path = "../security", version = "0.1.0-beta.4" }
 rayon.workspace = true

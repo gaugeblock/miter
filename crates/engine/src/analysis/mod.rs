@@ -6,28 +6,24 @@
 //! - [`cluster`]: Partitions symbol subgraphs into cohesive ~200–250 line extraction clusters.
 
 pub mod audit;
-pub mod clones;
-pub mod cluster;
+pub use miter_analysis::clones;
+pub use miter_analysis::cluster;
 pub mod contracts;
 pub mod cycles;
 pub mod deps;
 pub mod dirty;
 pub mod hygiene;
 pub mod impact;
-pub mod references;
-pub mod skeleton;
-pub mod slice;
+pub use miter_analysis::references;
+pub use miter_analysis::skeleton;
+pub use miter_analysis::slice;
 
 #[cfg(test)]
 mod tests;
 #[cfg(test)]
-mod tests_clones;
-#[cfg(test)]
 mod tests_contracts;
 #[cfg(test)]
 mod tests_references;
-#[cfg(test)]
-mod tests_skeleton;
 
 pub use audit::{AuditConfig, AuditSeverity, AuditViolation, WorkspaceAuditor};
 pub use clones::{

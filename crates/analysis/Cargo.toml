@@ -1,0 +1,26 @@
+[package]
+name = "miter-analysis"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Pure analysis passes over universal symbols: clones, references, skeletons, cluster and slice"
+readme = "../../README.md"
+keywords.workspace = true
+categories.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+miter-ast.workspace = true
+miter-polyglot = { path = "../polyglot", version = "0.1.0-beta.4" }
+miter-security = { path = "../security", version = "0.1.0-beta.4" }
+miter-storage.workspace = true
+tree-sitter.workspace = true
+dockerfile-parser = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

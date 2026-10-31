@@ -76,7 +76,7 @@ pub fn extract_skeleton(path: &Path, source: &str, options: SkeletonOptions) -> 
     let original_lines = source.lines().count();
     let original_chars = source.len();
 
-    if crate::polyglot::is_declarative_source(path) {
+    if miter_polyglot::is_declarative_source(path) {
         return declarative_skeleton(path, source, original_lines, original_chars);
     }
 
@@ -98,7 +98,7 @@ pub fn extract_skeleton(path: &Path, source: &str, options: SkeletonOptions) -> 
     collect_function_bodies(tree.root_node(), lang, &mut blocks);
 
     if blocks.is_empty() {
-        let scrubbed = crate::security::scrub_source_text(source);
+        let scrubbed = miter_security::scrub_source_text(source);
         let skeleton_lines = scrubbed.lines().count();
         let skeleton_chars = scrubbed.len();
         return SkeletonResult {
@@ -153,7 +153,7 @@ pub fn extract_skeleton(path: &Path, source: &str, options: SkeletonOptions) -> 
         }
     }
 
-    let skeleton_text = crate::security::scrub_source_text(&clean_lines.join("\n"));
+    let skeleton_text = miter_security::scrub_source_text(&clean_lines.join("\n"));
     let skeleton_lines = skeleton_text.lines().count();
     let skeleton_chars = skeleton_text.len();
 
@@ -176,7 +176,7 @@ fn declarative_skeleton(
     original_lines: usize,
     original_chars: usize,
 ) -> SkeletonResult {
-    let Some(symbols) = crate::polyglot::declarative_symbols(path, source) else {
+    let Some(symbols) = miter_polyglot::declarative_symbols(path, source) else {
         return empty_result(source, original_lines, original_chars);
     };
     if symbols.is_empty() {
@@ -191,7 +191,7 @@ fn declarative_skeleton(
             symbol.line, symbol.signature
         ));
     }
-    let skeleton_text = crate::security::scrub_source_text(&out);
+    let skeleton_text = miter_security::scrub_source_text(&out);
     SkeletonResult {
         skeleton_lines: skeleton_text.lines().count(),
         skeleton_chars: skeleton_text.len(),
@@ -202,7 +202,7 @@ fn declarative_skeleton(
 }
 
 fn empty_result(source: &str, lines: usize, chars: usize) -> SkeletonResult {
-    let scrubbed = crate::security::scrub_source_text(source);
+    let scrubbed = miter_security::scrub_source_text(source);
     let skeleton_lines = scrubbed.lines().count();
     let skeleton_chars = scrubbed.len();
     SkeletonResult {
