@@ -1,6 +1,7 @@
 # System Architecture — `miter`
 
-> **Crates:** `miter-cli`, `miter-engine`, `miter-ast`, `miter-storage`, `miter-harness`, `miter-mcp`  
+> **Crates:** `miter-cli`, `miter-engine`, `miter-ast`, `miter-storage`, `miter-harness`, `miter-mcp`,
+> `miter-polyglot`, `miter-security`, `miter-analysis`, `miter-inventory`
 > **Storage Backend:** Embedded `redb` B-Tree Key-Value Database (`.miter/miter.redb`)  
 > **Concurrency:** Multi-Reader Single-Writer Process Locking
 
@@ -93,6 +94,27 @@ The persistent index is housed in a single file at `.miter/miter.redb` within th
 ### `miter-engine`
 - **Path:** `crates/engine`
 - **Role:** Analysis engine and domain models. Owns secret scrubbing, symbol hydration neighbour sorting, Tarjan SCC cycle detection, SimHash clone clustering, polyglot contract verification, and file line-count audits.
+
+### `miter-polyglot`, `miter-security`, `miter-analysis`, `miter-inventory`
+
+Extracted from `miter-engine` in `GB-203`, in that order, because that is the order the dependencies
+allow. `miter-engine` re-exports each one under its original module path, so no caller changed a line.
+
+| Crate | Owns | Depends on |
+|:--|:--|:--|
+| `miter-security` | redaction and entropy detection | std only |
+| `miter-polyglot` | the universal symbol model and every language reader | security, ast, contracts, tree-sitter, sqlparser, hcl, dockerfile-parser, serde_yaml |
+| `miter-inventory` | Cargo manifests, toolchains, public types, CLI surface, git metadata | gaugeblock-git, serde, toml |
+| `miter-analysis` | pure passes: clones, references, skeletons, slices, clusters, dependency graphs | polyglot, inventory, security, storage (schema types only) |
+
+Two boundaries were set by measurement rather than by taste, and both are recorded in
+`.gaugeblock/storypole/plans/GB-203.md`:
+
+- **Storage-coupled passes stay in the engine.** Contracts, cycles, hygiene, impact and the dirty ingest
+  read the redb tables through the engine's `persist`, which is coupled to `codec`. They are not
+  wrappers around pure cores; they walk the store.
+- **`audit` stays too.** It calls `config::MiterConfig::load_from_workspace`, and `config` reads the
+  workspace root, so extracting audit would put engine config inside a crate the engine depends on.
 
 ### `miter-storage`
 - **Path:** `crates/storage`
