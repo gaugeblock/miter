@@ -80,7 +80,7 @@ impl MiterConfig {
     /// 5. Default fallback
     #[must_use]
     pub fn load_from_workspace(workspace_root: &Path) -> Self {
-        let unified_config = workspace_root.join(".gaugeblock").join("config.toml");
+        let unified_config = gaugeblock_workspace::GaugeblockPaths::at(workspace_root).config();
         if unified_config.is_file()
             && let Ok(content) = std::fs::read_to_string(&unified_config)
         {
@@ -95,10 +95,8 @@ impl MiterConfig {
             }
         }
 
-        let gb_miter = workspace_root
-            .join(".gaugeblock")
-            .join("miter")
-            .join("config.toml");
+        let gb_miter =
+            gaugeblock_workspace::GaugeblockPaths::at(workspace_root).tool_config("miter");
         if gb_miter.is_file()
             && let Ok(content) = std::fs::read_to_string(&gb_miter)
             && let Ok(config) = toml::from_str(&content)

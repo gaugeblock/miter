@@ -13,6 +13,7 @@ repository.workspace = true
 homepage.workspace = true
 
 [dependencies]
+gaugeblock-workspace = "0.1.0-beta.1"
 gaugeblock-git = "0.1.0-beta.1"
 miter-ast.workspace = true
 gaugeblock-contracts.workspace = true
