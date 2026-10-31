@@ -3,10 +3,10 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use crate::inventory::cargo_parser::{collect_member_crates, parse_single_crate};
-use crate::inventory::error::InventoryError;
-use crate::inventory::toolchain_extractor::extract_toolchain;
-use crate::inventory::types::{CrateInventory, ToolchainInventory};
+use crate::cargo_parser::{collect_member_crates, parse_single_crate};
+use crate::error::InventoryError;
+use crate::toolchain_extractor::extract_toolchain;
+use crate::types::{CrateInventory, ToolchainInventory};
 
 /// Discovered cargo manifests and toolchain config.
 #[derive(Debug, Clone)]

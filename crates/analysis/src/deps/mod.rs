@@ -27,7 +27,7 @@ pub use layers::{
     classify_edge, family,
 };
 
-use crate::inventory::{InventoryError, extract_cargo_inventory};
+use miter_inventory::{InventoryError, extract_cargo_inventory};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::path::Path;

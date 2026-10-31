@@ -3,7 +3,7 @@
 use std::fs;
 use std::path::Path;
 
-use crate::inventory::types::PublicTypeInventory;
+use crate::types::PublicTypeInventory;
 
 /// Extracts public structs, enums, and traits from Rust source files.
 pub fn extract_public_types(root_dir: &Path, source_dirs: &[&Path]) -> Vec<PublicTypeInventory> {

@@ -1,0 +1,23 @@
+[package]
+name = "miter-inventory"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Workspace inventory: Cargo manifests, toolchains, public types, CLI surface and git metadata"
+readme = "../../README.md"
+keywords.workspace = true
+categories.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+gaugeblock-git = "0.1.0-beta.1"
+serde = { workspace = true }
+serde_json = { workspace = true }
+toml = { workspace = true }
+thiserror = { workspace = true }
+
+[lints]
+workspace = true

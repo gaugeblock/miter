@@ -3,7 +3,7 @@
 use std::fs;
 use std::path::Path;
 
-use crate::inventory::types::{CliArgInventory, CliCommandInventory};
+use crate::types::{CliArgInventory, CliCommandInventory};
 
 /// Extracts CLI commands and arguments from Rust source files in member crates.
 pub fn extract_cli_inventory(

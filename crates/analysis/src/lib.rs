@@ -8,6 +8,7 @@
 //! The engine re-exports these modules under `analysis`, so no caller changes a path.
 
 pub mod clones;
+pub mod deps;
 pub mod cluster;
 pub mod references;
 pub mod skeleton;

@@ -17,6 +17,10 @@ miter-ast.workspace = true
 miter-polyglot = { path = "../polyglot", version = "0.1.0-beta.4" }
 miter-security = { path = "../security", version = "0.1.0-beta.4" }
 miter-storage.workspace = true
+miter-inventory = { path = "../inventory", version = "0.1.0-beta.4" }
+gaugeblock-contracts.workspace = true
+toml = { workspace = true }
+thiserror = { workspace = true }
 tree-sitter.workspace = true
 dockerfile-parser = { workspace = true }
 serde = { workspace = true }

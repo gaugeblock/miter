@@ -10,7 +10,7 @@ pub mod codec;
 pub mod config;
 pub mod hydrate;
 pub mod ingest;
-pub mod inventory;
+pub use miter_inventory as inventory;
 pub mod persist;
 pub mod store;
 

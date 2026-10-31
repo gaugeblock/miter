@@ -2,7 +2,7 @@
 
 use std::path::Path;
 
-use crate::inventory::types::GitInventory;
+use crate::types::GitInventory;
 
 /// Extracts Git metadata for the workspace root.
 pub fn extract_git_inventory(root_dir: &Path) -> Option<GitInventory> {

@@ -522,12 +522,16 @@ name = "miter-analysis"
 version = "0.1.0-beta.4"
 dependencies = [
  "dockerfile-parser",
+ "gaugeblock-contracts",
  "miter-ast",
+ "miter-inventory",
  "miter-polyglot",
  "miter-security",
  "miter-storage",
  "serde",
  "serde_json",
+ "thiserror 2.0.21",
+ "toml",
  "tree-sitter",
 ]
 
@@ -563,13 +567,13 @@ dependencies = [
 name = "miter-engine"
 version = "0.1.0-beta.4"
 dependencies = [
- "dockerfile-parser",
  "gaugeblock-contracts",
  "gaugeblock-git",
  "gaugeblock-workspace",
  "globset",
  "miter-analysis",
  "miter-ast",
+ "miter-inventory",
  "miter-polyglot",
  "miter-security",
  "miter-storage",
@@ -579,7 +583,6 @@ dependencies = [
  "serde_json",
  "thiserror 2.0.21",
  "toml",
- "tree-sitter",
 ]
 
 [[package]]
@@ -592,6 +595,17 @@ dependencies = [
  "thiserror 2.0.21",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "miter-inventory"
+version = "0.1.0-beta.4"
+dependencies = [
+ "gaugeblock-git",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+ "toml",
 ]
 
 [[package]]

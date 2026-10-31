@@ -7,6 +7,7 @@ members = [
     "crates/harness",
     "crates/mcp",
     "crates/analysis",
+    "crates/inventory",
     "crates/polyglot",
     "crates/security",
 ]

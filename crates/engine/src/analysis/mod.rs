@@ -10,7 +10,7 @@ pub use miter_analysis::clones;
 pub use miter_analysis::cluster;
 pub mod contracts;
 pub mod cycles;
-pub mod deps;
+pub use miter_analysis::deps;
 pub mod dirty;
 pub mod hygiene;
 pub mod impact;

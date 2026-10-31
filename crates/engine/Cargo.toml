@@ -16,12 +16,12 @@ homepage.workspace = true
 gaugeblock-workspace = "0.1.0-beta.1"
 gaugeblock-git = "0.1.0-beta.1"
 miter-ast.workspace = true
-gaugeblock-contracts.workspace = true
 # The canonical redb tables and the schema handshake: the record layer here is *built on*
 # this crate's tables rather than declaring its own.
 miter-storage.workspace = true
 # Extracted in GB-203 step 1; the engine re-exports both so no caller changes a path.
 miter-analysis = { path = "../analysis", version = "0.1.0-beta.4" }
+miter-inventory = { path = "../inventory", version = "0.1.0-beta.4" }
 miter-polyglot = { path = "../polyglot", version = "0.1.0-beta.4" }
 miter-security = { path = "../security", version = "0.1.0-beta.4" }
 rayon.workspace = true
@@ -31,14 +31,17 @@ rayon.workspace = true
 # declared once, in `miter-ast`, and are reached through `miter_ast::grammar_for(language)` — so
 # this crate needs the runtime and none of the four grammar crates, and there is exactly one
 # table saying which grammar reads which language.
-tree-sitter.workspace = true
 redb.workspace = true
 serde = { workspace = true }
-serde_json = { workspace = true }
-dockerfile-parser = { workspace = true }
 globset = { workspace = true }
 toml = { workspace = true }
 thiserror = { workspace = true }
+
+[dev-dependencies]
+# Declared here rather than as runtime dependencies: the language contract test checks that the wire
+# enum and the engine enum agree, and nothing in the engine's own code needs either crate.
+gaugeblock-contracts.workspace = true
+serde_json = { workspace = true }
 
 [lints]
 workspace = true

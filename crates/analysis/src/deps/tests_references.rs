@@ -30,14 +30,14 @@ fn test_a_local_module_does_not_mask_a_dependency_of_the_same_name() {
         ["regex"].iter().map(|s| s.to_string()).collect();
 
     assert!(
-        !crate::analysis::deps::resolution::masks_a_dependency("regex", &own, &deps),
+        !crate::deps::resolution::masks_a_dependency("regex", &own, &deps),
         "a declared dependency must not be hidden by a same-named module"
     );
     assert!(
-        crate::analysis::deps::resolution::masks_a_dependency("model", &own, &deps),
+        crate::deps::resolution::masks_a_dependency("model", &own, &deps),
         "a plain local module still hides, or every module would become a dependency"
     );
-    assert!(!crate::analysis::deps::resolution::masks_a_dependency(
+    assert!(!crate::deps::resolution::masks_a_dependency(
         "serde", &own, &deps
     ));
 }

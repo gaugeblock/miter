@@ -4,8 +4,8 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use crate::inventory::error::InventoryError;
-use crate::inventory::types::CrateInventory;
+use crate::error::InventoryError;
+use crate::types::CrateInventory;
 
 /// Collects member crates defined by workspace glob patterns or explicit paths.
 pub fn collect_member_crates(

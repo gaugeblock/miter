@@ -3,7 +3,7 @@
 use std::fs;
 use std::path::Path;
 
-use crate::inventory::types::ToolchainInventory;
+use crate::types::ToolchainInventory;
 
 /// Extracts toolchain specifications from `rust-toolchain.toml` and `package.json`.
 pub fn extract_toolchain(root: &Path, parsed_cargo: &toml::Value) -> ToolchainInventory {
