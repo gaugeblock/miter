@@ -15,7 +15,7 @@ homepage.workspace = true
 [dependencies]
 miter-ast.workspace = true
 gaugeblock-contracts.workspace = true
-miter-security = { path = "../security", version = "0.1.0-beta.4" }
+gaugeblock-security = { path = "../../../common/crates/gaugeblock-security", version = "0.1.0-beta.1" }
 tree-sitter.workspace = true
 sqlparser.workspace = true
 hcl.workspace = true

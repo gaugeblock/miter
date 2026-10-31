@@ -9,7 +9,6 @@ members = [
     "crates/analysis",
     "crates/inventory",
     "crates/polyglot",
-    "crates/security",
 ]
 
 [workspace.package]

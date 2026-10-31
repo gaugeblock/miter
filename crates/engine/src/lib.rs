@@ -19,7 +19,7 @@ use miter_ast::IndexError;
 // The polyglot model and the redaction it depends on now live in their own crates; the engine keeps
 // the same paths for every caller by re-exporting them (GB-203 step 1).
 pub use miter_polyglot as polyglot;
-pub use miter_security as security;
+pub use gaugeblock_security as security;
 
 pub use analysis::{
     AffectedTest, AuditConfig, AuditSeverity, AuditViolation, CloneDetectionReport,

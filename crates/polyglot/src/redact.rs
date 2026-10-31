@@ -5,7 +5,7 @@
 //! signature passes through [`redacted_value`] first, so a secret can never reach
 //! `.miter/miter.redb` or an MCP response.
 
-use miter_security::{
+use gaugeblock_security::{
     REDACTED_SECRET, is_high_entropy_secret, is_secret_literal, is_sensitive_identifier,
     scrub_source_text,
 };

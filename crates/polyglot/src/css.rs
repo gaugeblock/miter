@@ -30,7 +30,7 @@ pub fn extract_css_symbols(path: &Path, source: &str) -> Vec<UniversalSymbol> {
     for (offset, name, value) in custom_properties(&masked, source) {
         let signature = format!(
             "{name}: {}",
-            miter_security::scrub_source_text(value.trim())
+            gaugeblock_security::scrub_source_text(value.trim())
         );
         declared.entry(name.to_owned()).or_insert((
             common::line_at(source, offset),
