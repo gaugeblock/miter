@@ -33,6 +33,43 @@ fn test_crates_classify_by_name() {
 }
 
 #[test]
+fn test_composition_roots_are_orchestrators() {
+    assert_eq!(classify_crate("joiner-core"), Layer::Orchestrator);
+    assert_eq!(classify_crate("benchwork-core"), Layer::Orchestrator);
+    // The near-misses stay in the domain layer, or the layer would mean nothing.
+    assert_eq!(classify_crate("outfeed-core"), Layer::Domain);
+    assert_eq!(classify_crate("chalkline-core"), Layer::Domain);
+}
+
+#[test]
+fn test_an_orchestrator_may_reach_any_product() {
+    // A hub is supposed to reach every product; that is its shape, not debt.
+    assert_eq!(
+        assess_edge("benchwork-core", "storypole-core"),
+        EdgeKind::Downward
+    );
+    assert_eq!(assess_edge("joiner-core", "dado-core"), EdgeKind::Downward);
+    // One composition root driving another is the suite's own control flow.
+    assert_eq!(
+        assess_edge("benchwork-core", "joiner-core"),
+        EdgeKind::Internal
+    );
+}
+
+#[test]
+fn test_a_product_may_not_reach_up_into_a_composition_root() {
+    // Stricter than before the layer existed, when this was a lateral edge anyone could allowlist.
+    assert_eq!(
+        assess_edge("chalkline-core", "benchwork-core"),
+        EdgeKind::Upward
+    );
+    assert_eq!(
+        assess_edge("storypole-core", "joiner-core"),
+        EdgeKind::Upward
+    );
+}
+
+#[test]
 fn test_direction_follows_the_layer_order() {
     assert_eq!(
         classify_edge(Layer::Domain, Layer::Foundation),
@@ -151,10 +188,17 @@ fn test_foundation_crates_may_compose() {
 
 #[test]
 fn test_cross_product_domain_edges_stay_gated() {
+    // Examples that are still domain crates: a product importing another product's core is the debt
+    // GB-204 burns. `joiner-core -> dado-core` used to be the example here and is no longer debt -
+    // joiner is a declared composition root, so reaching dado is its job (see ORCHESTRATORS).
     assert_eq!(
-        assess_edge("joiner-core", "dado-core"),
+        assess_edge("chalkline-core", "dado-core"),
         EdgeKind::Lateral,
         "a product importing another product's core is the debt GB-204 burns"
+    );
+    assert_eq!(
+        assess_edge("outfeed-core", "chalkline-core"),
+        EdgeKind::Lateral
     );
     assert_eq!(assess_edge("storypole-cli", "miter-mcp"), EdgeKind::Lateral);
 }

@@ -23,8 +23,8 @@ mod tests_references;
 pub use allowlist::{AllowlistEntry, LayerAllowlist, load_allowlist};
 pub use imports::{ImportSite, collect_crate_imports, declared_modules, import_roots_in_source};
 pub use layers::{
-    EdgeKind, Layer, LayerEdge, LayerReport, assess_edge, build_layer_report, classify_crate,
-    classify_edge, family,
+    EdgeKind, Layer, LayerEdge, LayerReport, ORCHESTRATORS, assess_edge, build_layer_report,
+    classify_crate, classify_edge, family,
 };
 
 use gaugeblock_inventory::{InventoryError, extract_cargo_inventory};

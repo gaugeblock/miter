@@ -1,4 +1,5 @@
-//! Layer model for the crate graph (`GB-202`): foundation / domain / integrator.
+//! Layer model for the crate graph (`GB-202`, `GB-204`): foundation / domain / orchestrator /
+//! integrator.
 //!
 //! Tier 1 of `miter deps` answers *who imports whom*. That is not enough to say whether an edge is
 //! acceptable, because direction is what matters: a domain crate may lean on a foundation crate, and
@@ -11,11 +12,39 @@
 //! `-cli`/`-mcp` are integrators, and everything else is a domain crate. `-core`, `-engine`, `-ast`
 //! and `-storage` land in the domain layer by falling through, which is intentional: they are all
 //! product surfaces.
+//!
+//! **The one exception is [`ORCHESTRATORS`]**, and it is not derived from names because no name can
+//! express it: a composition root and a product core have the same shape. The exception is a named,
+//! documented list rather than a heuristic, and `miter deps --layers` prints every crate's layer so
+//! that a mistake in it is visible rather than silent.
 
 use super::CrateEdge;
 use super::allowlist::LayerAllowlist;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+
+/// Crates whose *product* is composing other products.
+///
+/// The criterion is deliberately narrow, because a looser one dissolves the layer: every crate in the
+/// suite consumes something. A crate is an orchestrator when composition **is** its product rather
+/// than a step inside it.
+///
+/// - `joiner-core` — the synthesis loop: pattern lookup in `dado`, grammar from `batten`, inference
+///   from `sawhorse`, verification through `miter-harness`. Its value is the loop.
+/// - `benchwork-core` — the workbench hub: the daemon behind the UI, which drives storypole's backlog,
+///   chalkline's docs engine, joiner's synthesis and dado's patterns on the operator's behalf.
+///
+/// Deliberately **not** listed, with the reason, because these are the interesting near-misses:
+///
+/// - `outfeed-core` composes storypole and sawhorse, but its product is release and delivery; reading
+///   a task receipt or synthesizing a changelog is a step inside that, not the point of it.
+/// - `chalkline-core` reads storypole and miter-polyglot to audit documentation; documentation is the
+///   product, and the reads are incidental.
+///
+/// Consequence, stated plainly: an edge from an orchestrator to a product crate is [`EdgeKind::Downward`]
+/// and is not gated. That is the intended shape — a hub is *supposed* to reach every product — and it
+/// is why the remaining allowlist entries are all edges between crates that are not composition roots.
+pub const ORCHESTRATORS: &[&str] = &["joiner-core", "benchwork-core"];
 
 /// Where a crate sits in the suite's dependency layering.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -24,6 +53,8 @@ pub enum Layer {
     Foundation,
     /// A product surface (`<product>-core`, `<product>-engine`, `<product>-ast`, ...).
     Domain,
+    /// A composition root: a crate whose product is driving other products ([`ORCHESTRATORS`]).
+    Orchestrator,
     /// A wiring layer: binaries, protocol adapters and root facades.
     Integrator,
 }
@@ -35,7 +66,8 @@ impl Layer {
         match self {
             Layer::Foundation => 0,
             Layer::Domain => 1,
-            Layer::Integrator => 2,
+            Layer::Orchestrator => 2,
+            Layer::Integrator => 3,
         }
     }
 
@@ -45,15 +77,18 @@ impl Layer {
         match self {
             Layer::Foundation => "foundation",
             Layer::Domain => "domain",
+            Layer::Orchestrator => "orchestrator",
             Layer::Integrator => "integrator",
         }
     }
 }
 
-/// Classifies a crate by its package name.
+/// Classifies a crate by its package name, consulting [`ORCHESTRATORS`] first.
 #[must_use]
 pub fn classify_crate(name: &str) -> Layer {
-    if name.starts_with("gaugeblock-") {
+    if ORCHESTRATORS.contains(&name) {
+        Layer::Orchestrator
+    } else if name.starts_with("gaugeblock-") {
         Layer::Foundation
     } else if name.ends_with("-cli") || name.ends_with("-mcp") || !name.contains('-') {
         Layer::Integrator
@@ -113,15 +148,24 @@ pub fn family(name: &str) -> &str {
 
 /// Full assessment of an edge: layer direction, with same-layer structural cases excepted.
 ///
-/// Two same-layer shapes are not debt and must not be gated: crates within one product family
-/// (`miter-engine -> miter-ast` at 71 sites, `miter-cli -> miter-mcp`), and foundation-to-foundation
-/// edges (`gaugeblock-common -> gaugeblock-contracts`), since shared infrastructure is expected to
-/// compose. Everything else keeps its layer verdict, which leaves cross-product domain edges as the
-/// debt `GB-204` burns down.
+/// Three same-layer shapes are not debt and must not be gated: crates within one product family
+/// (`miter-engine -> miter-ast` at 71 sites, `miter-cli -> miter-mcp`), foundation-to-foundation edges
+/// (`gaugeblock-common -> gaugeblock-contracts`), and orchestrator-to-orchestrator edges, where one
+/// declared composition root drives another (`benchwork-core -> joiner-core`: the hub dispatches the
+/// synthesis loop). Everything else keeps its layer verdict, which leaves cross-product domain edges
+/// as the debt `GB-204` burns down.
+///
+/// Note the direction this change makes *stricter*, not looser: before the orchestrator layer existed,
+/// a domain crate importing a composition root was merely lateral and therefore allowlistable. It is
+/// now upward, and an upward edge is never excused.
 #[must_use]
 pub fn assess_edge(from: &str, to: &str) -> EdgeKind {
     let (from_layer, to_layer) = (classify_crate(from), classify_crate(to));
-    if from_layer == to_layer && (family(from) == family(to) || from_layer == Layer::Foundation) {
+    if from_layer == to_layer
+        && (family(from) == family(to)
+            || from_layer == Layer::Foundation
+            || from_layer == Layer::Orchestrator)
+    {
         return EdgeKind::Internal;
     }
     classify_edge(from_layer, to_layer)
