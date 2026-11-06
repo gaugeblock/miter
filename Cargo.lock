@@ -331,6 +331,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "gaugeblock-inventory"
+version = "0.1.0-beta.1"
+dependencies = [
+ "gaugeblock-git",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+ "toml",
+]
+
+[[package]]
 name = "gaugeblock-security"
 version = "0.1.0-beta.1"
 
@@ -527,9 +538,9 @@ version = "0.1.0-beta.4"
 dependencies = [
  "dockerfile-parser",
  "gaugeblock-contracts",
+ "gaugeblock-inventory",
  "gaugeblock-security",
  "miter-ast",
- "miter-inventory",
  "miter-polyglot",
  "miter-storage",
  "serde",
@@ -573,12 +584,12 @@ version = "0.1.0-beta.4"
 dependencies = [
  "gaugeblock-contracts",
  "gaugeblock-git",
+ "gaugeblock-inventory",
  "gaugeblock-security",
  "gaugeblock-workspace",
  "globset",
  "miter-analysis",
  "miter-ast",
- "miter-inventory",
  "miter-polyglot",
  "miter-storage",
  "rayon",
@@ -599,17 +610,6 @@ dependencies = [
  "thiserror 2.0.21",
  "tokio",
  "tracing",
-]
-
-[[package]]
-name = "miter-inventory"
-version = "0.1.0-beta.4"
-dependencies = [
- "gaugeblock-git",
- "serde",
- "serde_json",
- "thiserror 2.0.21",
- "toml",
 ]
 
 [[package]]
