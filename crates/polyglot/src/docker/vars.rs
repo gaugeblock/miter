@@ -114,8 +114,7 @@ ENV PORT=8080 LOG_LEVEL=debug
 
     #[test]
     fn args_and_envs_are_declared_by_key() {
-        let symbols =
-            crate::docker::extract_docker_symbols(Path::new("Dockerfile"), SOURCE);
+        let symbols = crate::docker::extract_docker_symbols(Path::new("Dockerfile"), SOURCE);
         let names: Vec<&str> = symbols.iter().map(|s| s.name.as_str()).collect();
         assert_eq!(
             names,
@@ -135,8 +134,7 @@ ENV PORT=8080 LOG_LEVEL=debug
 
     #[test]
     fn secret_values_never_reach_the_signature() {
-        let symbols =
-            crate::docker::extract_docker_symbols(Path::new("Dockerfile"), SOURCE);
+        let symbols = crate::docker::extract_docker_symbols(Path::new("Dockerfile"), SOURCE);
         let by_name = |name: &str| symbols.iter().find(|s| s.name == name).expect("declared");
 
         let token = by_name("TOKEN");
