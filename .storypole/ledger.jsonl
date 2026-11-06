@@ -9,3 +9,5 @@
 {"event":"status_changed","task_id":"b38de2ea-7163-4c28-9181-81c92b51dd9f","from":"verified","to":"archived","reason":"Archived out of active backlog","timestamp_ms":1793289319665}
 {"event":"status_changed","task_id":"cef0e2ca-a888-419a-b8b6-9fb5d6dc8733","from":"verified","to":"archived","reason":"Archived out of active backlog","timestamp_ms":1793289327870}
 {"event":"status_changed","task_id":"f6a57dbd-2bd8-4fc0-b8dc-ac4ce569b03a","from":"verified","to":"archived","reason":"Archived out of active backlog","timestamp_ms":1793289344598}
+{"event":"status_changed","task_id":"04e9b89d-e0f1-404c-a21e-4850910fc90f","from":"ready","to":"archived","reason":"Archived out of active backlog","timestamp_ms":1793953169385}
+{"event":"status_changed","task_id":"a57eaf8a-7577-48e0-af3a-e3aa203b7523","from":"ready","to":"archived","reason":"Archived out of active backlog","timestamp_ms":1793953215133}
