@@ -3,4 +3,4 @@ allowed_crates = []
 allowed_repos = []
 claim_ttl_minutes = 60
 ticket_prefix = "MTR"
-verification_commands = []
+verification_commands = [["miter", "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo nextest run --workspace && chalkline docs check -d miter"]]
