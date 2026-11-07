@@ -14,6 +14,17 @@ use std::path::Path;
 /// Where the allowlist lives, relative to the analysed root.
 pub const DEFAULT_ALLOWLIST: &str = ".gaugeblock/miter/layers-allowlist.toml";
 
+/// Allowlist maintenance requested on the command line (`GB-248`).
+#[derive(Debug, Clone, Copy)]
+pub struct AllowlistEdit<'a> {
+    /// Delete entries that match no current edge.
+    pub prune: bool,
+    /// Write an entry for every unallowlisted lateral edge.
+    pub adopt: bool,
+    /// Ticket recorded on adopted entries.
+    pub ticket: Option<&'a str>,
+}
+
 /// Runs `miter deps --layers`.
 ///
 /// # Errors
@@ -24,6 +35,7 @@ pub fn run_deps_layers(
     root: &Path,
     check: bool,
     allowlist: Option<&Path>,
+    edit: AllowlistEdit<'_>,
     format: &str,
 ) -> Result<(), CliError> {
     let report = analyze_dependencies(root).map_err(|error| CliError::Usage(error.to_string()))?;
@@ -34,7 +46,16 @@ pub fn run_deps_layers(
     // An absent file means "no exceptions declared", which is the state Phase B2 is driving toward;
     // a malformed one is an error so a typo cannot pass the gate.
     let allow = load_allowlist(&path).map_err(|error| CliError::Usage(error.to_string()))?;
-    let layers = build_layer_report(&report.edges, &allow);
+    let mut layers = build_layer_report(&report.edges, &allow);
+
+    // Edits are applied before the report is shown, then the allowlist is re-read: reporting a stale entry
+    // and then removing it in the same breath would print `violated` for a file that is now clean, which is
+    // the kind of message that teaches a reader to distrust the verdict.
+    if edit.prune || edit.adopt {
+        super::deps_layers_edit::apply_edits(&layers, &path, &edit)?;
+        let reloaded = load_allowlist(&path).map_err(|error| CliError::Usage(error.to_string()))?;
+        layers = build_layer_report(&report.edges, &reloaded);
+    }
 
     if format.eq_ignore_ascii_case("json") {
         render_json(&layers, &path);
@@ -45,8 +66,9 @@ pub fn run_deps_layers(
     if check && !layers.is_clean() {
         let missing = layers.unallowlisted_lateral().count();
         return Err(CliError::Rejected(format!(
-            "layering violated: {missing} unallowlisted lateral edge(s), {} upward edge(s)",
-            layers.upward.len()
+            "layering violated: {missing} unallowlisted lateral edge(s), {} upward edge(s), {} stale allowlist entr(ies)",
+            layers.upward.len(),
+            layers.stale.len()
         )));
     }
     Ok(())
@@ -58,7 +80,12 @@ fn render_table(layers: &LayerReport, path: &Path) {
         layers.downward + layers.lateral.len() + layers.upward.len()
     );
     println!("{}", "=".repeat(80));
-    for layer in [Layer::Foundation, Layer::Domain, Layer::Integrator] {
+    for layer in [
+        Layer::Foundation,
+        Layer::Domain,
+        Layer::Orchestrator,
+        Layer::Integrator,
+    ] {
         let names = layers.layers.get(&layer).cloned().unwrap_or_default();
         println!("{} ({}):", layer.label().to_uppercase(), names.len());
         for name in &names {
@@ -92,6 +119,17 @@ fn render_table(layers: &LayerReport, path: &Path) {
                 "  {:<26} -> {:<26} {:>4} sites",
                 edge.from, edge.to, edge.sites
             );
+        }
+    }
+
+    if !layers.stale.is_empty() {
+        println!();
+        println!(
+            "Stale allowlist entries (match no edge): {}",
+            layers.stale.len()
+        );
+        for entry in &layers.stale {
+            println!("  {} -> {} ({})", entry.from, entry.to, entry.ticket);
         }
     }
 
@@ -147,6 +185,16 @@ fn render_json(layers: &LayerReport, path: &Path) {
             ("lateral", Json::array(layers.lateral.iter().map(edge_json)),),
             ("upward", Json::array(layers.upward.iter().map(edge_json))),
             ("allowlist", Json::string(path.display().to_string())),
+            (
+                "stale",
+                Json::array(layers.stale.iter().map(|entry| {
+                    Json::object([
+                        ("from", Json::string(&entry.from)),
+                        ("to", Json::string(&entry.to)),
+                        ("ticket", Json::string(&entry.ticket)),
+                    ])
+                })),
+            ),
         ])
         .render()
     );

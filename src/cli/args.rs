@@ -5,6 +5,7 @@
 //! thing that dispatches it, and the types are re-exported from `crate::cli`, so a caller naming
 //! `miter::cli::Command` does not have to know this module exists.
 
+use super::args_deps::DepsArgs;
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
@@ -200,29 +201,7 @@ pub enum Command {
         format: String,
     },
     /// Map crate-to-crate import edges, declared-but-unused dependencies and proof of use.
-    Deps {
-        /// Workspace root to analyse (defaults to current dir).
-        #[arg(long, default_value = ".")]
-        path: PathBuf,
-        /// Show every import site that proves use of this crate.
-        #[arg(long)]
-        why: Option<String>,
-        /// Only report declared dependencies that no source file imports.
-        #[arg(long)]
-        unused: bool,
-        /// Classify every edge as foundation / domain / integrator instead of listing edges.
-        #[arg(long)]
-        layers: bool,
-        /// Fail when a lateral edge is unallowlisted or an edge points at a higher layer.
-        #[arg(long)]
-        check: bool,
-        /// Layer allowlist path (default: `<path>/.gaugeblock/miter/layers-allowlist.toml`).
-        #[arg(long)]
-        allowlist: Option<PathBuf>,
-        /// Output format (`table` or `json`).
-        #[arg(long, default_value = "table")]
-        format: String,
-    },
+    Deps(DepsArgs),
     /// Run isolated compiler verification on the workspace or crate.
     Verify {
         /// Target path to verify (defaults to current directory).

@@ -39,11 +39,13 @@
 //! | [`json`] | the hand-rolled JSON writer the commands emit |
 
 pub mod args;
+pub mod args_deps;
 pub mod audit;
 pub mod clones;
 pub mod contracts;
 pub mod deps;
 pub mod deps_layers;
+mod deps_layers_edit;
 pub mod error;
 pub mod impact;
 pub mod ingest;
@@ -60,7 +62,8 @@ mod find;
 mod find_report;
 mod store;
 
-pub use args::{Cli, Command};
+use args::{Cli, Command};
+pub use args_deps::DepsArgs;
 pub use error::CliError;
 
 use clap::Parser;
@@ -184,17 +187,31 @@ pub fn execute(cli: Cli) -> Result<(), CliError> {
             include_tests,
             clones::ClonesFormat::parse(&format),
         ),
-        Command::Deps {
-            path,
-            why,
-            unused,
-            layers,
-            check,
-            allowlist,
-            format,
-        } => {
-            if layers || check {
-                deps_layers::run_deps_layers(&path, check, allowlist.as_deref(), &format)
+        Command::Deps(deps) => {
+            let DepsArgs {
+                path,
+                why,
+                unused,
+                layers,
+                check,
+                allowlist,
+                prune,
+                adopt,
+                ticket,
+                format,
+            } = deps;
+            if layers || check || prune || adopt {
+                deps_layers::run_deps_layers(
+                    &path,
+                    check,
+                    allowlist.as_deref(),
+                    deps_layers::AllowlistEdit {
+                        prune,
+                        adopt,
+                        ticket: ticket.as_deref(),
+                    },
+                    &format,
+                )
             } else {
                 deps::run_deps(
                     &path,
