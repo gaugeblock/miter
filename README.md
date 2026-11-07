@@ -3,7 +3,7 @@
 [![Version](https://img.shields.io/badge/version-0.1.0--beta.4-blue.svg)](https://gaugeblock.dev)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![gaugeblock](https://img.shields.io/badge/suite-gaugeblock-orange.svg)](https://github.com/gaugeblock)
-[![Documentation](https://img.shields.io/badge/docs-9--doc%20topology-green.svg)](ARCHITECTURE.md)
+[![Documentation](https://img.shields.io/badge/docs-9--doc%20topology-green.svg)](docs/ARCHITECTURE.md)
 
 Part of the **[`gaugeblock`](https://gaugeblock.dev)** neurosymbolic code synthesis ecosystem.
 
@@ -416,9 +416,9 @@ always applied on top of the configured patterns.
 ## Repository Documentation
 
 `miter` adheres strictly to the canonical **9-Document Architecture**:
-* **[`CONTRIBUTING.md`](./CONTRIBUTING.md):** Local toolchain setup, developer prerequisites, and test execution.
-* **[`ARCHITECTURE.md`](./ARCHITECTURE.md):** Internal sub-crate topologies, redb storage engine, and query pipelines.
-* **[`SPEC.md`](./SPEC.md):** Behavioral invariants, wire schemas, redb table layouts, and error codes.
+* **[`CONTRIBUTING.md`](docs/CONTRIBUTING.md):** Local toolchain setup, developer prerequisites, and test execution.
+* **[`ARCHITECTURE.md`](docs/ARCHITECTURE.md):** Internal sub-crate topologies, redb storage engine, and query pipelines.
+* **[`SPEC.md`](docs/SPEC.md):** Behavioral invariants, wire schemas, redb table layouts, and error codes.
 * **[`AGENTS.md`](./AGENTS.md):** Non-negotiable engineering directives, file-size ceilings, and verification gates.
 * **[`CHANGELOG.md`](./CHANGELOG.md):** Chronological historical release entries and unreleased changes.
 
