@@ -14,6 +14,8 @@ fn fingerprint(file: &str, name: &str, lines: usize, simhash: (u64, u64)) -> Fun
         line_span: (1, lines),
         line_count: lines,
         simhash,
+        // These fixtures test the size guard, so their content is deliberately identical.
+        identifiers: vec!["shared".to_string()],
     }
 }
 
@@ -23,7 +25,7 @@ fn test_pairs_with_matching_shape_and_size_are_reported() {
         fingerprint("src/a.rs", "alpha", 30, (0xAAAA, 0xBBBB)),
         fingerprint("src/b.rs", "beta", 34, (0xAAAA, 0xBBBB)),
     ];
-    let report = find_clones(&prints, 0.90);
+    let report = find_clones(&prints, 0.90, 0.35);
     assert_eq!(
         report.clone_pairs.len(),
         1,
@@ -37,7 +39,7 @@ fn test_pairs_with_divergent_sizes_are_dropped() {
         fingerprint("src/a.rs", "short_helper", 22, (0xAAAA, 0xBBBB)),
         fingerprint("src/b.rs", "long_orchestrator", 96, (0xAAAA, 0xBBBB)),
     ];
-    let report = find_clones(&prints, 0.90);
+    let report = find_clones(&prints, 0.90, 0.35);
     assert!(
         report.clone_pairs.is_empty(),
         "a 22 vs 96 line pair must not be reported, got {:?}",
@@ -53,7 +55,7 @@ fn test_identical_fingerprints_still_require_similar_size() {
         fingerprint("src/b.rs", "two", 41, (1, 2)),
         fingerprint("src/c.rs", "three", 200, (1, 2)),
     ];
-    let report = find_clones(&prints, 0.90);
+    let report = find_clones(&prints, 0.90, 0.35);
     assert_eq!(
         report.clone_pairs.len(),
         1,

@@ -193,6 +193,12 @@ pub enum Command {
         /// Minimum structural similarity threshold in 0.0..=1.0 (default: 0.90).
         #[arg(long, default_value_t = 0.90)]
         similarity: f32,
+        /// Minimum identifier-overlap threshold in 0.0..=1.0 (default: 0.35).
+        ///
+        /// A pair must clear this as well as the structural threshold: two functions with the same
+        /// control-flow skeleton but different contents are not duplication a reviewer would act on.
+        #[arg(long, default_value_t = 0.35)]
+        min_content: f32,
         /// Also analyse test code (excluded by default, because test bodies dominate the report).
         #[arg(long)]
         include_tests: bool,

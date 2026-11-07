@@ -21,6 +21,14 @@ pub struct FunctionFingerprint {
     pub line_count: usize,
     /// 128-bit SimHash structural fingerprint (stored as two u64s: high, low).
     pub simhash: (u64, u64),
+    /// Sorted, deduplicated identifiers the body names (`GB-197`).
+    ///
+    /// Shape alone cannot tell one `match`-and-`format!` function from another, which is how
+    /// `dado`'s `main` matched `outfeed`'s `parse_header` at 85%. Two bodies that look alike but name
+    /// different things are not duplication a reviewer would act on, so content is compared as well
+    /// as the silhouette.
+    #[serde(default)]
+    pub identifiers: Vec<String>,
 }
 
 /// A pair of structurally duplicated functions flagged for consolidation.
@@ -67,6 +75,34 @@ pub fn similarity_score(dist: u32) -> f32 {
 mod simhash;
 
 pub use simhash::{collect_structural_tokens, compute_simhash};
+/// Cap on the identifiers kept per function: enough to characterise a body, small enough that the
+/// fingerprint stays a fingerprint rather than a copy of the source.
+const MAX_IDENTIFIERS: usize = 96;
+
+/// Node kinds whose text names something the body uses.
+const NAME_KINDS: [&str; 6] = [
+    "identifier",
+    "field_identifier",
+    "type_identifier",
+    "scoped_identifier",
+    "shorthand_field_identifier",
+    "primitive_type",
+];
+
+/// Collects every identifier the body names.
+fn collect_identifiers(node: Node<'_>, content: &str, out: &mut Vec<String>) {
+    if NAME_KINDS.contains(&node.kind())
+        && let Some(text) = content.get(node.byte_range())
+        && text.len() <= 64
+    {
+        out.push(text.to_string());
+    }
+    let mut cursor = node.walk();
+    for child in node.children(&mut cursor) {
+        collect_identifiers(child, content, out);
+    }
+}
+
 /// Extracts fingerprints for all functions in `content` >= `min_lines`.
 #[must_use]
 pub fn extract_fingerprints_from_rust(
@@ -120,12 +156,20 @@ fn find_functions(
             }
 
             let simhash = compute_simhash(&tokens);
+            let mut identifiers = Vec::new();
+            if let Some(body) = node.child_by_field_name("body") {
+                collect_identifiers(body, content, &mut identifiers);
+            }
+            identifiers.sort();
+            identifiers.dedup();
+            identifiers.truncate(MAX_IDENTIFIERS);
             out.push(FunctionFingerprint {
                 file_path: file_path.to_string_lossy().replace('\\', "/"),
                 name,
                 line_span,
                 line_count,
                 simhash,
+                identifiers,
             });
         }
     }
@@ -136,58 +180,5 @@ fn find_functions(
     }
 }
 
-/// Analyzes fingerprints and finds structural clone pairs across different files.
-#[must_use]
-pub fn find_clones(
-    fingerprints: &[FunctionFingerprint],
-    min_similarity: f32,
-) -> CloneDetectionReport {
-    let mut clone_pairs = Vec::new();
-    let max_allowed_distance = ((1.0 - min_similarity) * 128.0).floor() as u32;
-
-    for i in 0..fingerprints.len() {
-        for j in (i + 1)..fingerprints.len() {
-            let f1 = &fingerprints[i];
-            let f2 = &fingerprints[j];
-
-            // Only compare across different files
-            if f1.file_path == f2.file_path {
-                continue;
-            }
-
-            // A SimHash fingerprint is scale-invariant: structural shape alone cannot tell a
-            // 22-line helper from a 96-line orchestrator. Require the shorter body to be at least
-            // `MIN_SIZE_RATIO` of the longer one, so only pairs a reviewer would call a clone survive.
-            let (short, long) = if f1.line_count <= f2.line_count {
-                (f1.line_count, f2.line_count)
-            } else {
-                (f2.line_count, f1.line_count)
-            };
-            if long > 0 && (short as f32) < (long as f32) * MIN_SIZE_RATIO {
-                continue;
-            }
-
-            let dist = hamming_distance(f1.simhash, f2.simhash);
-            if dist <= max_allowed_distance {
-                let similarity = similarity_score(dist);
-                clone_pairs.push(StructuralClonePair {
-                    first: f1.clone(),
-                    second: f2.clone(),
-                    similarity,
-                    hamming_distance: dist,
-                });
-            }
-        }
-    }
-
-    // INVARIANT: similarity is clamped to 0.0..=1.0, so `partial_cmp` never sees a NaN.
-    clone_pairs.sort_by(|a, b| {
-        b.similarity
-            .partial_cmp(&a.similarity)
-            .unwrap_or(std::cmp::Ordering::Equal)
-    });
-    CloneDetectionReport {
-        functions_analyzed: fingerprints.len(),
-        clone_pairs,
-    }
-}
+mod detect;
+pub use detect::{content_overlap, find_clones};

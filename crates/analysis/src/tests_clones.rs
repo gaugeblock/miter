@@ -69,7 +69,10 @@ fn handle_records_v2(records: &[Record]) -> Result<usize, CustomError> {
     assert_eq!(fps_b.len(), 1, "expected 1 fingerprint from file B");
 
     let all_fps = vec![fps_a[0].clone(), fps_b[0].clone()];
-    let report = find_clones(&all_fps, 0.90);
+    // Content similarity is disabled here on purpose: this fixture exists to prove that structural
+    // matching works at all, and its two functions name different things. The content dimension has its
+    // own test below (`GB-197`).
+    let report = find_clones(&all_fps, 0.90, 0.0);
 
     assert_eq!(report.functions_analyzed, 2);
     assert_eq!(
@@ -86,4 +89,53 @@ fn handle_records_v2(records: &[Record]) -> Result<usize, CustomError> {
     );
     assert_eq!(pair.first.file_path, "src/a.rs");
     assert_eq!(pair.second.file_path, "src/b.rs");
+}
+
+#[test]
+fn shape_without_shared_content_is_not_a_clone() {
+    // `GB-197`: two bodies with the same control-flow skeleton but unrelated contents were reported as
+    // duplication. `dado`'s `main` matched `outfeed`'s `parse_header` at 85 percent, which no reviewer
+    // would act on. Both must agree now.
+    let first = r#"
+fn first(a: i32) -> i32 {
+    if a > 0 {
+        let x = a * 2;
+        let y = x + 1;
+        let z = y * 3;
+        z - a
+    } else {
+        let x = a * 2;
+        let y = x + 1;
+        let z = y * 3;
+        z + a
+    }
+}
+"#;
+    let second = r#"
+fn second(b: i32) -> i32 {
+    if b > 0 {
+        let p = b * 2;
+        let q = p + 1;
+        let r = q * 3;
+        r - b
+    } else {
+        let p = b * 2;
+        let q = p + 1;
+        let r = q * 3;
+        r + b
+    }
+}
+"#;
+    let a = extract_fingerprints_from_rust(Path::new("src/one.rs"), first, 5);
+    let b = extract_fingerprints_from_rust(Path::new("src/two.rs"), second, 5);
+    assert_eq!((a.len(), b.len()), (1, 1));
+
+    let structural = find_clones(&[a[0].clone(), b[0].clone()], 0.50, 0.0);
+    assert_eq!(structural.clone_pairs.len(), 1, "shape alone still matches");
+
+    let with_content = find_clones(&[a[0].clone(), b[0].clone()], 0.50, 0.90);
+    assert!(
+        with_content.clone_pairs.is_empty(),
+        "different identifiers must not be reported as duplication"
+    );
 }

@@ -34,13 +34,14 @@ pub fn run_clones(
     root: &Path,
     min_lines: usize,
     min_similarity: f32,
+    min_content: f32,
     include_tests: bool,
     format: ClonesFormat,
 ) -> Result<(), CliError> {
     let mut fingerprints = Vec::new();
     collect_fingerprints(root, min_lines, include_tests, &mut fingerprints)?;
 
-    let report = find_clones(&fingerprints, min_similarity);
+    let report = find_clones(&fingerprints, min_similarity, min_content);
 
     match format {
         ClonesFormat::Table => render_table(&report, min_similarity),
