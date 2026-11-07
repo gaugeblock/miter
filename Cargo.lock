@@ -569,6 +569,7 @@ name = "miter-cli"
 version = "0.1.0-beta.4"
 dependencies = [
  "clap",
+ "gaugeblock-workspace",
  "indicatif",
  "miter-ast",
  "miter-engine",

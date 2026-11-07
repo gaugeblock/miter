@@ -131,6 +131,7 @@ miter-engine.workspace = true
 miter-storage.workspace = true
 miter-harness.workspace = true
 miter-mcp.workspace = true
+gaugeblock-workspace = "0.1.0-beta.1"
 clap.workspace = true
 indicatif.workspace = true
 serde_json.workspace = true

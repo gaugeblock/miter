@@ -172,8 +172,11 @@ pub fn execute(cli: Cli) -> Result<(), CliError> {
             format,
         } => {
             let root = path.unwrap_or_else(|| std::env::current_dir().unwrap_or_default());
-            let allowlist_path = allowlist
-                .unwrap_or_else(|| root.join(".gaugeblock/miter/contracts-allowlist.toml"));
+            let allowlist_path = allowlist.unwrap_or_else(|| {
+                gaugeblock_workspace::GaugeblockPaths::at(&root)
+                    .member("miter")
+                    .join("contracts-allowlist.toml")
+            });
             contracts::run_contracts(
                 &resolve_db(db),
                 contracts::ContractsFormat::parse(&format),

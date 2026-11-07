@@ -11,8 +11,15 @@ use miter_engine::analysis::{
 };
 use std::path::Path;
 
-/// Where the allowlist lives, relative to the analysed root.
-pub const DEFAULT_ALLOWLIST: &str = ".gaugeblock/miter/layers-allowlist.toml";
+/// Where the allowlist lives, resolved from the analysed root.
+///
+/// A function rather than a `const` string (`GB-304`): the constant restated the layout, which is the one
+/// thing this crate now enforces against elsewhere.
+pub fn default_allowlist(root: &Path) -> std::path::PathBuf {
+    gaugeblock_workspace::GaugeblockPaths::at(root)
+        .member("miter")
+        .join("layers-allowlist.toml")
+}
 
 /// Allowlist maintenance requested on the command line (`GB-248`).
 #[derive(Debug, Clone, Copy)]
@@ -42,7 +49,7 @@ pub fn run_deps_layers(
 
     let path = allowlist
         .map(Path::to_path_buf)
-        .unwrap_or_else(|| root.join(DEFAULT_ALLOWLIST));
+        .unwrap_or_else(|| default_allowlist(root));
     // An absent file means "no exceptions declared", which is the state Phase B2 is driving toward;
     // a malformed one is an error so a typo cannot pass the gate.
     let allow = load_allowlist(&path).map_err(|error| CliError::Usage(error.to_string()))?;
