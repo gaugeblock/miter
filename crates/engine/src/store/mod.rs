@@ -1,5 +1,6 @@
 //! The in-memory storage engine: ingestion, resolution and query entry points.
 
+mod ledger;
 use std::collections::HashMap;
 use std::path::Path;
 
@@ -18,6 +19,12 @@ pub struct Engine {
     symbols: Vec<FunctionSymbol>,
     by_id: HashMap<u64, usize>,
     universal_symbols: Vec<crate::polyglot::UniversalSymbol>,
+    /// Per-file baseline for incremental passes: digest, size and mtime (`GB-302`).
+    ///
+    /// Held here because `save_redb` rebuilds the database from the engine: a ledger written straight
+    /// to storage by an incremental pass was erased by the next full save, which is why `miter index`
+    /// left an index that could never be incremental again.
+    file_ledger: std::collections::BTreeMap<String, miter_storage::IndexedFileRecord>,
 }
 
 impl Engine {
@@ -28,6 +35,7 @@ impl Engine {
             symbols: Vec::new(),
             by_id: HashMap::new(),
             universal_symbols: Vec::new(),
+            file_ledger: std::collections::BTreeMap::new(),
         }
     }
 

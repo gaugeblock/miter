@@ -98,4 +98,34 @@ impl WorkspaceStore {
         list.sort_by(|a, b| a.0.cmp(&b.0));
         Ok(list)
     }
+    /// Writes a whole per-file baseline in **one** transaction.
+    ///
+    /// The per-key setters each begin their own write transaction, and a thousand of those turns a
+    /// ten-second full index into a thirty-second one. Both tables are written here because a baseline
+    /// row and its digest are one fact recorded twice - a reader must never see one without the other.
+    ///
+    /// # Errors
+    ///
+    /// [`StorageError`] when the transaction or a serialization fails.
+    pub fn set_baseline<'a, I>(&self, rows: I) -> StorageResult<()>
+    where
+        I: IntoIterator<Item = (&'a str, &'a IndexedFileRecord)>,
+    {
+        let tx = self.database().begin_write()?;
+        {
+            let mut hashes = tx.open_table(crate::tables::TABLE_FILE_HASHES)?;
+            let mut records = tx.open_table(INDEXED_FILES_TABLE)?;
+            for (relative, record) in rows {
+                hashes.insert(relative.as_bytes(), record.content_hash.as_slice())?;
+                let bytes =
+                    serde_json::to_vec(record).map_err(|error| StorageError::Malformed {
+                        expected: "serializable IndexedFileRecord",
+                        found: error.to_string(),
+                    })?;
+                records.insert(relative, bytes.as_slice())?;
+            }
+        }
+        tx.commit()?;
+        Ok(())
+    }
 }

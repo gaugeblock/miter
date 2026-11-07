@@ -61,14 +61,26 @@ impl Engine {
             Vec<UniversalSymbol>,
             String,
             Vec<(String, miter_storage::ReferenceEntry)>,
+            miter_storage::IndexedFileRecord,
         );
         let parsed: Vec<Result<ParsedFile, String>> = files
             .par_iter()
             .map(|(path, lang_opt, _depth)| {
                 progress.file(path);
-                match std::fs::read_to_string(path) {
-                    Ok(source) => {
+                match std::fs::read(path) {
+                    Ok(bytes) => {
+                        let Ok(source) = String::from_utf8(bytes) else {
+                            return Err(format!("{}: not UTF-8", path.display()));
+                        };
                         let relative = relative_to(root, path);
+                        // The baseline row, captured from the bytes already in hand (`GB-302`).
+                        let (secs, nanos) = mtime_parts(path).unwrap_or_default();
+                        let record = miter_storage::IndexedFileRecord::new(
+                            secs,
+                            nanos,
+                            miter_storage::sha256(source.as_bytes()),
+                            source.len() as u64,
+                        );
                         let refs =
                             crate::analysis::extract_references(Path::new(&relative), &source);
                         let syms_res = if let Some(idx_lang) = lang_opt {
@@ -78,7 +90,7 @@ impl Engine {
                         } else {
                             Ok(polyglot::declarative_symbols(path, &source).unwrap_or_default())
                         };
-                        syms_res.map(|syms| (syms, relative, refs))
+                        syms_res.map(|syms| (syms, relative, refs, record))
                     }
                     Err(error) => Err(format!("{}: {error}", path.display())),
                 }
@@ -89,8 +101,9 @@ impl Engine {
         let mut file_refs: Vec<(String, Vec<(String, miter_storage::ReferenceEntry)>)> = Vec::new();
         for result in parsed {
             match result {
-                Ok((mut read, rel, refs)) => {
+                Ok((mut read, rel, refs, record)) => {
                     stats.files_indexed += 1;
+                    self.file_ledger_mut().insert(rel.clone(), record);
                     symbols.append(&mut read);
                     if !refs.is_empty() {
                         file_refs.push((rel, refs));
@@ -120,4 +133,16 @@ impl Engine {
             references: file_refs,
         })
     }
+}
+
+/// Modification time as `(seconds, nanoseconds)` since the UNIX epoch.
+///
+/// `None` when the platform cannot report one, which the caller treats as "always re-index": an absent
+/// timestamp must not read as "unchanged".
+fn mtime_parts(path: &Path) -> Option<(u64, u32)> {
+    let modified = std::fs::metadata(path).ok()?.modified().ok()?;
+    let since = modified
+        .duration_since(std::time::SystemTime::UNIX_EPOCH)
+        .ok()?;
+    Some((since.as_secs(), since.subsec_nanos()))
 }

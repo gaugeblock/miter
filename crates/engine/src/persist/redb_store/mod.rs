@@ -41,7 +41,36 @@ pub fn save_redb(engine: &Engine, path: &Path) -> Result<(), PersistError> {
     let _ = std::fs::remove_file(PathBuf::from(lock));
 
     let database = Database::create(path).map_err(|error| PersistError::Redb(error.to_string()))?;
-    replace_records(&database, engine)
+    replace_records(&database, engine)?;
+    // The database handle is exclusive, so the baseline is written through a second handle opened
+    // after it is dropped. Without this the index had symbols but no per-file memory, and every
+    // incremental pass afterwards compared against nothing (`GB-302`).
+    drop(database);
+    write_baseline(path, engine)
+}
+
+/// Writes the per-file baseline: content digest and the size/mtime record the dirty check compares.
+///
+/// Both live in the same database as the symbols and are written here rather than by whoever happened
+/// to compute them, because `save_redb` rebuilds the file from the engine - a baseline written by an
+/// incremental pass alone was erased by the next full index.
+fn write_baseline(path: &Path, engine: &Engine) -> Result<(), PersistError> {
+    if engine.file_ledger().is_empty() {
+        return Ok(());
+    }
+    let store = miter_storage::WorkspaceStore::open(path)
+        .map_err(|error| PersistError::Redb(error.to_string()))?;
+    // One transaction for the whole baseline: a commit per file made a ten-second index take longer
+    // than thirty, which is a worse regression than the emptiness this fixes.
+    store
+        .set_baseline(
+            engine
+                .file_ledger()
+                .iter()
+                .map(|(relative, record)| (relative.as_str(), record)),
+        )
+        .map_err(|error| PersistError::Redb(error.to_string()))?;
+    Ok(())
 }
 
 /// Writes every symbol of `engine` through an *already open* workspace database.
