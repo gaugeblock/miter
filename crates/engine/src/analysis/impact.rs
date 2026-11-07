@@ -146,9 +146,15 @@ pub fn compute_impact(
                 continue;
             };
 
+            // One row per *thing to run or review*, not per call site: a test listed twice carries the
+            // same run command and no extra information, and an entrypoint counted six times for six call
+            // sites inside it made a bounded refactor look unbounded when this output is what decides a
+            // refactor's size (`GB-300`). Call sites keep their own granularity below, where a site is the
+            // fact being reported.
+            let thing_key = format!("{}:{}", r.file_path, enclosing);
             let caller_key = format!("{}:{}:{}", r.file_path, r.line_range.0, enclosing);
 
-            if is_test_symbol(enclosing, &r.file_path) && visited_tests.insert(caller_key.clone()) {
+            if is_test_symbol(enclosing, &r.file_path) && visited_tests.insert(thing_key.clone()) {
                 analysis.affected_tests.push(AffectedTest {
                     symbol: enclosing.clone(),
                     file_path: r.file_path.clone(),
@@ -156,7 +162,7 @@ pub fn compute_impact(
                     test_command: format_test_command(enclosing, &r.file_path),
                 });
             } else if is_entrypoint_or_handler(enclosing, &r.file_path)
-                && visited_entrypoints.insert(caller_key.clone())
+                && visited_entrypoints.insert(thing_key)
             {
                 analysis.entrypoints_and_handlers.push(EntrypointHandler {
                     symbol: enclosing.clone(),

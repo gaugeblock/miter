@@ -1,5 +1,6 @@
 //! Import-root collection: which identifiers a crate's source actually references.
 
+use super::resolution::starts_a_path;
 use super::strip::{StripState, code_only};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -98,6 +99,7 @@ fn path_roots_in_line(line: &str) -> Vec<&str> {
             if looks_like_crate
                 && line[index..].starts_with("::")
                 && !NOT_A_DEPENDENCY.contains(&ident)
+                && starts_a_path(&line[..start])
             {
                 roots.push(ident);
             }

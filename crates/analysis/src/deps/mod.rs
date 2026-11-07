@@ -20,6 +20,8 @@ mod tests;
 
 #[cfg(test)]
 mod tests_references;
+#[cfg(test)]
+mod tests_resolution;
 
 pub use allowlist::{AllowlistEntry, LayerAllowlist, load_allowlist};
 pub use imports::{ImportSite, collect_crate_imports, declared_modules, import_roots_in_source};
