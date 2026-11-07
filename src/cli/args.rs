@@ -60,6 +60,23 @@ pub enum Command {
         #[arg(long)]
         json: bool,
     },
+    /// Locate a literal and name the declarations the hits land in.
+    Find {
+        /// Literal text to search for (`--ignore-case` folds ASCII only).
+        pattern: String,
+        /// Match ASCII case-insensitively.
+        #[arg(long)]
+        ignore_case: bool,
+        /// Maximum hits to report.
+        #[arg(long, default_value_t = 100)]
+        max: usize,
+        /// Database file to read (defaults to `<workspace_root>/.gaugeblock/miter/miter.redb`).
+        #[arg(long)]
+        db: Option<PathBuf>,
+        /// Emit JSON instead of the rendered report.
+        #[arg(long)]
+        json: bool,
+    },
     /// Locate a declaration and print its hydrated context.
     Lookup {
         /// Declaration name, or a qualified path such as `miter_engine::store::Engine`.

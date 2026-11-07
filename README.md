@@ -27,6 +27,7 @@ miter index .                           # build the map (once, or per commit)
 miter skeleton src/api/handlers.rs      # 800-line file → its signatures
 miter lookup Engine --context           # one symbol, its members, its neighbours
 miter enclosing src/api/handlers.rs:412 # a position → the function that contains it
+miter find "TRACE_ENV" --max 20      # a literal → the declarations its hits land in
 ```
 
 ---

@@ -56,6 +56,8 @@ pub mod slice;
 pub mod verify;
 
 mod enclosing;
+mod find;
+mod find_report;
 mod store;
 
 pub use args::{Cli, Command};
@@ -99,6 +101,13 @@ pub fn execute(cli: Cli) -> Result<(), CliError> {
             dirty,
             json,
         } => ingest::run_index(&path, &resolve_db(db), dirty, json),
+        Command::Find {
+            pattern,
+            ignore_case,
+            max,
+            db,
+            json,
+        } => find::run_find(&pattern, &resolve_db(db), ignore_case, max, json),
         Command::Enclosing { target, db, json } => {
             enclosing::run_enclosing(&target, &resolve_db(db), json)
         }

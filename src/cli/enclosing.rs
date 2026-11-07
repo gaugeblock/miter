@@ -64,7 +64,7 @@ fn parse_target(target: &str) -> Result<(String, usize), CliError> {
 }
 
 /// Byte offset of the first character of a one-based line.
-fn byte_offset_of_line(source: &str, line: usize) -> usize {
+pub(super) fn byte_offset_of_line(source: &str, line: usize) -> usize {
     let mut offset = 0;
     for (index, text) in source.split_inclusive('\n').enumerate() {
         if index + 1 == line {
@@ -76,7 +76,7 @@ fn byte_offset_of_line(source: &str, line: usize) -> usize {
 }
 
 /// One-based line containing a byte offset.
-fn line_of_offset(source: &str, offset: usize) -> usize {
+pub(super) fn line_of_offset(source: &str, offset: usize) -> usize {
     let capped = offset.min(source.len());
     1 + source[..capped]
         .bytes()
@@ -88,7 +88,10 @@ fn line_of_offset(source: &str, offset: usize) -> usize {
 ///
 /// Narrowest rather than first: a method sits inside its type's span, and the useful answer for a
 /// position inside the method is the method.
-fn innermost<'a>(symbols: &[&'a UniversalSymbol], offset: usize) -> Option<&'a UniversalSymbol> {
+pub(super) fn innermost<'a>(
+    symbols: &[&'a UniversalSymbol],
+    offset: usize,
+) -> Option<&'a UniversalSymbol> {
     symbols
         .iter()
         .filter(|symbol| symbol.span.0 <= offset && offset < symbol.span.1)
@@ -151,7 +154,7 @@ fn render_json(path: &Path, line: usize, symbol: Option<&UniversalSymbol>, sourc
 }
 
 /// JSON string quoting for the fields that could carry a control character.
-fn quote(text: &str) -> String {
+pub(super) fn quote(text: &str) -> String {
     let escaped: String = text
         .chars()
         .map(|character| match character {
