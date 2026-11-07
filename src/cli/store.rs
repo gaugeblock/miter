@@ -34,11 +34,13 @@ pub(crate) fn load(path: &Path) -> Result<Engine, CliError> {
     let indexed_at = std::fs::metadata(path)
         .and_then(|meta| meta.modified())
         .ok();
-    let engine = Engine::open_redb(path)?;
+    // Refresh before opening the read handle: the refresh needs the write handle, and redb allows one
+    // at a time. Auto-indexing is a policy over a mechanism that now detects staleness correctly
+    // (`GB-237`), so read commands answer from a current index instead of warning about an old one.
     if let Some(indexed_at) = indexed_at {
-        warn_if_stale(path, indexed_at);
+        refresh_if_stale(path, indexed_at);
     }
-    Ok(engine)
+    Ok(Engine::open_redb(path)?)
 }
 
 /// Source files an index is expected to describe.
@@ -53,6 +55,61 @@ const SKIPPED_DIRS: [&str; 6] = [
     "dist",
     "e2e",
 ];
+
+/// Env var that turns auto-indexing off, for CI and for gates that must not write.
+pub(crate) const NO_AUTO_INDEX_ENV: &str = "MITTER_NO_AUTO_INDEX";
+
+/// Refreshes the index in place when a source file is newer than it.
+///
+/// Silent on the happy path and explicit on every other: a refresh says how many files it touched on
+/// stderr (stdout belongs to `--json`), and a refresh that cannot take the write lock says so rather
+/// than hanging or failing. `redb` is single-writer and an MCP server holds the index for hours, so
+/// contention is the normal case rather than an error.
+fn refresh_if_stale(db: &Path, indexed_at: std::time::SystemTime) {
+    if std::env::var_os(NO_AUTO_INDEX_ENV).is_some() {
+        // Opting out of the refresh must not opt out of the warning: the caller has said it wants the
+        // index left alone, not that it wants to be told nothing about it.
+        warn_if_stale(db, indexed_at);
+        return;
+    }
+    let Some(root) = db.parent().and_then(Path::parent).and_then(Path::parent) else {
+        return;
+    };
+    let Some(newest) = newest_source_mtime(root, indexed_at) else {
+        return;
+    };
+    let Ok(age) = newest.duration_since(indexed_at) else {
+        return;
+    };
+    // The same tolerance the warning used: a file touched seconds ago is mid-edit, and re-indexing on
+    // every keystroke would cost more than it saves.
+    if age.as_secs() < 60 {
+        return;
+    }
+    let Ok(store) = miter_storage::WorkspaceStore::open(db) else {
+        eprintln!(
+            "miter: note: index is {} minute(s) stale but is held by another process; answering from it",
+            age.as_secs() / 60
+        );
+        return;
+    };
+    let started = std::time::Instant::now();
+    let mut engine = Engine::new();
+    // The two halves report different error types, so they are sequenced rather than chained: the
+    // message is the same to a reader, and flattening them into one type would lose which half failed.
+    let refreshed = miter_engine::ingest_dirty(&mut engine, root, &store).and_then(|_stats| {
+        miter_engine::persist::save_redb_into(&store, &engine)
+            .map_err(miter_engine::EngineError::Persist)
+    });
+    match refreshed {
+        Ok(()) => eprintln!(
+            "miter: index was {} minute(s) stale; refreshed in {} ms",
+            age.as_secs() / 60,
+            started.elapsed().as_millis()
+        ),
+        Err(error) => eprintln!("miter: could not refresh the stale index: {error}"),
+    }
+}
 
 /// Warns on stderr when the index predates the newest source file it should describe (`GB-237`).
 ///
