@@ -647,6 +647,7 @@ dependencies = [
 name = "miter-storage"
 version = "0.1.0-beta.4"
 dependencies = [
+ "gaugeblock-workspace",
  "redb",
  "serde",
  "serde_json",

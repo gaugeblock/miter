@@ -40,10 +40,9 @@ pub const INDEX_FILE: &str = "miter.redb";
 /// or `<workspace_root>/.miter/miter.redb` (legacy fallback).
 #[must_use]
 pub fn default_db_path(workspace_root: &Path) -> PathBuf {
-    let unified = workspace_root
-        .join(".gaugeblock")
-        .join("miter")
-        .join(INDEX_FILE);
+    // The layout is stated once, in `gaugeblock-workspace` (`GB-304`): this crate restating
+    // `.gaugeblock/miter/miter.redb` was a private copy of it, correct today and drifting later.
+    let unified = gaugeblock_workspace::GaugeblockPaths::at(workspace_root).index_db();
     let legacy = workspace_root.join(WORKSPACE_DIR).join(INDEX_FILE);
     if unified.exists() {
         unified
