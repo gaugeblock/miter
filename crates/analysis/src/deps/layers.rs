@@ -18,33 +18,12 @@
 //! documented list rather than a heuristic, and `miter deps --layers` prints every crate's layer so
 //! that a mistake in it is visible rather than silent.
 
+pub use super::orchestrators::{ORCHESTRATORS, classify_crate};
+
 use super::CrateEdge;
 use super::allowlist::LayerAllowlist;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
-
-/// Crates whose *product* is composing other products.
-///
-/// The criterion is deliberately narrow, because a looser one dissolves the layer: every crate in the
-/// suite consumes something. A crate is an orchestrator when composition **is** its product rather
-/// than a step inside it.
-///
-/// - `joiner-core` — the synthesis loop: pattern lookup in `dado`, grammar from `batten`, inference
-///   from `sawhorse`, verification through `miter-harness`. Its value is the loop.
-/// - `benchwork-core` — the workbench hub: the daemon behind the UI, which drives storypole's backlog,
-///   chalkline's docs engine, joiner's synthesis and dado's patterns on the operator's behalf.
-///
-/// Deliberately **not** listed, with the reason, because these are the interesting near-misses:
-///
-/// - `outfeed-core` composes storypole and sawhorse, but its product is release and delivery; reading
-///   a task receipt or synthesizing a changelog is a step inside that, not the point of it.
-/// - `chalkline-core` reads storypole and miter-polyglot to audit documentation; documentation is the
-///   product, and the reads are incidental.
-///
-/// Consequence, stated plainly: an edge from an orchestrator to a product crate is [`EdgeKind::Downward`]
-/// and is not gated. That is the intended shape — a hub is *supposed* to reach every product — and it
-/// is why the remaining allowlist entries are all edges between crates that are not composition roots.
-pub const ORCHESTRATORS: &[&str] = &["joiner-core", "benchwork-core"];
 
 /// Where a crate sits in the suite's dependency layering.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -80,20 +59,6 @@ impl Layer {
             Layer::Orchestrator => "orchestrator",
             Layer::Integrator => "integrator",
         }
-    }
-}
-
-/// Classifies a crate by its package name, consulting [`ORCHESTRATORS`] first.
-#[must_use]
-pub fn classify_crate(name: &str) -> Layer {
-    if ORCHESTRATORS.contains(&name) {
-        Layer::Orchestrator
-    } else if name.starts_with("gaugeblock-") {
-        Layer::Foundation
-    } else if name.ends_with("-cli") || name.ends_with("-mcp") || !name.contains('-') {
-        Layer::Integrator
-    } else {
-        Layer::Domain
     }
 }
 

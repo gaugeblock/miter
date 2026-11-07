@@ -8,6 +8,7 @@
 mod allowlist;
 pub(crate) mod imports;
 mod layers;
+mod orchestrators;
 pub(crate) mod resolution;
 mod strip;
 
