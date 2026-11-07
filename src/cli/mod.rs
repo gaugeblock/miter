@@ -41,6 +41,7 @@
 pub mod args;
 pub mod args_deps;
 pub mod audit;
+mod audit_paths;
 pub mod clones;
 pub mod contracts;
 pub mod deps;
@@ -123,10 +124,16 @@ pub fn execute(cli: Cli) -> Result<(), CliError> {
         } => lookup::run_lookup(&symbol, &resolve_db(db), context, json, max_tokens),
         Command::Mcp { db } => mcp::run_mcp(resolve_db(db)),
         Command::Audit {
+            paths,
             path,
             threshold,
             format,
-        } => audit::run_audit(path, threshold, audit::AuditFormat::parse(&format)),
+        } => audit::run_audit(
+            path,
+            threshold,
+            audit::AuditFormat::parse(&format),
+            paths,
+        ),
         Command::Slice {
             path,
             target_lines,

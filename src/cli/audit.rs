@@ -31,6 +31,7 @@ pub fn run_audit(
     path: Option<PathBuf>,
     explicit_threshold: Option<usize>,
     format: AuditFormat,
+    check_paths: bool,
 ) -> Result<(), CliError> {
     let root = path.unwrap_or_else(|| PathBuf::from("."));
     let config = AuditConfig::from_workspace_with_threshold(&root, explicit_threshold);
@@ -48,6 +49,13 @@ pub fn run_audit(
         AuditFormat::Table => {
             render_audit_table(&violations, threshold, &root);
         }
+    }
+
+    // The layout check runs alongside the line check (`GB-304`): `miter audit` is already in every
+    // verification chain, so the rule is enforced without anyone remembering to run a second command -
+    // which is exactly how five restated paths survived this long.
+    if check_paths {
+        super::audit_paths::run_paths_audit(&root, format)?;
     }
 
     if violations.is_empty() {

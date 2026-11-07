@@ -107,6 +107,9 @@ pub enum Command {
     },
     /// Scan workspace source files to flag files exceeding line-count thresholds.
     Audit {
+        /// Also fail when a crate names `.gaugeblock` without depending on `gaugeblock-workspace`.
+        #[arg(long)]
+        paths: bool,
         /// Target root directory to audit (defaults to current workspace).
         #[arg(long)]
         path: Option<PathBuf>,
