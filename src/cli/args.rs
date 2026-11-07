@@ -49,6 +49,17 @@ pub enum Command {
         #[arg(long)]
         json: bool,
     },
+    /// Find the innermost declaration containing a source position.
+    Enclosing {
+        /// Position as `<file>:<line>`, line one-based, as a compiler error reports it.
+        target: String,
+        /// Database file to read (defaults to `<workspace_root>/.gaugeblock/miter/miter.redb`).
+        #[arg(long)]
+        db: Option<PathBuf>,
+        /// Emit JSON instead of the rendered payload.
+        #[arg(long)]
+        json: bool,
+    },
     /// Locate a declaration and print its hydrated context.
     Lookup {
         /// Declaration name, or a qualified path such as `miter_engine::store::Engine`.

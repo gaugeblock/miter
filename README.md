@@ -26,6 +26,7 @@ pure function of your source tree: the same answer on every machine, on every ru
 miter index .                           # build the map (once, or per commit)
 miter skeleton src/api/handlers.rs      # 800-line file → its signatures
 miter lookup Engine --context           # one symbol, its members, its neighbours
+miter enclosing src/api/handlers.rs:412 # a position → the function that contains it
 ```
 
 ---

@@ -55,6 +55,7 @@ pub mod skeleton;
 pub mod slice;
 pub mod verify;
 
+mod enclosing;
 mod store;
 
 pub use args::{Cli, Command};
@@ -98,6 +99,9 @@ pub fn execute(cli: Cli) -> Result<(), CliError> {
             dirty,
             json,
         } => ingest::run_index(&path, &resolve_db(db), dirty, json),
+        Command::Enclosing { target, db, json } => {
+            enclosing::run_enclosing(&target, &resolve_db(db), json)
+        }
         Command::Lookup {
             symbol,
             db,
