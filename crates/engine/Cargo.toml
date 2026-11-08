@@ -42,6 +42,9 @@ thiserror = { workspace = true }
 # enum and the engine enum agree, and nothing in the engine's own code needs either crate.
 gaugeblock-contracts.workspace = true
 serde_json = { workspace = true }
+# Temporary directories for the persistence tests: a database and its ledger are files, so they need a
+# directory that is cleaned up rather than a path in the repository
+tempfile.workspace = true
 
 [lints]
 workspace = true
