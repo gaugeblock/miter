@@ -32,6 +32,13 @@ pub struct AllowlistEdit<'a> {
     pub ticket: Option<&'a str>,
 }
 
+/// Where the contracts allowlist lives, resolved from the analysed root.
+pub fn contracts_allowlist(root: &Path) -> std::path::PathBuf {
+    gaugeblock_workspace::GaugeblockPaths::at(root)
+        .member("miter")
+        .join("contracts-allowlist.toml")
+}
+
 /// Runs `miter deps --layers`.
 ///
 /// # Errors
