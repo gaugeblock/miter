@@ -418,7 +418,7 @@ always applied on top of the configured patterns.
 ## Repository Documentation
 
 `miter` adheres strictly to the canonical **9-Document Architecture**:
-* **[`CONTRIBUTING.md`](docs/CONTRIBUTING.md):** Local toolchain setup, developer prerequisites, and test execution.
+* **[`CONTRIBUTING.md`](CONTRIBUTING.md):** Local toolchain setup, developer prerequisites, and test execution.
 * **[`ARCHITECTURE.md`](docs/ARCHITECTURE.md):** Internal sub-crate topologies, redb storage engine, and query pipelines.
 * **[`SPEC.md`](docs/SPEC.md):** Behavioral invariants, wire schemas, redb table layouts, and error codes.
 * **[`AGENTS.md`](./AGENTS.md):** Non-negotiable engineering directives, file-size ceilings, and verification gates.
