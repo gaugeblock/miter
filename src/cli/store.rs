@@ -21,13 +21,21 @@ pub(crate) fn save(engine: &Engine, path: &Path) -> Result<(), CliError> {
 
 /// Loads an index, reporting a friendly error when the file is missing.
 ///
+/// An *absent* index is built rather than refused (`GB-322`): the harness verification chain begins with
+/// `miter contracts`, which needs an index, so a fresh clone could not pass its own gate until someone
+/// ran `miter index` by hand - and an instruction inside a verification chain is a step nobody notices
+/// is missing. This is the same precedent as `GB-237` for a stale index: a read that needs the index
+/// brings it up to date rather than describing the problem to the caller.
+///
+/// `MITTER_NO_AUTO_INDEX` still means "do not write an index", for CI and for gates that must not.
+///
 /// # Errors
 ///
-/// [`CliError::MissingIndex`] when the file does not exist, [`CliError::Persist`] when it
-/// cannot be read or decoded.
+/// [`CliError::MissingIndex`] when the file is absent and auto-indexing is off, [`CliError::Persist`]
+/// when it cannot be read, built or decoded.
 pub(crate) fn load(path: &Path) -> Result<Engine, CliError> {
     if !path.exists() {
-        return Err(CliError::MissingIndex(path.to_path_buf()));
+        build_if_missing(path)?;
     }
     // Read the mtime *before* opening: redb rewrites the file on open, so a timestamp taken
     // afterwards is always "now" and the check silently passes.
@@ -41,6 +49,42 @@ pub(crate) fn load(path: &Path) -> Result<Engine, CliError> {
         refresh_if_stale(path, indexed_at);
     }
     Ok(Engine::open_redb(path)?)
+}
+
+/// Builds the index when it does not exist yet (`GB-322`).
+///
+/// Mirrors what `miter index` does without its progress reporting: the passes, the save, and the
+/// reference table. The duplication is deliberate - `run_index` owns the CLI's output and job counts,
+/// and threading a "quiet" mode through it would put a flag in a command that already has three.
+fn build_if_missing(path: &Path) -> Result<(), CliError> {
+    if std::env::var_os(NO_AUTO_INDEX_ENV).is_some() {
+        return Err(CliError::MissingIndex(path.to_path_buf()));
+    }
+    // `<root>/.gaugeblock/miter/miter.redb` - the index sits inside the tree it describes.
+    let Some(root) = path.parent().and_then(Path::parent).and_then(Path::parent) else {
+        return Err(CliError::MissingIndex(path.to_path_buf()));
+    };
+    let started = std::time::Instant::now();
+    let mut engine = Engine::new();
+    engine.ingest_dir(root)?;
+    let polyglot = engine.ingest_polyglot_tree(root)?;
+    save(&engine, path)?;
+    if let Ok(store) = miter_storage::WorkspaceStore::open_or_recreate(path) {
+        let references = polyglot
+            .references
+            .iter()
+            .flat_map(|(_, refs)| refs.clone());
+        let _ = store.replace_all_references(references);
+    }
+    // Stderr, because stdout belongs to `--json` and this is a statement about work the caller did not
+    // ask for and should still know happened.
+    eprintln!(
+        "miter: no index at {}; built it in {} ms ({} files). Set {NO_AUTO_INDEX_ENV} to forbid this.",
+        path.display(),
+        started.elapsed().as_millis(),
+        polyglot.stats.files_indexed
+    );
+    Ok(())
 }
 
 /// Source files an index is expected to describe.
