@@ -41,6 +41,7 @@
 pub mod args;
 pub mod args_deps;
 pub mod audit;
+mod audit_multi_repo;
 mod audit_paths;
 pub mod clones;
 pub mod contracts;
@@ -128,12 +129,7 @@ pub fn execute(cli: Cli) -> Result<(), CliError> {
             path,
             threshold,
             format,
-        } => audit::run_audit(
-            path,
-            threshold,
-            audit::AuditFormat::parse(&format),
-            paths,
-        ),
+        } => audit::run_audit(path, threshold, audit::AuditFormat::parse(&format), paths),
         Command::Slice {
             path,
             target_lines,

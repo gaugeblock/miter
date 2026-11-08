@@ -29,13 +29,13 @@ const ALLOWED: [(&str, &str); 2] = [
 
 /// One crate that names the layout without adopting the resolver.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct PathViolation {
+pub(super) struct PathViolation {
     /// Package name from the manifest.
-    pub crate_name: String,
+    pub(super) crate_name: String,
     /// Manifest that should have carried the dependency.
-    pub manifest: PathBuf,
+    pub(super) manifest: PathBuf,
     /// `(file, line)` for each non-comment mention.
-    pub sites: Vec<(PathBuf, usize)>,
+    pub(super) sites: Vec<(PathBuf, usize)>,
 }
 
 /// Directories that cannot contain a workspace crate.
@@ -54,7 +54,7 @@ const SKIP_DIRS: [&str; 6] = [
 ///
 /// [`std::io::Error`] only when the walk itself fails; an unreadable manifest is skipped rather than
 /// aborting, because one malformed crate must not hide the rest of the report.
-pub fn audit_layout_adoption(root: &Path) -> std::io::Result<Vec<PathViolation>> {
+pub(super) fn audit_layout_adoption(root: &Path) -> std::io::Result<Vec<PathViolation>> {
     let mut violations = Vec::new();
     let mut pending = vec![root.to_path_buf()];
     while let Some(dir) = pending.pop() {
@@ -159,25 +159,28 @@ fn mentions_layout(line: &str) -> bool {
     code.contains(".gaugeblock")
 }
 
-
 /// Runs the check and reports it in the caller's format.
 ///
 /// # Errors
 ///
 /// [`CliError::Rejected`] when a crate names the layout without the dependency, [`CliError::Io`] when the
 /// walk itself fails.
-pub fn run_paths_audit(root: &Path, format: super::audit::AuditFormat) -> Result<(), super::error::CliError> {
-    let violations =
-        audit_layout_adoption(root).map_err(super::error::CliError::Io)?;
+pub(super) fn run_paths_audit(
+    root: &Path,
+    format: super::audit::AuditFormat,
+) -> Result<(), super::error::CliError> {
+    let violations = audit_layout_adoption(root).map_err(super::error::CliError::Io)?;
 
     match format {
         super::audit::AuditFormat::Json => println!("{}", json(&violations).render()),
         super::audit::AuditFormat::Table => {
             if violations.is_empty() {
-                println!("AUDIT PASSED: every crate naming .gaugeblock depends on gaugeblock-workspace");
+                println!(
+                    "AUDIT PASSED: every crate naming .gaugeblock depends on gaugeblock-workspace"
+                );
             } else {
                 println!("Crate names .gaugeblock without gaugeblock-workspace:");
-                println!("{:<28} {:<10} {}", "CRATE", "SITES", "MANIFEST");
+                println!("{:<28} {:<10} MANIFEST", "CRATE", "SITES");
                 println!("{}", "-".repeat(78));
                 for violation in &violations {
                     println!(
@@ -194,6 +197,8 @@ pub fn run_paths_audit(root: &Path, format: super::audit::AuditFormat) -> Result
         }
     }
 
+    super::audit_multi_repo::run_multi_repo_audit(root, format)?; // GB-305, the rule's other half
+
     if violations.is_empty() {
         return Ok(());
     }
@@ -205,22 +210,17 @@ pub fn run_paths_audit(root: &Path, format: super::audit::AuditFormat) -> Result
 
 /// The same report as JSON.
 fn json(violations: &[PathViolation]) -> super::json::Json {
-    super::json::Json::object([(
-        "violations",
-        super::json::Json::array(violations.iter().map(|violation| {
-            super::json::Json::object([
-                ("crate", super::json::Json::string(&violation.crate_name)),
-                (
-                    "manifest",
-                    super::json::Json::string(violation.manifest.display().to_string()),
-                ),
-                (
-                    "sites",
-                    super::json::Json::Unsigned(violation.sites.len() as u64),
-                ),
-            ])
-        })),
-    )])
+    let rows = violations.iter().map(|v| {
+        super::json::Json::object([
+            ("crate", super::json::Json::string(&v.crate_name)),
+            (
+                "manifest",
+                super::json::Json::string(v.manifest.display().to_string()),
+            ),
+            ("sites", super::json::Json::Unsigned(v.sites.len() as u64)),
+        ])
+    });
+    super::json::Json::object([("violations", super::json::Json::array(rows))])
 }
 
 #[cfg(test)]
@@ -236,13 +236,16 @@ mod tests {
 
     #[test]
     fn a_restated_default_path_is_a_use() {
-        assert!(mentions_layout(r#"#[arg(long, default_value = ".gaugeblock/spool/outbox.jsonl")]"#));
+        assert!(mentions_layout(
+            r#"#[arg(long, default_value = ".gaugeblock/spool/outbox.jsonl")]"#
+        ));
         assert!(mentions_layout(r#"let dir = root.join(".gaugeblock");"#));
     }
 
     #[test]
     fn the_package_name_is_read_from_the_package_table() {
-        let manifest = "[workspace]\nmembers = []\n\n[package]\nname = \"dado-core\"\nversion = \"1\"\n";
+        let manifest =
+            "[workspace]\nmembers = []\n\n[package]\nname = \"dado-core\"\nversion = \"1\"\n";
         assert_eq!(package_name(manifest), Some("dado-core".to_string()));
     }
 }
