@@ -27,7 +27,7 @@ pub(crate) fn save(engine: &Engine, path: &Path) -> Result<(), CliError> {
 /// is missing. This is the same precedent as `GB-237` for a stale index: a read that needs the index
 /// brings it up to date rather than describing the problem to the caller.
 ///
-/// `MITTER_NO_AUTO_INDEX` still means "do not write an index", for CI and for gates that must not.
+/// `MITER_NO_AUTO_INDEX` still means "do not write an index", for CI and for gates that must not.
 ///
 /// # Errors
 ///
@@ -101,7 +101,11 @@ const SKIPPED_DIRS: [&str; 6] = [
 ];
 
 /// Env var that turns auto-indexing off, for CI and for gates that must not write.
-pub(crate) const NO_AUTO_INDEX_ENV: &str = "MITTER_NO_AUTO_INDEX";
+///
+/// Spelled `MITER_`, one T, because the tool is `miter`. It read `MITTER_NO_AUTO_INDEX` until
+/// 2026-11-07 - a name nobody would guess correctly, and one that a reader who *did* guess correctly
+/// would get wrong. See the test below, which exists so the typo cannot come back.
+pub(crate) const NO_AUTO_INDEX_ENV: &str = "MITER_NO_AUTO_INDEX";
 
 /// Refreshes the index in place when a source file is newer than it.
 ///
@@ -230,17 +234,4 @@ fn newest_source_mtime(
 }
 
 #[cfg(test)]
-mod tests {
-    #![allow(clippy::unwrap_used, clippy::expect_used)]
-
-    use super::*;
-    use std::path::PathBuf;
-
-    #[test]
-    fn loading_a_missing_database_is_a_friendly_error() {
-        let path = PathBuf::from("/tmp/miter_never_written_9f3a.redb");
-        let error = load(&path).expect_err("missing index is an error");
-        assert!(matches!(error, CliError::MissingIndex(_)));
-        assert!(error.to_string().contains("miter index"), "{error}");
-    }
-}
+mod tests;
