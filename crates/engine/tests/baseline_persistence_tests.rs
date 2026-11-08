@@ -23,16 +23,30 @@ fn record(digest_byte: u8, size: u64, mtime_secs: u64) -> IndexedFileRecord {
 #[test]
 fn a_saved_index_remembers_every_file_it_describes() {
     let tmp = tempdir().expect("tempdir");
-    let db = tmp.path().join(".gaugeblock").join("miter").join("miter.redb");
+    let db = tmp
+        .path()
+        .join(".gaugeblock")
+        .join("miter")
+        .join("miter.redb");
 
     let mut engine = Engine::new();
     // Two members of one suite, which is the shape the defect needed: one repository hid it.
-    engine.record_file("alpha/src/lib.rs".to_string(), record(1, 120, 1_700_000_000));
-    engine.record_file("beta/src/main.rs".to_string(), record(2, 240, 1_700_000_100));
+    engine.record_file(
+        "alpha/src/lib.rs".to_string(),
+        record(1, 120, 1_700_000_000),
+    );
+    engine.record_file(
+        "beta/src/main.rs".to_string(),
+        record(2, 240, 1_700_000_100),
+    );
     save_redb(&engine, &db).expect("save the index");
 
     let store = WorkspaceStore::open(&db).expect("reopen the index");
-    assert_eq!(store.file_hash_count().expect("hashes"), 2, "both files are recorded");
+    assert_eq!(
+        store.file_hash_count().expect("hashes"),
+        2,
+        "both files are recorded"
+    );
 
     let alpha = store
         .get_indexed_file("alpha/src/lib.rs")

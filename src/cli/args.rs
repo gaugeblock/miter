@@ -46,6 +46,9 @@ pub enum Command {
         /// Incremental dirty-file indexing mode driven by mtime and git status.
         #[arg(long)]
         dirty: bool,
+        /// Re-parse every file, ignoring the stored baseline.
+        #[arg(long, conflicts_with = "dirty")]
+        full: bool,
         /// Emit JSON instead of a human-readable summary.
         #[arg(long)]
         json: bool,

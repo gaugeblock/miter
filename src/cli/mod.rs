@@ -51,6 +51,7 @@ pub mod deps_layers;
 mod deps_layers_edit;
 pub mod error;
 pub mod impact;
+mod index_mode;
 pub mod ingest;
 pub mod json;
 pub mod lookup;
@@ -105,8 +106,9 @@ pub fn execute(cli: Cli) -> Result<(), CliError> {
             path,
             db,
             dirty,
+            full,
             json,
-        } => ingest::run_index(&path, &resolve_db(db), dirty, json),
+        } => ingest::run_index(&path, &resolve_db(db), dirty, full, json),
         Command::Find {
             pattern,
             ignore_case,
