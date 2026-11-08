@@ -191,58 +191,6 @@ fn package_name(manifest: &str) -> Option<String> {
         })
 }
 
-/// Reports the check in the caller's format and fails when a crate owes a test.
-pub(super) fn run_multi_repo_audit(
-    root: &Path,
-    format: super::audit::AuditFormat,
-) -> Result<(), super::error::CliError> {
-    let findings = audit_multi_repo(root).map_err(super::error::CliError::Io)?;
-    match format {
-        super::audit::AuditFormat::Json => {
-            let rows = findings.iter().map(|finding| {
-                super::json::Json::object([
-                    ("crate", super::json::Json::string(&finding.crate_name)),
-                    (
-                        "discovery_sites",
-                        super::json::Json::Unsigned(finding.sites.len() as u64),
-                    ),
-                ])
-            });
-            println!(
-                "{}",
-                super::json::Json::object([("multi_repo_gaps", super::json::Json::array(rows))])
-                    .render()
-            );
-        }
-        super::audit::AuditFormat::Table => {
-            if findings.is_empty() {
-                println!(
-                    "AUDIT PASSED: every crate resolving the suite has a multi-repository test"
-                );
-            } else {
-                println!("Crate resolves the suite without a multi-repository test:");
-                for finding in &findings {
-                    println!(
-                        "  {:<28} {} discovery site(s)",
-                        finding.crate_name,
-                        finding.sites.len()
-                    );
-                    for (file, line) in finding.sites.iter().take(2) {
-                        println!("      {}:{line}", file.display());
-                    }
-                }
-            }
-        }
-    }
-    if findings.is_empty() {
-        return Ok(());
-    }
-    Err(super::error::CliError::Rejected(format!(
-        "{} crate(s) resolve the suite without a multi-repository test",
-        findings.len()
-    )))
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
