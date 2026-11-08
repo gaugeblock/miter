@@ -43,6 +43,7 @@ pub mod args_deps;
 pub mod audit;
 mod audit_multi_repo;
 mod audit_paths;
+mod audit_paths_report;
 pub mod clones;
 pub mod contracts;
 pub mod deps;

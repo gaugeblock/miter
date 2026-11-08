@@ -55,7 +55,7 @@ pub fn run_audit(
     // verification chain, so the rule is enforced without anyone remembering to run a second command -
     // which is exactly how five restated paths survived this long.
     if check_paths {
-        super::audit_paths::run_paths_audit(&root, format)?;
+        super::audit_paths_report::run_paths_audit(&root, format)?;
     }
 
     if violations.is_empty() {
