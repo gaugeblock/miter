@@ -1,0 +1,77 @@
+{
+  "ticket": {
+    "id": "9f2b9c8c-676d-43f7-a0eb-57e8d62e5453",
+    "ticket_key": "MTR-1",
+    "slug": "miter-audit-should-refuse-a-commit-deleting-tracked-gaugeblock-state-without-citing-a-decision-record-9f2b9c",
+    "title": "miter audit should refuse a commit deleting tracked .gaugeblock state without citing a decision record",
+    "description": "The rule that would have prevented this whole line of work, and the last refusal owed on storypole GB-334.\n\nWHAT HAPPENED: on 2026-11-06 ten repositories each committed chore(storypole): retire the legacy repo-local ledger, deleting their .storypole/ledger.jsonl and keeping the bytes at the suite root. It read as routine hygiene. Nobody asked why the files had frozen, and the answer - because nothing wrote to them, because write routing was never wired - was the actual defect. Days of work were spent rediscovering it.\n\nWHAT THE RULE SHOULD DO: a commit that deletes tracked files under .gaugeblock/ must cite a decision record (docs/decisions/NNNN-*.md or an ADR-NNNN reference) in its message. Requiring the ADR forces the sentence that exposes the circularity: an ADR has to say why the state is superseded, and because-nothing-writes-to-it is a statement that invites a second look.\n\nWHERE: src/cli/audit_paths.rs alongside audit_layout_adoption, so it runs in the same --paths gate every repository chain already calls.\n\nTHE HARD PART: the historical commits are already in ten repositories, so a naive rule reports violations from day one and blocks every chain. It needs a baseline - commits reachable from a recorded marker, or an allowlist beside layers-allowlist.toml naming each accepted deletion with its justification. The allowlist is probably right: ten entries, each stating why the deletion was correct, is a durable record rather than an exemption.\n\nTESTS: a fixture repository with a deletion that cites an ADR (passes), one that does not (fails naming the commit), and one that is allowlisted (passes).",
+    "kind": "feature",
+    "status": "deferred",
+    "priority": 3,
+    "scope": {
+      "repo": "miter",
+      "crate_name": "miter-cli",
+      "module_path": null,
+      "target_files": [],
+      "target_symbols": [
+        "miter_cli::cli::audit_paths"
+      ],
+      "labels": []
+    },
+    "edges": [],
+    "decisions": [],
+    "acceptance_criteria": [],
+    "plan": null,
+    "active_claim": null,
+    "latest_handoff": null,
+    "verification_receipt": null,
+    "created_at_epoch_ms": 1794245672524,
+    "updated_at_epoch_ms": 1794245672524
+  },
+  "events": [
+    {
+      "event": "deferred_item_captured",
+      "task": {
+        "id": "9f2b9c8c-676d-43f7-a0eb-57e8d62e5453",
+        "ticket_key": "MTR-1",
+        "slug": "miter-audit-should-refuse-a-commit-deleting-tracked-gaugeblock-state-without-citing-a-decision-record-9f2b9c",
+        "title": "miter audit should refuse a commit deleting tracked .gaugeblock state without citing a decision record",
+        "description": "The rule that would have prevented this whole line of work, and the last refusal owed on storypole GB-334.\n\nWHAT HAPPENED: on 2026-11-06 ten repositories each committed chore(storypole): retire the legacy repo-local ledger, deleting their .storypole/ledger.jsonl and keeping the bytes at the suite root. It read as routine hygiene. Nobody asked why the files had frozen, and the answer - because nothing wrote to them, because write routing was never wired - was the actual defect. Days of work were spent rediscovering it.\n\nWHAT THE RULE SHOULD DO: a commit that deletes tracked files under .gaugeblock/ must cite a decision record (docs/decisions/NNNN-*.md or an ADR-NNNN reference) in its message. Requiring the ADR forces the sentence that exposes the circularity: an ADR has to say why the state is superseded, and because-nothing-writes-to-it is a statement that invites a second look.\n\nWHERE: src/cli/audit_paths.rs alongside audit_layout_adoption, so it runs in the same --paths gate every repository chain already calls.\n\nTHE HARD PART: the historical commits are already in ten repositories, so a naive rule reports violations from day one and blocks every chain. It needs a baseline - commits reachable from a recorded marker, or an allowlist beside layers-allowlist.toml naming each accepted deletion with its justification. The allowlist is probably right: ten entries, each stating why the deletion was correct, is a durable record rather than an exemption.\n\nTESTS: a fixture repository with a deletion that cites an ADR (passes), one that does not (fails naming the commit), and one that is allowlisted (passes).",
+        "kind": "feature",
+        "status": "deferred",
+        "priority": 3,
+        "scope": {
+          "repo": "miter",
+          "crate_name": "miter-cli",
+          "module_path": null,
+          "target_files": [],
+          "target_symbols": [
+            "miter_cli::cli::audit_paths"
+          ],
+          "labels": []
+        },
+        "edges": [],
+        "decisions": [],
+        "acceptance_criteria": [],
+        "plan": null,
+        "active_claim": null,
+        "latest_handoff": null,
+        "verification_receipt": null,
+        "created_at_epoch_ms": 1794245672524,
+        "updated_at_epoch_ms": 1794245672524
+      },
+      "captured_by_agent": "user",
+      "discovered_from_task_id": null
+    },
+    {
+      "event": "task_updated",
+      "task_id": "9f2b9c8c-676d-43f7-a0eb-57e8d62e5453",
+      "title": null,
+      "description": null,
+      "priority": 1,
+      "scope": null,
+      "acceptance_criteria": null,
+      "timestamp_ms": 1794245679874
+    }
+  ]
+}
