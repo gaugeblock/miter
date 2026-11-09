@@ -1,0 +1,127 @@
+{
+  "ticket": {
+    "id": "3ad91395-e81b-47d7-83e3-5e13718cffa6",
+    "ticket_key": "GB-248",
+    "slug": "miter-deps-layers-should-prune-and-adopt-allowlist-entries-and-fail-on-an-entry-that-matches-no-edge-3ad913",
+    "title": "miter deps --layers should prune and adopt allowlist entries, and fail on an entry that matches no edge",
+    "description": "Observed 2026-11-06 across GB-204 steps 1-3: the allowlist is hand-edited TOML every time an edge changes, so I edited it with python three times. Two gaps follow. (1) PRUNE/ADOPT: after a repoint the entry's 'to' crate changes name (miter-inventory -> gaugeblock-inventory) and after a mitigation the edge disappears; a --prune that deletes entries matching no current edge, and an --adopt --ticket KEY that adds entries for unallowlisted edges, would make burn-down mechanical instead of error-prone. (2) GATE HOLE: --check fails for unallowlisted lateral and for upward edges, but passes when the allowlist holds an entry for an edge that no longer exists. That is a silent suppression waiting to be re-armed: if the edge returns, it is excused without anyone deciding. --check should report stale entries and fail on them.",
+    "kind": "feature",
+    "status": "verified",
+    "priority": 3,
+    "scope": {
+      "repo": "miter",
+      "crate_name": "miter-analysis",
+      "module_path": null,
+      "target_files": [],
+      "target_symbols": [
+        "miter_analysis::deps::allowlist::LayerAllowlist"
+      ],
+      "labels": [
+        "miter,layers,gate,gb-204"
+      ]
+    },
+    "edges": [],
+    "decisions": [],
+    "acceptance_criteria": [
+      "DONE 2026-11-06, commit eccb774 (miter).\n\nThe gate could see an unallowlisted edge but not an entry that explained nothing. That gap had a body count: a burned edge left its allowlisted exception behind twice today (chalkline-core -> storypole-core, then both outfeed edges), and both times I noticed by eye and deleted it by hand. An entry is now an input to the verdict rather than bookkeeping the verdict ignores.\n\nWhat changed:\n- LayerReport.stale lists entries no lateral edge claimed. It is built from the input allowlist rather than by set difference over edge names, so an entry naming a crate that no longer exists still counts as stale instead of vanishing.\n- is_clean() requires stale to be empty, so --check fails with its own message: 'N unallowlisted lateral edge(s), M upward edge(s), K stale allowlist entr(ies)'. The three failure kinds are named separately because they need different fixes.\n- --prune deletes stale entries; --adopt --ticket KEY writes an entry for every unallowlisted lateral edge. --adopt without a ticket refuses with 'an exception without an owner is a suppression'.\n- Both edit the file textually rather than round-tripping TOML. The allowlist opens with a comment explaining what an entry means and how one leaves the file; a round-trip would delete the prose, and an entry without its explanation is exactly the suppression the file exists to prevent.\n- Edits apply before the report is rendered, and the allowlist is re-read afterwards. Without that, --prune --check printed 'violated' for a file it had just cleaned - a verdict that disagrees with the file teaches a reader to distrust verdicts.\n\nProven on the live workspace rather than asserted: seeded a ghost entry, --check failed naming it, --prune --check exited 0 with 'Verdict: clean' and the entry gone with the header comment intact, and --adopt without --ticket refused.\n\nFound on the way: the layer table never printed the orchestrator layer, though the report has carried it since GB-204, so 'miter deps --layers prints every crate's layer' was false for three crates. Fixed.\n\nAnd the audit caught this change itself: layers.rs went to 258 and args.rs to 253, both split rather than left over - layers/report.rs and args_deps.rs. The gate wired in the previous commit is already earning its place.\n\nTier 2: fmt clean, clippy --workspace --all-targets -D warnings clean, 277 tests green, audit clean, docs 9 present 0 drifted, layers clean at 0 lateral edges."
+    ],
+    "plan": null,
+    "active_claim": null,
+    "latest_handoff": null,
+    "verification_receipt": {
+      "verifier": "storypole-verify",
+      "command": "miter contracts && outfeed lockfiles && miter audit --path . --threshold 250 && chalkline docs check --workspace",
+      "exit_code": 0,
+      "diagnostic_count": null,
+      "summary": "Polyglot Contract Verification across SQL, Rust, and TypeScript\n================================================================================\nVerified Multi-Language Entities: 0\nEntities with Contract Drift:     0\n\nALL CONTRACTS CONSISTENT: No cross-language schema drifts detected.\nREPOSITORY     LOCKFILE     FRESH   \n------------------------------------\n\nAll 0 repositories track a fresh Cargo.lock.\nAUDIT PASSED: No files exceed 250 lines in .\n\n=== Gaugeblock 9-Document Architecture Audit (Workspace) ===\nWorkspace Root: /Users/wolff/dev2026/neurosymbolic-suite/miter\n\nRepo           README CONTRIB PROD   ARCH   SPEC   DESIGN   ROADMAP   CHANGELOG   AGENTS   Status    \n-----------------------------------------------------------------------------------------------\nworkspace      [OK]   [OK]    [OK]   [OK]   [OK]   [OK]     [OK]      [OK]        [OK]     CLEAN     \n\nSummary: 1 targets audited, 9 present, 0 missing, 0 drifted\n\n",
+      "verified_at_epoch_ms": 1794037887969,
+      "git_branch": "main",
+      "base_commit_sha": "eccb774e6eee3baddad75c7ffc56bcd4a3e1dc00",
+      "head_commit_sha": "eccb774e6eee3baddad75c7ffc56bcd4a3e1dc00",
+      "commit_shas": [
+        "eccb774e6eee3baddad75c7ffc56bcd4a3e1dc00"
+      ],
+      "repo": null,
+      "chain_key": null
+    },
+    "created_at_epoch_ms": 1793948501923,
+    "updated_at_epoch_ms": 1794038024300,
+    "archived_at_epoch_ms": 1794038024300
+  },
+  "events": [
+    {
+      "event": "deferred_item_captured",
+      "task": {
+        "id": "3ad91395-e81b-47d7-83e3-5e13718cffa6",
+        "ticket_key": "GB-248",
+        "slug": "miter-deps-layers-should-prune-and-adopt-allowlist-entries-and-fail-on-an-entry-that-matches-no-edge-3ad913",
+        "title": "miter deps --layers should prune and adopt allowlist entries, and fail on an entry that matches no edge",
+        "description": "Observed 2026-11-06 across GB-204 steps 1-3: the allowlist is hand-edited TOML every time an edge changes, so I edited it with python three times. Two gaps follow. (1) PRUNE/ADOPT: after a repoint the entry's 'to' crate changes name (miter-inventory -> gaugeblock-inventory) and after a mitigation the edge disappears; a --prune that deletes entries matching no current edge, and an --adopt --ticket KEY that adds entries for unallowlisted edges, would make burn-down mechanical instead of error-prone. (2) GATE HOLE: --check fails for unallowlisted lateral and for upward edges, but passes when the allowlist holds an entry for an edge that no longer exists. That is a silent suppression waiting to be re-armed: if the edge returns, it is excused without anyone deciding. --check should report stale entries and fail on them.",
+        "kind": "feature",
+        "status": "deferred",
+        "priority": 3,
+        "scope": {
+          "repo": "miter",
+          "crate_name": "miter-analysis",
+          "module_path": null,
+          "target_files": [],
+          "target_symbols": [
+            "miter_analysis::deps::allowlist::LayerAllowlist"
+          ],
+          "labels": [
+            "miter,layers,gate,gb-204"
+          ]
+        },
+        "edges": [],
+        "decisions": [],
+        "acceptance_criteria": [],
+        "plan": null,
+        "active_claim": null,
+        "latest_handoff": null,
+        "verification_receipt": null,
+        "created_at_epoch_ms": 1793948501923,
+        "updated_at_epoch_ms": 1793948501923
+      },
+      "captured_by_agent": "cline",
+      "discovered_from_task_id": null
+    },
+    {
+      "event": "task_updated",
+      "task_id": "3ad91395-e81b-47d7-83e3-5e13718cffa6",
+      "title": null,
+      "description": null,
+      "priority": null,
+      "scope": null,
+      "acceptance_criteria": [
+        "DONE 2026-11-06, commit eccb774 (miter).\n\nThe gate could see an unallowlisted edge but not an entry that explained nothing. That gap had a body count: a burned edge left its allowlisted exception behind twice today (chalkline-core -> storypole-core, then both outfeed edges), and both times I noticed by eye and deleted it by hand. An entry is now an input to the verdict rather than bookkeeping the verdict ignores.\n\nWhat changed:\n- LayerReport.stale lists entries no lateral edge claimed. It is built from the input allowlist rather than by set difference over edge names, so an entry naming a crate that no longer exists still counts as stale instead of vanishing.\n- is_clean() requires stale to be empty, so --check fails with its own message: 'N unallowlisted lateral edge(s), M upward edge(s), K stale allowlist entr(ies)'. The three failure kinds are named separately because they need different fixes.\n- --prune deletes stale entries; --adopt --ticket KEY writes an entry for every unallowlisted lateral edge. --adopt without a ticket refuses with 'an exception without an owner is a suppression'.\n- Both edit the file textually rather than round-tripping TOML. The allowlist opens with a comment explaining what an entry means and how one leaves the file; a round-trip would delete the prose, and an entry without its explanation is exactly the suppression the file exists to prevent.\n- Edits apply before the report is rendered, and the allowlist is re-read afterwards. Without that, --prune --check printed 'violated' for a file it had just cleaned - a verdict that disagrees with the file teaches a reader to distrust verdicts.\n\nProven on the live workspace rather than asserted: seeded a ghost entry, --check failed naming it, --prune --check exited 0 with 'Verdict: clean' and the entry gone with the header comment intact, and --adopt without --ticket refused.\n\nFound on the way: the layer table never printed the orchestrator layer, though the report has carried it since GB-204, so 'miter deps --layers prints every crate's layer' was false for three crates. Fixed.\n\nAnd the audit caught this change itself: layers.rs went to 258 and args.rs to 253, both split rather than left over - layers/report.rs and args_deps.rs. The gate wired in the previous commit is already earning its place.\n\nTier 2: fmt clean, clippy --workspace --all-targets -D warnings clean, 277 tests green, audit clean, docs 9 present 0 drifted, layers clean at 0 lateral edges."
+      ],
+      "timestamp_ms": 1794037887713
+    },
+    {
+      "event": "task_verified",
+      "task_id": "3ad91395-e81b-47d7-83e3-5e13718cffa6",
+      "receipt": {
+        "verifier": "storypole-verify",
+        "command": "miter contracts && outfeed lockfiles && miter audit --path . --threshold 250 && chalkline docs check --workspace",
+        "exit_code": 0,
+        "diagnostic_count": null,
+        "summary": "Polyglot Contract Verification across SQL, Rust, and TypeScript\n================================================================================\nVerified Multi-Language Entities: 0\nEntities with Contract Drift:     0\n\nALL CONTRACTS CONSISTENT: No cross-language schema drifts detected.\nREPOSITORY     LOCKFILE     FRESH   \n------------------------------------\n\nAll 0 repositories track a fresh Cargo.lock.\nAUDIT PASSED: No files exceed 250 lines in .\n\n=== Gaugeblock 9-Document Architecture Audit (Workspace) ===\nWorkspace Root: /Users/wolff/dev2026/neurosymbolic-suite/miter\n\nRepo           README CONTRIB PROD   ARCH   SPEC   DESIGN   ROADMAP   CHANGELOG   AGENTS   Status    \n-----------------------------------------------------------------------------------------------\nworkspace      [OK]   [OK]    [OK]   [OK]   [OK]   [OK]     [OK]      [OK]        [OK]     CLEAN     \n\nSummary: 1 targets audited, 9 present, 0 missing, 0 drifted\n\n",
+        "verified_at_epoch_ms": 1794037887969,
+        "git_branch": "main",
+        "base_commit_sha": "eccb774e6eee3baddad75c7ffc56bcd4a3e1dc00",
+        "head_commit_sha": "eccb774e6eee3baddad75c7ffc56bcd4a3e1dc00",
+        "commit_shas": [
+          "eccb774e6eee3baddad75c7ffc56bcd4a3e1dc00"
+        ],
+        "repo": null,
+        "chain_key": null
+      }
+    },
+    {
+      "event": "task_archived",
+      "task_id": "3ad91395-e81b-47d7-83e3-5e13718cffa6",
+      "status": "verified",
+      "timestamp_ms": 1794038024300
+    }
+  ]
+}

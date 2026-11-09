@@ -1,0 +1,77 @@
+{
+  "ticket": {
+    "id": "bf05670b-b62d-4abd-bf37-a163a8080c3b",
+    "ticket_key": "GB-251",
+    "slug": "make-miter-verify-the-documented-tier-1-loop-since-cargo-check-cannot-finish-inside-an-agent-tool-window-bf0567",
+    "title": "Make miter verify the documented Tier 1 loop, since cargo check cannot finish inside an agent tool window",
+    "description": "Observed 2026-11-06 across roughly twenty build invocations: every 'cargo check --workspace --all-targets' exceeded the 30s tool window and had to be backgrounded and polled, burning two or three turns per build. Tier 1 in AGENTS.md prescribes cargo check -p <crate>; miter verify already exists for exactly this shape of problem and returns sliced diagnostics with zero build scrollback. Worth doing: measure miter verify cold and warm against cargo check on a real crate, and if it wins, rewrite Tier 1 in AGENTS.md to name it, with cargo as the fallback. It also sidesteps the shared build-lock stall in GB-236 better than polling a log.\n\nSCOPE CLARIFIED 2026-11-06 (owner): storypole verify --compiler already shells out to `miter verify` (storypole-core/src/ops/verification/mod.rs:48 via run_miter_verify), so miter verify IS already trusted for the closing gate and the receipt records the diagnostic count. That does not cover Tier 1, which is the inner loop DURING development: storypole verify needs a task that is InProgress and resolves its target from the ticket scope, so it cannot answer \"did my last edit compile\" mid-change. The gap is exactly two things - the documented inner-loop command, and speed. Measure `miter verify --path <crate> --json` cold and warm against `cargo check -p <crate>`; if it wins, Tier 1 in AGENTS.md should name it with cargo as the fallback.",
+    "kind": "feature",
+    "status": "deferred",
+    "priority": 3,
+    "scope": {
+      "repo": "miter",
+      "crate_name": "miter-harness",
+      "module_path": null,
+      "target_files": [],
+      "target_symbols": [],
+      "labels": [
+        "miter,agents,verification,law-4"
+      ]
+    },
+    "edges": [],
+    "decisions": [],
+    "acceptance_criteria": [],
+    "plan": null,
+    "active_claim": null,
+    "latest_handoff": null,
+    "verification_receipt": null,
+    "created_at_epoch_ms": 1793948510731,
+    "updated_at_epoch_ms": 1793949391687
+  },
+  "events": [
+    {
+      "event": "deferred_item_captured",
+      "task": {
+        "id": "bf05670b-b62d-4abd-bf37-a163a8080c3b",
+        "ticket_key": "GB-251",
+        "slug": "make-miter-verify-the-documented-tier-1-loop-since-cargo-check-cannot-finish-inside-an-agent-tool-window-bf0567",
+        "title": "Make miter verify the documented Tier 1 loop, since cargo check cannot finish inside an agent tool window",
+        "description": "Observed 2026-11-06 across roughly twenty build invocations: every 'cargo check --workspace --all-targets' exceeded the 30s tool window and had to be backgrounded and polled, burning two or three turns per build. Tier 1 in AGENTS.md prescribes cargo check -p <crate>; miter verify already exists for exactly this shape of problem and returns sliced diagnostics with zero build scrollback. Worth doing: measure miter verify cold and warm against cargo check on a real crate, and if it wins, rewrite Tier 1 in AGENTS.md to name it, with cargo as the fallback. It also sidesteps the shared build-lock stall in GB-236 better than polling a log.",
+        "kind": "feature",
+        "status": "deferred",
+        "priority": 3,
+        "scope": {
+          "repo": "miter",
+          "crate_name": "miter-harness",
+          "module_path": null,
+          "target_files": [],
+          "target_symbols": [],
+          "labels": [
+            "miter,agents,verification,law-4"
+          ]
+        },
+        "edges": [],
+        "decisions": [],
+        "acceptance_criteria": [],
+        "plan": null,
+        "active_claim": null,
+        "latest_handoff": null,
+        "verification_receipt": null,
+        "created_at_epoch_ms": 1793948510731,
+        "updated_at_epoch_ms": 1793948510731
+      },
+      "captured_by_agent": "cline",
+      "discovered_from_task_id": null
+    },
+    {
+      "event": "task_updated",
+      "task_id": "bf05670b-b62d-4abd-bf37-a163a8080c3b",
+      "title": null,
+      "description": "Observed 2026-11-06 across roughly twenty build invocations: every 'cargo check --workspace --all-targets' exceeded the 30s tool window and had to be backgrounded and polled, burning two or three turns per build. Tier 1 in AGENTS.md prescribes cargo check -p <crate>; miter verify already exists for exactly this shape of problem and returns sliced diagnostics with zero build scrollback. Worth doing: measure miter verify cold and warm against cargo check on a real crate, and if it wins, rewrite Tier 1 in AGENTS.md to name it, with cargo as the fallback. It also sidesteps the shared build-lock stall in GB-236 better than polling a log.\n\nSCOPE CLARIFIED 2026-11-06 (owner): storypole verify --compiler already shells out to `miter verify` (storypole-core/src/ops/verification/mod.rs:48 via run_miter_verify), so miter verify IS already trusted for the closing gate and the receipt records the diagnostic count. That does not cover Tier 1, which is the inner loop DURING development: storypole verify needs a task that is InProgress and resolves its target from the ticket scope, so it cannot answer \"did my last edit compile\" mid-change. The gap is exactly two things - the documented inner-loop command, and speed. Measure `miter verify --path <crate> --json` cold and warm against `cargo check -p <crate>`; if it wins, Tier 1 in AGENTS.md should name it with cargo as the fallback.",
+      "priority": null,
+      "scope": null,
+      "acceptance_criteria": null,
+      "timestamp_ms": 1793949391687
+    }
+  ]
+}
