@@ -108,9 +108,18 @@ pub enum Command {
         #[arg(long)]
         db: Option<PathBuf>,
     },
-    /// Scan workspace source files to flag files exceeding line-count thresholds.
+    /// Audit the workspace and **exit non-zero** on what it finds.
+    ///
+    /// Every repository's verification chain gates on this command's exit code, so it is a check that prints a
+    /// report rather than a report that happens to run. `--paths` adds the policy gates: the 250-line limit, the
+    /// rule that a crate naming `.gaugeblock` must depend on `gaugeblock-workspace`, and the rule that a crate
+    /// resolving the suite must have a multi-repository test.
+    ///
+    /// `miter verify` is a different thing: isolated compiler verification of one crate, used by `storypole
+    /// verify` to produce a receipt. It gates nothing in the chains.
     Audit {
-        /// Also fail when a crate names `.gaugeblock` without depending on `gaugeblock-workspace`.
+        /// Add the policy gates: layout adoption (a crate naming `.gaugeblock` must depend on
+        /// `gaugeblock-workspace`) and the multi-repository test requirement.
         #[arg(long)]
         paths: bool,
         /// Target root directory to audit (defaults to current workspace).
