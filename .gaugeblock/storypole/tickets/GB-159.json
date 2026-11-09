@@ -1,0 +1,71 @@
+{
+  "ticket": {
+    "id": "6a9cb9e9-5db5-4c5a-bb4a-9905df360b2a",
+    "ticket_key": "GB-159",
+    "slug": "feature-gate-miter-engine-s-heavy-subsystems-so-inventory-only-consumers-stop-linking-the-analysis-stack-6a9cb9",
+    "title": "Feature gate miter-engine's heavy subsystems so inventory-only consumers stop linking the analysis stack",
+    "description": "Measured with cargo tree: every consumer already reaches miter-engine transitively through chalkline-core (dado 434 crates via chalkline, batten 434, joiner 483, rabbet 591; engine subtree 165). So repointing dado/batten to a lighter crate removes nothing - GB-157 as scoped has zero dependency and zero compile-time effect and should be rescoped or closed. The edge worth cutting is chalkline-core's use of inspect_workspace: the whole inventory module references no sibling module and none of redb, sqlparser, hcl, dockerfile-parser, serde_yaml, globset or rayon, yet it lives in the crate that pulls all eight. Cheapest lever is feature gating - make storage, the declarative parsers and rayon non-default features so a consumer can take miter-engine with default-features = false plus inventory and language - which needs no new crates; extracting miter-inventory is the cleaner but larger alternative.",
+    "kind": "tech_debt",
+    "status": "triage",
+    "priority": 3,
+    "scope": {
+      "repo": null,
+      "crate_name": "miter-engine",
+      "module_path": null,
+      "target_files": [
+        "miter/crates/engine/Cargo.toml,miter/crates/engine/src/inventory,miter/crates/engine/src/lib.rs"
+      ],
+      "target_symbols": [
+        "miter_engine::inspect_workspace"
+      ],
+      "labels": []
+    },
+    "edges": [],
+    "decisions": [],
+    "acceptance_criteria": [],
+    "plan": null,
+    "active_claim": null,
+    "latest_handoff": null,
+    "verification_receipt": null,
+    "created_at_epoch_ms": 1793248191804,
+    "updated_at_epoch_ms": 1793248191804
+  },
+  "events": [
+    {
+      "event": "deferred_item_captured",
+      "task": {
+        "id": "6a9cb9e9-5db5-4c5a-bb4a-9905df360b2a",
+        "ticket_key": "GB-159",
+        "slug": "feature-gate-miter-engine-s-heavy-subsystems-so-inventory-only-consumers-stop-linking-the-analysis-stack-6a9cb9",
+        "title": "Feature gate miter-engine's heavy subsystems so inventory-only consumers stop linking the analysis stack",
+        "description": "Measured with cargo tree: every consumer already reaches miter-engine transitively through chalkline-core (dado 434 crates via chalkline, batten 434, joiner 483, rabbet 591; engine subtree 165). So repointing dado/batten to a lighter crate removes nothing - GB-157 as scoped has zero dependency and zero compile-time effect and should be rescoped or closed. The edge worth cutting is chalkline-core's use of inspect_workspace: the whole inventory module references no sibling module and none of redb, sqlparser, hcl, dockerfile-parser, serde_yaml, globset or rayon, yet it lives in the crate that pulls all eight. Cheapest lever is feature gating - make storage, the declarative parsers and rayon non-default features so a consumer can take miter-engine with default-features = false plus inventory and language - which needs no new crates; extracting miter-inventory is the cleaner but larger alternative.",
+        "kind": "tech_debt",
+        "status": "triage",
+        "priority": 3,
+        "scope": {
+          "repo": null,
+          "crate_name": "miter-engine",
+          "module_path": null,
+          "target_files": [
+            "miter/crates/engine/Cargo.toml,miter/crates/engine/src/inventory,miter/crates/engine/src/lib.rs"
+          ],
+          "target_symbols": [
+            "miter_engine::inspect_workspace"
+          ],
+          "labels": []
+        },
+        "edges": [],
+        "decisions": [],
+        "acceptance_criteria": [],
+        "plan": null,
+        "active_claim": null,
+        "latest_handoff": null,
+        "verification_receipt": null,
+        "created_at_epoch_ms": 1793248191804,
+        "updated_at_epoch_ms": 1793248191804
+      },
+      "captured_by_agent": "cline",
+      "discovered_from_task_id": null
+    }
+  ]
+}

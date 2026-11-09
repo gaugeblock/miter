@@ -1,0 +1,67 @@
+{
+  "ticket": {
+    "id": "4a3fd8e1-629b-4ae9-b212-bb9e1dcb1f3d",
+    "ticket_key": "GB-163",
+    "slug": "miter-deps-tier-3-feature-inventory-per-feature-cost-estimates-and-dead-feature-detection-4a3fd8",
+    "title": "miter deps tier 3: feature inventory, per-feature cost estimates and dead feature detection",
+    "description": "Tier 3 of miter deps, deferred until the GB-160 audit proves features are the right mechanism for a given case. (1) --features: per feature, the gated items (#[cfg(feature)] sites), the optional dependencies it unlocks, and who enables it - the feature-unification blame that cargo still explains poorly. (2) --feature-cost <name>: the estimated tree delta of default-features = false from the intersection of optional dependencies and gated items, labelled an estimate because it is not a build. (3) --dead-features: features declared with no gated item and gated items with no feature, catching both halves of drift. Explicitly must not pretend to compile feature combinations - cargo hack owns that. Depends on GB-161.",
+    "kind": "feature",
+    "status": "deferred",
+    "priority": 3,
+    "scope": {
+      "repo": null,
+      "crate_name": "miter-engine",
+      "module_path": null,
+      "target_files": [],
+      "target_symbols": [
+        "miter_cli"
+      ],
+      "labels": []
+    },
+    "edges": [],
+    "decisions": [],
+    "acceptance_criteria": [],
+    "plan": null,
+    "active_claim": null,
+    "latest_handoff": null,
+    "verification_receipt": null,
+    "created_at_epoch_ms": 1793250777494,
+    "updated_at_epoch_ms": 1793250777494
+  },
+  "events": [
+    {
+      "event": "deferred_item_captured",
+      "task": {
+        "id": "4a3fd8e1-629b-4ae9-b212-bb9e1dcb1f3d",
+        "ticket_key": "GB-163",
+        "slug": "miter-deps-tier-3-feature-inventory-per-feature-cost-estimates-and-dead-feature-detection-4a3fd8",
+        "title": "miter deps tier 3: feature inventory, per-feature cost estimates and dead feature detection",
+        "description": "Tier 3 of miter deps, deferred until the GB-160 audit proves features are the right mechanism for a given case. (1) --features: per feature, the gated items (#[cfg(feature)] sites), the optional dependencies it unlocks, and who enables it - the feature-unification blame that cargo still explains poorly. (2) --feature-cost <name>: the estimated tree delta of default-features = false from the intersection of optional dependencies and gated items, labelled an estimate because it is not a build. (3) --dead-features: features declared with no gated item and gated items with no feature, catching both halves of drift. Explicitly must not pretend to compile feature combinations - cargo hack owns that. Depends on GB-161.",
+        "kind": "feature",
+        "status": "deferred",
+        "priority": 3,
+        "scope": {
+          "repo": null,
+          "crate_name": "miter-engine",
+          "module_path": null,
+          "target_files": [],
+          "target_symbols": [
+            "miter_cli"
+          ],
+          "labels": []
+        },
+        "edges": [],
+        "decisions": [],
+        "acceptance_criteria": [],
+        "plan": null,
+        "active_claim": null,
+        "latest_handoff": null,
+        "verification_receipt": null,
+        "created_at_epoch_ms": 1793250777494,
+        "updated_at_epoch_ms": 1793250777494
+      },
+      "captured_by_agent": "cline",
+      "discovered_from_task_id": null
+    }
+  ]
+}

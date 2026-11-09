@@ -1,0 +1,478 @@
+{
+  "ticket": {
+    "id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+    "ticket_key": "GB-203",
+    "slug": "split-miter-engine-into-miter-polyglot-miter-inventory-and-miter-analysis-with-engine-as-facade-9296fd",
+    "title": "Split miter-engine into miter-polyglot, miter-inventory and miter-analysis with engine as facade",
+    "description": "Phase B1 of GB-200. miter-engine is 15,776 LOC with 21 of the suite 70 band files and 12 dependents, and it currently holds four unrelated jobs: language visitors and grammar glue (polyglot, markdown, html, typescript modules), analysis (audit, clones, contracts, cycles, deps, hygiene, impact, references, skeleton, slice), inventory (cargo_parser, clap_extractor, git_extractor, public_types_extractor, toolchain_extractor) and the security redaction that joiner consumes on its own. Consumers import thin slices - joiner needs security::scrub_source_text and nothing else - which is exactly the split seam, and it is also what makes feature gating tractable instead of a combinatorial exercise. Target three crates of at most about 5k LOC each plus engine as the facade that re-exports them, so no consumer path changes.",
+    "kind": "refactor",
+    "status": "verified",
+    "priority": 1,
+    "scope": {
+      "repo": null,
+      "crate_name": "miter-engine",
+      "module_path": null,
+      "target_files": [
+        "miter/crates/engine/src/lib.rs",
+        "miter/crates/polyglot/Cargo.toml",
+        "miter/crates/inventory/Cargo.toml",
+        "miter/crates/analysis/Cargo.toml"
+      ],
+      "target_symbols": [],
+      "labels": []
+    },
+    "edges": [
+      {
+        "kind": "parent_epic",
+        "target_id": "bb69af13-9c35-438c-befc-82013dba8579",
+        "target_ticket_key": "GB-200"
+      },
+      {
+        "kind": "blocked_by",
+        "target_id": "1be1907f-adbe-458a-8c64-9c965144f2e5",
+        "target_ticket_key": "GB-202"
+      },
+      {
+        "kind": "related_to",
+        "target_id": "272e2f4a-b035-4516-8cb0-096c6c8cf71d",
+        "target_ticket_key": "GB-195"
+      },
+      {
+        "kind": "related_to",
+        "target_id": "6a9cb9e9-5db5-4c5a-bb4a-9905df360b2a",
+        "target_ticket_key": "GB-159"
+      }
+    ],
+    "decisions": [],
+    "acceptance_criteria": [
+      "miter-engine re-exports the three crates and no consumer import breaks",
+      "No new crate exceeds roughly 5k LOC and no file exceeds 250 lines",
+      "miter-engine has zero files in the 200-250 band after the sweep",
+      "cargo nextest --workspace stays green in miter at every commit in the series"
+    ],
+    "plan": {
+      "summary": "GB-203 — split miter-engine into polyglot, inventory and analysis",
+      "design_markdown": "# GB-203 — split miter-engine into polyglot, inventory and analysis\n\nEvidence gathered for GB-160 (\"evidence before any further crate extraction\"), 2026-10-31.\n\n## Measured inventory (126 files, ~9.3k lines)\n\n| subsystem | lines | files |\n|:--|--:|--:|\n| polyglot | 2488 | 17 |\n| analysis | 2346 | 16 |\n| inventory | 1046 | 10 |\n| hydrate | 960 | 7 |\n| codec | 742 | 5 |\n| security | 599 | 3 |\n| store | 406 | 4 |\n| ingest | 317 | 3 |\n| root files (lib, config, persist) | 376 | 3 |\n\n## Which dependency belongs to which subsystem (files mentioning it)\n\n| dep | polyglot | analysis | inventory | other |\n|:--|--:|--:|--:|:--|\n| tree_sitter | 6 | 9 | 0 | — |\n| sqlparser | 1 | 1 | 0 | — |\n| hcl | 4 | 0 | 0 | — |\n| dockerfile_parser | 2 | 1 | 0 | — |\n| serde_yaml | 4 | 0 | 0 | — |\n| globset | 0 | 1 | 0 | — |\n| rayon | 0 | 0 | 0 | store=1, ingest=1 |\n| redb | 1 | 5 | 0 | codec=1, store=1 |\n\nThree findings that shape the split:\n\n1. **`tree_sitter` spans polyglot (6) and analysis (9).** So `miter-analysis` depends on `miter-polyglot`: a\ndownward edge, which satisfies the layer rule rather than violating it. The split order therefore has to be\npolyglot first, analysis second.\n2. **The language parsers are polyglot's alone**: hcl, serde_yaml, dockerfile-parser and sqlparser appear\nalmost nowhere else. That is the heavy half of the crate by dependency weight, and it is already\nconcentrated.\n3. **`redb` in `analysis` is not a coupling to freeze in**: the hits are store-coupled convenience wrappers\n(`verify_contracts_from_store`, `analyze_hygiene(store)`) sitting beside pure cores\n(`verify_contracts_from_symbols`). The pure functions are what move to `miter-analysis`; the wrappers stay\nbehind in the facade, which is what a facade is for.\n\n## Proposed shape\n\n- `miter-polyglot`: language extraction and the universal symbol model. Owns tree_sitter, sqlparser, hcl,\ndockerfile-parser, serde_yaml. Leaf crate.\n- `miter-analysis`: pure passes over symbols (contracts, cycles, clones, hygiene, impact, deps). Depends on\n`miter-polyglot`. No storage dependency once the wrappers stay behind.\n- `miter-inventory`: file walking and AST inventory. Parser-free today (no tree_sitter hits), so it can move\nwithout pulling the language stack.\n- `miter-engine` stays as the facade: hydrate, codec, store, persist, ingest, security, and the\n`*_from_store` entry points, re-exporting the three crates so no caller changes a path.\n\n## Sequencing\n\n1. `miter-polyglot` (leaf, no in-crate edges) — move, re-export from engine, gate.\n2. `miter-analysis` (depends on polyglot) — move pure passes, keep wrappers, gate.\n3. `miter-inventory` — move, gate.\n4. Delete the now-empty modules from engine and confirm the re-exports still satisfy every caller.\n\n## Open risk\n\n`rayon` appears only in `store` and `ingest`, not in `analysis`, which is the opposite of where parallel\nanalysis would be expected. Worth a look before the split so the dependency does not end up on the wrong\nside of it.\n",
+      "steps": [
+        {
+          "step_id": "polyglot",
+          "title": "Extract miter-polyglot and re-export it from engine",
+          "target_files": [],
+          "verification_gate": "cargo nextest run --workspace",
+          "completed": true
+        },
+        {
+          "step_id": "analysis",
+          "title": "Extract miter-analysis with pure passes, wrappers left behind",
+          "target_files": [],
+          "verification_gate": "cargo nextest run --workspace",
+          "completed": true
+        },
+        {
+          "step_id": "inventory",
+          "title": "Extract miter-inventory",
+          "target_files": [],
+          "verification_gate": "cargo nextest run --workspace",
+          "completed": true
+        },
+        {
+          "step_id": "facade",
+          "title": "Delete the emptied modules and prove every caller still resolves",
+          "target_files": [],
+          "verification_gate": "miter contracts --check && outfeed gate",
+          "completed": true
+        }
+      ],
+      "plan_file_path": ".gaugeblock/storypole/plans/GB-203.md",
+      "updated_at_epoch_ms": 1793472716055
+    },
+    "active_claim": null,
+    "latest_handoff": null,
+    "verification_receipt": {
+      "verifier": "manual",
+      "command": "n/a",
+      "exit_code": 0,
+      "diagnostic_count": null,
+      "summary": "Manual verification confirmed",
+      "verified_at_epoch_ms": 1793472716182,
+      "git_branch": "main",
+      "base_commit_sha": "e5897cfeeaac8f01d5121c424f9021d99d09d7d3",
+      "head_commit_sha": "e5897cfeeaac8f01d5121c424f9021d99d09d7d3",
+      "commit_shas": [
+        "e5897cfeeaac8f01d5121c424f9021d99d09d7d3"
+      ],
+      "repo": null,
+      "chain_key": null
+    },
+    "created_at_epoch_ms": 1793330756075,
+    "updated_at_epoch_ms": 1794037984343,
+    "archived_at_epoch_ms": 1794037984343
+  },
+  "events": [
+    {
+      "event": "task_created",
+      "task": {
+        "id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+        "ticket_key": "GB-203",
+        "slug": "split-miter-engine-into-miter-polyglot-miter-inventory-and-miter-analysis-with-engine-as-facade-9296fd",
+        "title": "Split miter-engine into miter-polyglot, miter-inventory and miter-analysis with engine as facade",
+        "description": "Phase B1 of GB-200. miter-engine is 15,776 LOC with 21 of the suite 70 band files and 12 dependents, and it currently holds four unrelated jobs: language visitors and grammar glue (polyglot, markdown, html, typescript modules), analysis (audit, clones, contracts, cycles, deps, hygiene, impact, references, skeleton, slice), inventory (cargo_parser, clap_extractor, git_extractor, public_types_extractor, toolchain_extractor) and the security redaction that joiner consumes on its own. Consumers import thin slices - joiner needs security::scrub_source_text and nothing else - which is exactly the split seam, and it is also what makes feature gating tractable instead of a combinatorial exercise. Target three crates of at most about 5k LOC each plus engine as the facade that re-exports them, so no consumer path changes.",
+        "kind": "refactor",
+        "status": "ready",
+        "priority": 1,
+        "scope": {
+          "repo": null,
+          "crate_name": "miter-engine",
+          "module_path": null,
+          "target_files": [
+            "miter/crates/engine/src/lib.rs",
+            "miter/crates/polyglot/Cargo.toml",
+            "miter/crates/inventory/Cargo.toml",
+            "miter/crates/analysis/Cargo.toml"
+          ],
+          "target_symbols": [],
+          "labels": []
+        },
+        "edges": [],
+        "decisions": [],
+        "acceptance_criteria": [
+          "miter-engine re-exports the three crates and no consumer import breaks",
+          "No new crate exceeds roughly 5k LOC and no file exceeds 250 lines",
+          "miter-engine has zero files in the 200-250 band after the sweep",
+          "cargo nextest --workspace stays green in miter at every commit in the series"
+        ],
+        "plan": null,
+        "active_claim": null,
+        "latest_handoff": null,
+        "verification_receipt": null,
+        "created_at_epoch_ms": 1793330756075,
+        "updated_at_epoch_ms": 1793330756075
+      }
+    },
+    {
+      "event": "edge_added",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "edge": {
+        "kind": "parent_epic",
+        "target_id": "bb69af13-9c35-438c-befc-82013dba8579",
+        "target_ticket_key": "GB-200"
+      },
+      "timestamp_ms": 1793330765746
+    },
+    {
+      "event": "edge_added",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "edge": {
+        "kind": "blocked_by",
+        "target_id": "1be1907f-adbe-458a-8c64-9c965144f2e5",
+        "target_ticket_key": "GB-202"
+      },
+      "timestamp_ms": 1793330768097
+    },
+    {
+      "event": "status_changed",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "from": "ready",
+      "to": "blocked",
+      "reason": "Blocked by unverified task GB-202",
+      "timestamp_ms": 1793330768097
+    },
+    {
+      "event": "edge_added",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "edge": {
+        "kind": "related_to",
+        "target_id": "272e2f4a-b035-4516-8cb0-096c6c8cf71d",
+        "target_ticket_key": "GB-195"
+      },
+      "timestamp_ms": 1793330770828
+    },
+    {
+      "event": "edge_added",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "edge": {
+        "kind": "related_to",
+        "target_id": "6a9cb9e9-5db5-4c5a-bb4a-9905df360b2a",
+        "target_ticket_key": "GB-159"
+      },
+      "timestamp_ms": 1793330771204
+    },
+    {
+      "event": "status_changed",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "from": "blocked",
+      "to": "ready",
+      "reason": "Dependency GB-202 verified",
+      "timestamp_ms": 1793368169304
+    },
+    {
+      "event": "plan_updated",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "plan": {
+        "summary": "GB-203 — split miter-engine into polyglot, inventory and analysis",
+        "design_markdown": "# GB-203 — split miter-engine into polyglot, inventory and analysis\n\nEvidence gathered for GB-160 (\"evidence before any further crate extraction\"), 2026-10-31.\n\n## Measured inventory (126 files, ~9.3k lines)\n\n| subsystem | lines | files |\n|:--|--:|--:|\n| polyglot | 2488 | 17 |\n| analysis | 2346 | 16 |\n| inventory | 1046 | 10 |\n| hydrate | 960 | 7 |\n| codec | 742 | 5 |\n| security | 599 | 3 |\n| store | 406 | 4 |\n| ingest | 317 | 3 |\n| root files (lib, config, persist) | 376 | 3 |\n\n## Which dependency belongs to which subsystem (files mentioning it)\n\n| dep | polyglot | analysis | inventory | other |\n|:--|--:|--:|--:|:--|\n| tree_sitter | 6 | 9 | 0 | — |\n| sqlparser | 1 | 1 | 0 | — |\n| hcl | 4 | 0 | 0 | — |\n| dockerfile_parser | 2 | 1 | 0 | — |\n| serde_yaml | 4 | 0 | 0 | — |\n| globset | 0 | 1 | 0 | — |\n| rayon | 0 | 0 | 0 | store=1, ingest=1 |\n| redb | 1 | 5 | 0 | codec=1, store=1 |\n\nThree findings that shape the split:\n\n1. **`tree_sitter` spans polyglot (6) and analysis (9).** So `miter-analysis` depends on `miter-polyglot`: a\ndownward edge, which satisfies the layer rule rather than violating it. The split order therefore has to be\npolyglot first, analysis second.\n2. **The language parsers are polyglot's alone**: hcl, serde_yaml, dockerfile-parser and sqlparser appear\nalmost nowhere else. That is the heavy half of the crate by dependency weight, and it is already\nconcentrated.\n3. **`redb` in `analysis` is not a coupling to freeze in**: the hits are store-coupled convenience wrappers\n(`verify_contracts_from_store`, `analyze_hygiene(store)`) sitting beside pure cores\n(`verify_contracts_from_symbols`). The pure functions are what move to `miter-analysis`; the wrappers stay\nbehind in the facade, which is what a facade is for.\n\n## Proposed shape\n\n- `miter-polyglot`: language extraction and the universal symbol model. Owns tree_sitter, sqlparser, hcl,\ndockerfile-parser, serde_yaml. Leaf crate.\n- `miter-analysis`: pure passes over symbols (contracts, cycles, clones, hygiene, impact, deps). Depends on\n`miter-polyglot`. No storage dependency once the wrappers stay behind.\n- `miter-inventory`: file walking and AST inventory. Parser-free today (no tree_sitter hits), so it can move\nwithout pulling the language stack.\n- `miter-engine` stays as the facade: hydrate, codec, store, persist, ingest, security, and the\n`*_from_store` entry points, re-exporting the three crates so no caller changes a path.\n\n## Sequencing\n\n1. `miter-polyglot` (leaf, no in-crate edges) — move, re-export from engine, gate.\n2. `miter-analysis` (depends on polyglot) — move pure passes, keep wrappers, gate.\n3. `miter-inventory` — move, gate.\n4. Delete the now-empty modules from engine and confirm the re-exports still satisfy every caller.\n\n## Open risk\n\n`rayon` appears only in `store` and `ingest`, not in `analysis`, which is the opposite of where parallel\nanalysis would be expected. Worth a look before the split so the dependency does not end up on the wrong\nside of it.\n",
+        "steps": [
+          {
+            "step_id": "polyglot",
+            "title": "Extract miter-polyglot and re-export it from engine",
+            "target_files": [],
+            "verification_gate": "cargo nextest run --workspace",
+            "completed": false
+          },
+          {
+            "step_id": "analysis",
+            "title": "Extract miter-analysis with pure passes, wrappers left behind",
+            "target_files": [],
+            "verification_gate": "cargo nextest run --workspace",
+            "completed": false
+          },
+          {
+            "step_id": "inventory",
+            "title": "Extract miter-inventory",
+            "target_files": [],
+            "verification_gate": "cargo nextest run --workspace",
+            "completed": false
+          },
+          {
+            "step_id": "facade",
+            "title": "Delete the emptied modules and prove every caller still resolves",
+            "target_files": [],
+            "verification_gate": "miter contracts --check && outfeed gate",
+            "completed": false
+          }
+        ],
+        "plan_file_path": ".gaugeblock/storypole/plans/GB-203.md",
+        "updated_at_epoch_ms": 1793470751296
+      },
+      "timestamp_ms": 1793470751296
+    },
+    {
+      "event": "task_claimed",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "claim": {
+        "agent_id": "cline",
+        "claimed_at_epoch_ms": 1793471407888,
+        "lease_expires_at_epoch_ms": 1793475007888,
+        "git_branch": null,
+        "base_commit_sha": null
+      }
+    },
+    {
+      "event": "status_changed",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "from": "ready",
+      "to": "in_progress",
+      "reason": "Claimed by cline",
+      "timestamp_ms": 1793471407888
+    },
+    {
+      "event": "plan_updated",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "plan": {
+        "summary": "GB-203 — split miter-engine into polyglot, inventory and analysis",
+        "design_markdown": "# GB-203 — split miter-engine into polyglot, inventory and analysis\n\nEvidence gathered for GB-160 (\"evidence before any further crate extraction\"), 2026-10-31.\n\n## Measured inventory (126 files, ~9.3k lines)\n\n| subsystem | lines | files |\n|:--|--:|--:|\n| polyglot | 2488 | 17 |\n| analysis | 2346 | 16 |\n| inventory | 1046 | 10 |\n| hydrate | 960 | 7 |\n| codec | 742 | 5 |\n| security | 599 | 3 |\n| store | 406 | 4 |\n| ingest | 317 | 3 |\n| root files (lib, config, persist) | 376 | 3 |\n\n## Which dependency belongs to which subsystem (files mentioning it)\n\n| dep | polyglot | analysis | inventory | other |\n|:--|--:|--:|--:|:--|\n| tree_sitter | 6 | 9 | 0 | — |\n| sqlparser | 1 | 1 | 0 | — |\n| hcl | 4 | 0 | 0 | — |\n| dockerfile_parser | 2 | 1 | 0 | — |\n| serde_yaml | 4 | 0 | 0 | — |\n| globset | 0 | 1 | 0 | — |\n| rayon | 0 | 0 | 0 | store=1, ingest=1 |\n| redb | 1 | 5 | 0 | codec=1, store=1 |\n\nThree findings that shape the split:\n\n1. **`tree_sitter` spans polyglot (6) and analysis (9).** So `miter-analysis` depends on `miter-polyglot`: a\ndownward edge, which satisfies the layer rule rather than violating it. The split order therefore has to be\npolyglot first, analysis second.\n2. **The language parsers are polyglot's alone**: hcl, serde_yaml, dockerfile-parser and sqlparser appear\nalmost nowhere else. That is the heavy half of the crate by dependency weight, and it is already\nconcentrated.\n3. **`redb` in `analysis` is not a coupling to freeze in**: the hits are store-coupled convenience wrappers\n(`verify_contracts_from_store`, `analyze_hygiene(store)`) sitting beside pure cores\n(`verify_contracts_from_symbols`). The pure functions are what move to `miter-analysis`; the wrappers stay\nbehind in the facade, which is what a facade is for.\n\n## Proposed shape\n\n- `miter-polyglot`: language extraction and the universal symbol model. Owns tree_sitter, sqlparser, hcl,\ndockerfile-parser, serde_yaml. Leaf crate.\n- `miter-analysis`: pure passes over symbols (contracts, cycles, clones, hygiene, impact, deps). Depends on\n`miter-polyglot`. No storage dependency once the wrappers stay behind.\n- `miter-inventory`: file walking and AST inventory. Parser-free today (no tree_sitter hits), so it can move\nwithout pulling the language stack.\n- `miter-engine` stays as the facade: hydrate, codec, store, persist, ingest, security, and the\n`*_from_store` entry points, re-exporting the three crates so no caller changes a path.\n\n## Sequencing\n\n1. `miter-polyglot` (leaf, no in-crate edges) — move, re-export from engine, gate.\n2. `miter-analysis` (depends on polyglot) — move pure passes, keep wrappers, gate.\n3. `miter-inventory` — move, gate.\n4. Delete the now-empty modules from engine and confirm the re-exports still satisfy every caller.\n\n## Open risk\n\n`rayon` appears only in `store` and `ingest`, not in `analysis`, which is the opposite of where parallel\nanalysis would be expected. Worth a look before the split so the dependency does not end up on the wrong\nside of it.\n",
+        "steps": [
+          {
+            "step_id": "polyglot",
+            "title": "Extract miter-polyglot and re-export it from engine",
+            "target_files": [],
+            "verification_gate": "cargo nextest run --workspace",
+            "completed": true
+          },
+          {
+            "step_id": "analysis",
+            "title": "Extract miter-analysis with pure passes, wrappers left behind",
+            "target_files": [],
+            "verification_gate": "cargo nextest run --workspace",
+            "completed": false
+          },
+          {
+            "step_id": "inventory",
+            "title": "Extract miter-inventory",
+            "target_files": [],
+            "verification_gate": "cargo nextest run --workspace",
+            "completed": false
+          },
+          {
+            "step_id": "facade",
+            "title": "Delete the emptied modules and prove every caller still resolves",
+            "target_files": [],
+            "verification_gate": "miter contracts --check && outfeed gate",
+            "completed": false
+          }
+        ],
+        "plan_file_path": ".gaugeblock/storypole/plans/GB-203.md",
+        "updated_at_epoch_ms": 1793471408395
+      },
+      "timestamp_ms": 1793471408395
+    },
+    {
+      "event": "plan_updated",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "plan": {
+        "summary": "GB-203 — split miter-engine into polyglot, inventory and analysis",
+        "design_markdown": "# GB-203 — split miter-engine into polyglot, inventory and analysis\n\nEvidence gathered for GB-160 (\"evidence before any further crate extraction\"), 2026-10-31.\n\n## Measured inventory (126 files, ~9.3k lines)\n\n| subsystem | lines | files |\n|:--|--:|--:|\n| polyglot | 2488 | 17 |\n| analysis | 2346 | 16 |\n| inventory | 1046 | 10 |\n| hydrate | 960 | 7 |\n| codec | 742 | 5 |\n| security | 599 | 3 |\n| store | 406 | 4 |\n| ingest | 317 | 3 |\n| root files (lib, config, persist) | 376 | 3 |\n\n## Which dependency belongs to which subsystem (files mentioning it)\n\n| dep | polyglot | analysis | inventory | other |\n|:--|--:|--:|--:|:--|\n| tree_sitter | 6 | 9 | 0 | — |\n| sqlparser | 1 | 1 | 0 | — |\n| hcl | 4 | 0 | 0 | — |\n| dockerfile_parser | 2 | 1 | 0 | — |\n| serde_yaml | 4 | 0 | 0 | — |\n| globset | 0 | 1 | 0 | — |\n| rayon | 0 | 0 | 0 | store=1, ingest=1 |\n| redb | 1 | 5 | 0 | codec=1, store=1 |\n\nThree findings that shape the split:\n\n1. **`tree_sitter` spans polyglot (6) and analysis (9).** So `miter-analysis` depends on `miter-polyglot`: a\ndownward edge, which satisfies the layer rule rather than violating it. The split order therefore has to be\npolyglot first, analysis second.\n2. **The language parsers are polyglot's alone**: hcl, serde_yaml, dockerfile-parser and sqlparser appear\nalmost nowhere else. That is the heavy half of the crate by dependency weight, and it is already\nconcentrated.\n3. **`redb` in `analysis` is not a coupling to freeze in**: the hits are store-coupled convenience wrappers\n(`verify_contracts_from_store`, `analyze_hygiene(store)`) sitting beside pure cores\n(`verify_contracts_from_symbols`). The pure functions are what move to `miter-analysis`; the wrappers stay\nbehind in the facade, which is what a facade is for.\n\n## Proposed shape\n\n- `miter-polyglot`: language extraction and the universal symbol model. Owns tree_sitter, sqlparser, hcl,\ndockerfile-parser, serde_yaml. Leaf crate.\n- `miter-analysis`: pure passes over symbols (contracts, cycles, clones, hygiene, impact, deps). Depends on\n`miter-polyglot`. No storage dependency once the wrappers stay behind.\n- `miter-inventory`: file walking and AST inventory. Parser-free today (no tree_sitter hits), so it can move\nwithout pulling the language stack.\n- `miter-engine` stays as the facade: hydrate, codec, store, persist, ingest, security, and the\n`*_from_store` entry points, re-exporting the three crates so no caller changes a path.\n\n## Sequencing\n\n1. `miter-polyglot` (leaf, no in-crate edges) — move, re-export from engine, gate.\n2. `miter-analysis` (depends on polyglot) — move pure passes, keep wrappers, gate.\n3. `miter-inventory` — move, gate.\n4. Delete the now-empty modules from engine and confirm the re-exports still satisfy every caller.\n\n## Open risk\n\n`rayon` appears only in `store` and `ingest`, not in `analysis`, which is the opposite of where parallel\nanalysis would be expected. Worth a look before the split so the dependency does not end up on the wrong\nside of it.\n",
+        "steps": [
+          {
+            "step_id": "polyglot",
+            "title": "Extract miter-polyglot and re-export it from engine",
+            "target_files": [],
+            "verification_gate": "cargo nextest run --workspace",
+            "completed": true
+          },
+          {
+            "step_id": "analysis",
+            "title": "Extract miter-analysis with pure passes, wrappers left behind",
+            "target_files": [],
+            "verification_gate": "cargo nextest run --workspace",
+            "completed": true
+          },
+          {
+            "step_id": "inventory",
+            "title": "Extract miter-inventory",
+            "target_files": [],
+            "verification_gate": "cargo nextest run --workspace",
+            "completed": false
+          },
+          {
+            "step_id": "facade",
+            "title": "Delete the emptied modules and prove every caller still resolves",
+            "target_files": [],
+            "verification_gate": "miter contracts --check && outfeed gate",
+            "completed": false
+          }
+        ],
+        "plan_file_path": ".gaugeblock/storypole/plans/GB-203.md",
+        "updated_at_epoch_ms": 1793472076387
+      },
+      "timestamp_ms": 1793472076387
+    },
+    {
+      "event": "plan_updated",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "plan": {
+        "summary": "GB-203 — split miter-engine into polyglot, inventory and analysis",
+        "design_markdown": "# GB-203 — split miter-engine into polyglot, inventory and analysis\n\nEvidence gathered for GB-160 (\"evidence before any further crate extraction\"), 2026-10-31.\n\n## Measured inventory (126 files, ~9.3k lines)\n\n| subsystem | lines | files |\n|:--|--:|--:|\n| polyglot | 2488 | 17 |\n| analysis | 2346 | 16 |\n| inventory | 1046 | 10 |\n| hydrate | 960 | 7 |\n| codec | 742 | 5 |\n| security | 599 | 3 |\n| store | 406 | 4 |\n| ingest | 317 | 3 |\n| root files (lib, config, persist) | 376 | 3 |\n\n## Which dependency belongs to which subsystem (files mentioning it)\n\n| dep | polyglot | analysis | inventory | other |\n|:--|--:|--:|--:|:--|\n| tree_sitter | 6 | 9 | 0 | — |\n| sqlparser | 1 | 1 | 0 | — |\n| hcl | 4 | 0 | 0 | — |\n| dockerfile_parser | 2 | 1 | 0 | — |\n| serde_yaml | 4 | 0 | 0 | — |\n| globset | 0 | 1 | 0 | — |\n| rayon | 0 | 0 | 0 | store=1, ingest=1 |\n| redb | 1 | 5 | 0 | codec=1, store=1 |\n\nThree findings that shape the split:\n\n1. **`tree_sitter` spans polyglot (6) and analysis (9).** So `miter-analysis` depends on `miter-polyglot`: a\ndownward edge, which satisfies the layer rule rather than violating it. The split order therefore has to be\npolyglot first, analysis second.\n2. **The language parsers are polyglot's alone**: hcl, serde_yaml, dockerfile-parser and sqlparser appear\nalmost nowhere else. That is the heavy half of the crate by dependency weight, and it is already\nconcentrated.\n3. **`redb` in `analysis` is not a coupling to freeze in**: the hits are store-coupled convenience wrappers\n(`verify_contracts_from_store`, `analyze_hygiene(store)`) sitting beside pure cores\n(`verify_contracts_from_symbols`). The pure functions are what move to `miter-analysis`; the wrappers stay\nbehind in the facade, which is what a facade is for.\n\n## Proposed shape\n\n- `miter-polyglot`: language extraction and the universal symbol model. Owns tree_sitter, sqlparser, hcl,\ndockerfile-parser, serde_yaml. Leaf crate.\n- `miter-analysis`: pure passes over symbols (contracts, cycles, clones, hygiene, impact, deps). Depends on\n`miter-polyglot`. No storage dependency once the wrappers stay behind.\n- `miter-inventory`: file walking and AST inventory. Parser-free today (no tree_sitter hits), so it can move\nwithout pulling the language stack.\n- `miter-engine` stays as the facade: hydrate, codec, store, persist, ingest, security, and the\n`*_from_store` entry points, re-exporting the three crates so no caller changes a path.\n\n## Sequencing\n\n1. `miter-polyglot` (leaf, no in-crate edges) — move, re-export from engine, gate.\n2. `miter-analysis` (depends on polyglot) — move pure passes, keep wrappers, gate.\n3. `miter-inventory` — move, gate.\n4. Delete the now-empty modules from engine and confirm the re-exports still satisfy every caller.\n\n## Open risk\n\n`rayon` appears only in `store` and `ingest`, not in `analysis`, which is the opposite of where parallel\nanalysis would be expected. Worth a look before the split so the dependency does not end up on the wrong\nside of it.\n",
+        "steps": [
+          {
+            "step_id": "polyglot",
+            "title": "Extract miter-polyglot and re-export it from engine",
+            "target_files": [],
+            "verification_gate": "cargo nextest run --workspace",
+            "completed": true
+          },
+          {
+            "step_id": "analysis",
+            "title": "Extract miter-analysis with pure passes, wrappers left behind",
+            "target_files": [],
+            "verification_gate": "cargo nextest run --workspace",
+            "completed": true
+          },
+          {
+            "step_id": "inventory",
+            "title": "Extract miter-inventory",
+            "target_files": [],
+            "verification_gate": "cargo nextest run --workspace",
+            "completed": true
+          },
+          {
+            "step_id": "facade",
+            "title": "Delete the emptied modules and prove every caller still resolves",
+            "target_files": [],
+            "verification_gate": "miter contracts --check && outfeed gate",
+            "completed": false
+          }
+        ],
+        "plan_file_path": ".gaugeblock/storypole/plans/GB-203.md",
+        "updated_at_epoch_ms": 1793472632400
+      },
+      "timestamp_ms": 1793472632400
+    },
+    {
+      "event": "plan_updated",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "plan": {
+        "summary": "GB-203 — split miter-engine into polyglot, inventory and analysis",
+        "design_markdown": "# GB-203 — split miter-engine into polyglot, inventory and analysis\n\nEvidence gathered for GB-160 (\"evidence before any further crate extraction\"), 2026-10-31.\n\n## Measured inventory (126 files, ~9.3k lines)\n\n| subsystem | lines | files |\n|:--|--:|--:|\n| polyglot | 2488 | 17 |\n| analysis | 2346 | 16 |\n| inventory | 1046 | 10 |\n| hydrate | 960 | 7 |\n| codec | 742 | 5 |\n| security | 599 | 3 |\n| store | 406 | 4 |\n| ingest | 317 | 3 |\n| root files (lib, config, persist) | 376 | 3 |\n\n## Which dependency belongs to which subsystem (files mentioning it)\n\n| dep | polyglot | analysis | inventory | other |\n|:--|--:|--:|--:|:--|\n| tree_sitter | 6 | 9 | 0 | — |\n| sqlparser | 1 | 1 | 0 | — |\n| hcl | 4 | 0 | 0 | — |\n| dockerfile_parser | 2 | 1 | 0 | — |\n| serde_yaml | 4 | 0 | 0 | — |\n| globset | 0 | 1 | 0 | — |\n| rayon | 0 | 0 | 0 | store=1, ingest=1 |\n| redb | 1 | 5 | 0 | codec=1, store=1 |\n\nThree findings that shape the split:\n\n1. **`tree_sitter` spans polyglot (6) and analysis (9).** So `miter-analysis` depends on `miter-polyglot`: a\ndownward edge, which satisfies the layer rule rather than violating it. The split order therefore has to be\npolyglot first, analysis second.\n2. **The language parsers are polyglot's alone**: hcl, serde_yaml, dockerfile-parser and sqlparser appear\nalmost nowhere else. That is the heavy half of the crate by dependency weight, and it is already\nconcentrated.\n3. **`redb` in `analysis` is not a coupling to freeze in**: the hits are store-coupled convenience wrappers\n(`verify_contracts_from_store`, `analyze_hygiene(store)`) sitting beside pure cores\n(`verify_contracts_from_symbols`). The pure functions are what move to `miter-analysis`; the wrappers stay\nbehind in the facade, which is what a facade is for.\n\n## Proposed shape\n\n- `miter-polyglot`: language extraction and the universal symbol model. Owns tree_sitter, sqlparser, hcl,\ndockerfile-parser, serde_yaml. Leaf crate.\n- `miter-analysis`: pure passes over symbols (contracts, cycles, clones, hygiene, impact, deps). Depends on\n`miter-polyglot`. No storage dependency once the wrappers stay behind.\n- `miter-inventory`: file walking and AST inventory. Parser-free today (no tree_sitter hits), so it can move\nwithout pulling the language stack.\n- `miter-engine` stays as the facade: hydrate, codec, store, persist, ingest, security, and the\n`*_from_store` entry points, re-exporting the three crates so no caller changes a path.\n\n## Sequencing\n\n1. `miter-polyglot` (leaf, no in-crate edges) — move, re-export from engine, gate.\n2. `miter-analysis` (depends on polyglot) — move pure passes, keep wrappers, gate.\n3. `miter-inventory` — move, gate.\n4. Delete the now-empty modules from engine and confirm the re-exports still satisfy every caller.\n\n## Open risk\n\n`rayon` appears only in `store` and `ingest`, not in `analysis`, which is the opposite of where parallel\nanalysis would be expected. Worth a look before the split so the dependency does not end up on the wrong\nside of it.\n",
+        "steps": [
+          {
+            "step_id": "polyglot",
+            "title": "Extract miter-polyglot and re-export it from engine",
+            "target_files": [],
+            "verification_gate": "cargo nextest run --workspace",
+            "completed": true
+          },
+          {
+            "step_id": "analysis",
+            "title": "Extract miter-analysis with pure passes, wrappers left behind",
+            "target_files": [],
+            "verification_gate": "cargo nextest run --workspace",
+            "completed": true
+          },
+          {
+            "step_id": "inventory",
+            "title": "Extract miter-inventory",
+            "target_files": [],
+            "verification_gate": "cargo nextest run --workspace",
+            "completed": true
+          },
+          {
+            "step_id": "facade",
+            "title": "Delete the emptied modules and prove every caller still resolves",
+            "target_files": [],
+            "verification_gate": "miter contracts --check && outfeed gate",
+            "completed": true
+          }
+        ],
+        "plan_file_path": ".gaugeblock/storypole/plans/GB-203.md",
+        "updated_at_epoch_ms": 1793472716055
+      },
+      "timestamp_ms": 1793472716055
+    },
+    {
+      "event": "task_claimed",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "claim": {
+        "agent_id": "cline",
+        "claimed_at_epoch_ms": 1793472716121,
+        "lease_expires_at_epoch_ms": 1793476316121,
+        "git_branch": null,
+        "base_commit_sha": null
+      }
+    },
+    {
+      "event": "task_verified",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "receipt": {
+        "verifier": "manual",
+        "command": "n/a",
+        "exit_code": 0,
+        "diagnostic_count": null,
+        "summary": "Manual verification confirmed",
+        "verified_at_epoch_ms": 1793472716182,
+        "git_branch": "main",
+        "base_commit_sha": "e5897cfeeaac8f01d5121c424f9021d99d09d7d3",
+        "head_commit_sha": "e5897cfeeaac8f01d5121c424f9021d99d09d7d3",
+        "commit_shas": [
+          "e5897cfeeaac8f01d5121c424f9021d99d09d7d3"
+        ],
+        "repo": null,
+        "chain_key": null
+      }
+    },
+    {
+      "event": "status_changed",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "from": "verified",
+      "to": "archived",
+      "reason": "Archived out of active backlog",
+      "timestamp_ms": 1793953206157
+    },
+    {
+      "event": "task_archived",
+      "task_id": "9296fdfe-1e9a-4190-a6a2-642e7fd212c6",
+      "status": "verified",
+      "timestamp_ms": 1794037984343
+    }
+  ]
+}
