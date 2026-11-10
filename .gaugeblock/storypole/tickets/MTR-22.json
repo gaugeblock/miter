@@ -1,0 +1,141 @@
+{
+  "events": [
+    {
+      "event": "task_created",
+      "task": {
+        "acceptance_criteria": [],
+        "active_claim": null,
+        "created_at_epoch_ms": 1793945209089,
+        "decisions": [],
+        "description": "PREREQUISITE for moving miter-polyglot to common, measured 2026-11-06. miter-polyglot depends on miter-ast and constructs AstIndexer, FunctionSymbol, FunctionNode and Param (miter/crates/polyglot/src/symbol.rs:42-91), so relocating it would put a foundation crate on top of a miter domain crate - an upward edge, which the layer model forbids. It also means every dado and joiner build transitively carries miter-ast and its tree-sitter grammar table today.\\n\\nScope: identify exactly which miter-ast items polyglot consumes (symbol.rs: Param, FunctionSymbol, FunctionNode, AstIndexer::encode, seed_from_text, signature_of), decide whether they are AST-indexer wiring or a shared code-model vocabulary, and if the latter extract them into a foundation crate under common. miter-ast then re-exports them so its own paths keep resolving, exactly as miter does for gaugeblock-security.\\n\\nDo not start until the owner calls it: test 2 of the four admission tests (a measured reduction) is unproven here, and GB-160 says a hunch about weight is not a measurement.",
+        "edges": [],
+        "id": "9fe4c3fc-80d7-4a26-b471-92b88f9c72e7",
+        "kind": "refactor",
+        "latest_handoff": null,
+        "plan": null,
+        "priority": 2,
+        "scope": {
+          "crate_name": "miter-polyglot",
+          "labels": [
+            "gb-204,crate-boundary,miter"
+          ],
+          "module_path": null,
+          "repo": "miter",
+          "target_files": [],
+          "target_symbols": [
+            "miter_polyglot::symbol::UniversalSymbol"
+          ]
+        },
+        "slug": "extract-the-ast-vocabulary-miter-polyglot-needs-so-the-grammar-table-can-leave-miter-9fe4c3",
+        "status": "ready",
+        "ticket_key": "MTR-22",
+        "title": "Extract the AST vocabulary miter-polyglot needs, so the grammar table can leave miter",
+        "updated_at_epoch_ms": 1793945209089,
+        "verification_receipt": null
+      }
+    },
+    {
+      "edge": {
+        "kind": "related_to",
+        "target_id": "19e92b79-78e8-43f9-99b8-678755b610a8",
+        "target_ticket_key": "GB-204"
+      },
+      "event": "edge_added",
+      "task_id": "9fe4c3fc-80d7-4a26-b471-92b88f9c72e7",
+      "timestamp_ms": 1793945219546
+    },
+    {
+      "acceptance_criteria": [
+        "DONE 2026-11-06. Commit 9b79643 (common) + d2f8573 (dado). The last lateral edge in the graph is gone and the allowlist is now empty.\n\nThe edge: dado-core depended on miter-polyglot to answer \"does this generated code parse?\". That made a code generator reach sideways into a code indexer for a property of neither product.\n\nThe extraction was smaller than the ticket assumed, and the reason is worth recording: the vocabulary already existed. gaugeblock-contracts has carried the full Language enum since GB-143, so the new gaugeblock-syntax crate adds the reading of that vocabulary - grammar_for, parser_for, and the syntax diagnostics - rather than a third language enum. A second enum would have been a second table that can disagree with the first, the exact failure GB-148 recorded when dado kept its own parser copy and drifted.\n\nWhat stayed put: the per-grammar node-kind specs (GrammarSpec, spec_for) are about indexing declarations rather than parsing, so they remain in miter-ast beside the walker that needs them. The grammar *handle* table left miter; the declaration-shape table did not.\n\nThe dado side shrank rather than moved: it never needed polyglot's format taxonomy (SQL, HTML, CSS, Markdown, Docker, HCL, Kubernetes), only the five grammar-backed languages, so polyglot_language() and its index_language() indirection are deleted and the wire Language passes straight through. miter-polyglot is gone from the manifest, not merely unused. Declarative formats are still rejected as Unsupported rather than silently accepted.\n\nGraph state: lateral edges 1 -> 0, allowlist empty, downward 154 -> 155, upward 0, verdict clean. That is GB-204's stated goal - burn the lateral edges and empty the allowlist - reached from 19 entries.\n\nGates: common 111 tests and dado 14 tests green, both clippy --workspace --all-targets -D warnings clean; docs 108 present 0 drifted after adding the boundary-type spec and both architecture inventories; 11/11 lockfiles fresh, including benchwork and joiner whose locks moved transitively; audit clean."
+      ],
+      "description": null,
+      "event": "task_updated",
+      "priority": null,
+      "scope": null,
+      "task_id": "9fe4c3fc-80d7-4a26-b471-92b88f9c72e7",
+      "timestamp_ms": 1794037096876,
+      "title": null
+    },
+    {
+      "event": "task_verified",
+      "receipt": {
+        "base_commit_sha": "a99dfc2c2d5a9f1dfe42105672f1eb068a82a710",
+        "chain_key": null,
+        "command": "miter contracts && outfeed lockfiles && miter audit --path . --threshold 250 && chalkline docs check --workspace",
+        "commit_shas": [
+          "a99dfc2c2d5a9f1dfe42105672f1eb068a82a710"
+        ],
+        "diagnostic_count": null,
+        "exit_code": 0,
+        "git_branch": "main",
+        "head_commit_sha": "a99dfc2c2d5a9f1dfe42105672f1eb068a82a710",
+        "repo": null,
+        "summary": "Polyglot Contract Verification across SQL, Rust, and TypeScript\n================================================================================\nVerified Multi-Language Entities: 0\nEntities with Contract Drift:     0\n\nALL CONTRACTS CONSISTENT: No cross-language schema drifts detected.\nREPOSITORY     LOCKFILE     FRESH   \n------------------------------------\n\nAll 0 repositories track a fresh Cargo.lock.\nAUDIT PASSED: No files exceed 250 lines in .\n\n=== Gaugeblock 9-Document Architecture Audit (Workspace) ===\nWorkspace Root: /Users/wolff/dev2026/neurosymbolic-suite/miter\n\nRepo           README CONTRIB PROD   ARCH   SPEC   DESIGN   ROADMAP   CHANGELOG   AGENTS   Status    \n-----------------------------------------------------------------------------------------------\nworkspace      [OK]   [OK]    [OK]   [OK]   [OK]   [OK]     [OK]      [OK]        [OK]     CLEAN     \n\nSummary: 1 targets audited, 9 present, 0 missing, 0 drifted\n\n",
+        "verified_at_epoch_ms": 1794037109325,
+        "verifier": "storypole-verify"
+      },
+      "task_id": "9fe4c3fc-80d7-4a26-b471-92b88f9c72e7"
+    },
+    {
+      "event": "task_archived",
+      "status": "verified",
+      "task_id": "9fe4c3fc-80d7-4a26-b471-92b88f9c72e7",
+      "timestamp_ms": 1794038005138
+    }
+  ],
+  "ticket": {
+    "acceptance_criteria": [
+      "DONE 2026-11-06. Commit 9b79643 (common) + d2f8573 (dado). The last lateral edge in the graph is gone and the allowlist is now empty.\n\nThe edge: dado-core depended on miter-polyglot to answer \"does this generated code parse?\". That made a code generator reach sideways into a code indexer for a property of neither product.\n\nThe extraction was smaller than the ticket assumed, and the reason is worth recording: the vocabulary already existed. gaugeblock-contracts has carried the full Language enum since GB-143, so the new gaugeblock-syntax crate adds the reading of that vocabulary - grammar_for, parser_for, and the syntax diagnostics - rather than a third language enum. A second enum would have been a second table that can disagree with the first, the exact failure GB-148 recorded when dado kept its own parser copy and drifted.\n\nWhat stayed put: the per-grammar node-kind specs (GrammarSpec, spec_for) are about indexing declarations rather than parsing, so they remain in miter-ast beside the walker that needs them. The grammar *handle* table left miter; the declaration-shape table did not.\n\nThe dado side shrank rather than moved: it never needed polyglot's format taxonomy (SQL, HTML, CSS, Markdown, Docker, HCL, Kubernetes), only the five grammar-backed languages, so polyglot_language() and its index_language() indirection are deleted and the wire Language passes straight through. miter-polyglot is gone from the manifest, not merely unused. Declarative formats are still rejected as Unsupported rather than silently accepted.\n\nGraph state: lateral edges 1 -> 0, allowlist empty, downward 154 -> 155, upward 0, verdict clean. That is GB-204's stated goal - burn the lateral edges and empty the allowlist - reached from 19 entries.\n\nGates: common 111 tests and dado 14 tests green, both clippy --workspace --all-targets -D warnings clean; docs 108 present 0 drifted after adding the boundary-type spec and both architecture inventories; 11/11 lockfiles fresh, including benchwork and joiner whose locks moved transitively; audit clean."
+    ],
+    "active_claim": null,
+    "archived_at_epoch_ms": 1794038005138,
+    "created_at_epoch_ms": 1793945209089,
+    "decisions": [],
+    "description": "PREREQUISITE for moving miter-polyglot to common, measured 2026-11-06. miter-polyglot depends on miter-ast and constructs AstIndexer, FunctionSymbol, FunctionNode and Param (miter/crates/polyglot/src/symbol.rs:42-91), so relocating it would put a foundation crate on top of a miter domain crate - an upward edge, which the layer model forbids. It also means every dado and joiner build transitively carries miter-ast and its tree-sitter grammar table today.\\n\\nScope: identify exactly which miter-ast items polyglot consumes (symbol.rs: Param, FunctionSymbol, FunctionNode, AstIndexer::encode, seed_from_text, signature_of), decide whether they are AST-indexer wiring or a shared code-model vocabulary, and if the latter extract them into a foundation crate under common. miter-ast then re-exports them so its own paths keep resolving, exactly as miter does for gaugeblock-security.\\n\\nDo not start until the owner calls it: test 2 of the four admission tests (a measured reduction) is unproven here, and GB-160 says a hunch about weight is not a measurement.",
+    "edges": [
+      {
+        "kind": "related_to",
+        "target_id": "19e92b79-78e8-43f9-99b8-678755b610a8",
+        "target_ticket_key": "GB-204"
+      }
+    ],
+    "id": "9fe4c3fc-80d7-4a26-b471-92b88f9c72e7",
+    "kind": "refactor",
+    "latest_handoff": null,
+    "plan": null,
+    "priority": 2,
+    "scope": {
+      "crate_name": "miter-polyglot",
+      "labels": [
+        "gb-204,crate-boundary,miter"
+      ],
+      "module_path": null,
+      "repo": "miter",
+      "target_files": [],
+      "target_symbols": [
+        "miter_polyglot::symbol::UniversalSymbol"
+      ]
+    },
+    "slug": "extract-the-ast-vocabulary-miter-polyglot-needs-so-the-grammar-table-can-leave-miter-9fe4c3",
+    "status": "verified",
+    "ticket_key": "MTR-22",
+    "title": "Extract the AST vocabulary miter-polyglot needs, so the grammar table can leave miter",
+    "updated_at_epoch_ms": 1794038005138,
+    "verification_receipt": {
+      "base_commit_sha": "a99dfc2c2d5a9f1dfe42105672f1eb068a82a710",
+      "chain_key": null,
+      "command": "miter contracts && outfeed lockfiles && miter audit --path . --threshold 250 && chalkline docs check --workspace",
+      "commit_shas": [
+        "a99dfc2c2d5a9f1dfe42105672f1eb068a82a710"
+      ],
+      "diagnostic_count": null,
+      "exit_code": 0,
+      "git_branch": "main",
+      "head_commit_sha": "a99dfc2c2d5a9f1dfe42105672f1eb068a82a710",
+      "repo": null,
+      "summary": "Polyglot Contract Verification across SQL, Rust, and TypeScript\n================================================================================\nVerified Multi-Language Entities: 0\nEntities with Contract Drift:     0\n\nALL CONTRACTS CONSISTENT: No cross-language schema drifts detected.\nREPOSITORY     LOCKFILE     FRESH   \n------------------------------------\n\nAll 0 repositories track a fresh Cargo.lock.\nAUDIT PASSED: No files exceed 250 lines in .\n\n=== Gaugeblock 9-Document Architecture Audit (Workspace) ===\nWorkspace Root: /Users/wolff/dev2026/neurosymbolic-suite/miter\n\nRepo           README CONTRIB PROD   ARCH   SPEC   DESIGN   ROADMAP   CHANGELOG   AGENTS   Status    \n-----------------------------------------------------------------------------------------------\nworkspace      [OK]   [OK]    [OK]   [OK]   [OK]   [OK]     [OK]      [OK]        [OK]     CLEAN     \n\nSummary: 1 targets audited, 9 present, 0 missing, 0 drifted\n\n",
+      "verified_at_epoch_ms": 1794037109325,
+      "verifier": "storypole-verify"
+    }
+  }
+}

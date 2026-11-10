@@ -1,0 +1,225 @@
+{
+  "events": [
+    {
+      "captured_by_agent": "user",
+      "discovered_from_task_id": "243b5157-660d-4f1e-847c-3a427282a095",
+      "event": "deferred_item_captured",
+      "task": {
+        "acceptance_criteria": [],
+        "active_claim": null,
+        "created_at_epoch_ms": 1793330313601,
+        "decisions": [],
+        "description": "miter deps scanning its own tests reports miter-engine -> outfeed and miter-engine -> storypole-core, but both come from string literals in analysis/deps/tests.rs that contain use/mod lines, not from real imports. File is scanned as source, so a fixture that demonstrates parsing becomes evidence of a dependency. Fix: skip raw string literals and #[cfg(test)] modules (or at least skip files whose lines are inside multi-line string literals) when collecting import roots. Found while reading the suite wide dependency graph after GB-198.",
+        "edges": [
+          {
+            "kind": "discovered_from",
+            "target_id": "243b5157-660d-4f1e-847c-3a427282a095"
+          }
+        ],
+        "id": "df07c9b8-9e1d-4b4f-aa04-b97d29ed9dfa",
+        "kind": "bug",
+        "latest_handoff": null,
+        "plan": null,
+        "priority": 3,
+        "scope": {
+          "crate_name": "miter-engine",
+          "labels": [],
+          "module_path": null,
+          "repo": null,
+          "target_files": [],
+          "target_symbols": [
+            "miter_engine::analysis::deps::import_roots_in_source"
+          ]
+        },
+        "slug": "miter-deps-counts-test-fixture-strings-as-real-crate-references-df07c9",
+        "status": "triage",
+        "ticket_key": "MTR-18",
+        "title": "miter deps counts test fixture strings as real crate references",
+        "updated_at_epoch_ms": 1793330313601,
+        "verification_receipt": null
+      }
+    },
+    {
+      "edge": {
+        "kind": "parent_epic",
+        "target_id": "bb69af13-9c35-438c-befc-82013dba8579",
+        "target_ticket_key": "GB-200"
+      },
+      "event": "edge_added",
+      "task_id": "df07c9b8-9e1d-4b4f-aa04-b97d29ed9dfa",
+      "timestamp_ms": 1793330764831
+    },
+    {
+      "claim": {
+        "agent_id": "cline",
+        "base_commit_sha": null,
+        "claimed_at_epoch_ms": 1793331099858,
+        "git_branch": "feat/gb-199-deps-precision",
+        "lease_expires_at_epoch_ms": 1793334699858
+      },
+      "event": "task_claimed",
+      "task_id": "df07c9b8-9e1d-4b4f-aa04-b97d29ed9dfa"
+    },
+    {
+      "event": "status_changed",
+      "from": "triage",
+      "reason": "Claimed by cline",
+      "task_id": "df07c9b8-9e1d-4b4f-aa04-b97d29ed9dfa",
+      "timestamp_ms": 1793331099858,
+      "to": "in_progress"
+    },
+    {
+      "event": "plan_updated",
+      "plan": {
+        "design_markdown": "# Task Plan: MTR-18 — `miter deps` must not count literals as references\n\n> **Scope:** `miter/crates/engine/src/analysis/deps` **Parent:** `GB-200` **Status:** InProgress\n\n## 1. Symptom\n\nReading the suite-wide graph after GB-198 showed two edges that cannot exist:\n\n```\nmiter-engine -> outfeed          1 site\nmiter-engine -> storypole-core   1 site\n```\n\nBoth came from `analysis/deps/tests.rs`, where the *fixture strings* contain lines like\n\n```rust\nlet source = \"pub mod outfeed;\\nuse storypole_core::model::TaskNode;\\n\";\n```\n\nThe scanner read every physical line of every `.rs` file as code, so data became proof of use, and a\nfixture that exists to *test* the parser registered a module (`pub mod outfeed;`) as well.\n\nThis matters beyond two edges: every number produced by `miter deps` feeds the layer gate that\n`MTR-19` will introduce, and a gate built on phantom edges is worse than no gate.\n\n## 2. Fix\n\nA line is passed through `strip::code_only` before anything is matched. It removes:\n\n* `//` line comments and `/* */` block comments (state carried across lines),\n* ordinary string literals with backslash escapes,\n* raw strings `r\"...\"`, `r#\"...\"#`, `r##\"...\"##`, including multi-line ones (state carried).\n\n`declared_modules` uses the same stripper, so a fixture can no longer declare a module either.\n\nDeliberate conservatism: an unterminated raw string or block comment swallows the remainder of the\nfile rather than guessing a close. Guessing is precisely what produced the false edges, and a missed\nreference is cheaper than a fabricated dependency.\n\n## 3. Proof\n\n| Check | Expectation |\n|:--|:--|\n| `test_import_looking_content_inside_strings_is_not_a_reference` | fixture string, raw string and hashed raw string yield no roots and no modules |\n| `test_a_multiline_raw_string_swallows_the_lines_it_covers` | only the `use` after the closing `\"#;` is counted |\n| `test_comments_hide_imports_but_real_code_after_a_block_comment_still_counts` | a trailing `/* */` does not swallow the statement before it |\n| `miter deps --path miter` | `miter-engine -> outfeed` and `-> storypole-core` are gone |\n| `miter deps --path .` | cross-repo edge count drops from 132 |\n\nGates: `cargo nextest run -p miter-engine` (165), `cargo clippy -p miter-engine -p miter-cli\n--all-targets -- -D warnings`, `cargo fmt --all -- --check`.\n\n## 4. Non-goals\n\n* Not changing what counts as *use* otherwise: a dependency used only in `#[cfg(test)]` code still\n  counts as used, because the declaration half of that problem belongs to `GB-201`.\n* Not touching `miter clones`' similarity semantics (`MTR-17`).\n",
+        "plan_file_path": ".gaugeblock/storypole/plans/MTR-18.md",
+        "steps": [
+          {
+            "completed": false,
+            "step_id": "1",
+            "target_files": [],
+            "title": "Strip literals, raw strings and comments in code_only",
+            "verification_gate": "nextest -p miter-engine analysis::deps"
+          },
+          {
+            "completed": false,
+            "step_id": "2",
+            "target_files": [],
+            "title": "Carry unterminated normal strings across lines",
+            "verification_gate": "regression test with trailing-backslash continuation"
+          },
+          {
+            "completed": false,
+            "step_id": "3",
+            "target_files": [],
+            "title": "Prove the phantom edges are gone at the meta-harness root",
+            "verification_gate": "miter deps --path . --why outfeed returns none"
+          }
+        ],
+        "summary": "Strip literals and comments before scanning for crate roots, so fixtures stop manufacturing dependencies",
+        "updated_at_epoch_ms": 1793332012034
+      },
+      "task_id": "df07c9b8-9e1d-4b4f-aa04-b97d29ed9dfa",
+      "timestamp_ms": 1793332012034
+    },
+    {
+      "event": "task_verified",
+      "receipt": {
+        "base_commit_sha": "c6a9b56938db3628537ede1a1e043c7d28d87bb7",
+        "chain_key": null,
+        "command": "n/a",
+        "commit_shas": [
+          "3d72c4cda7d4d31838e8be51403ea1e4ea0b94e1",
+          "cefd8edb9c135a5651adb7f5ad7cfed32738b7be"
+        ],
+        "diagnostic_count": null,
+        "exit_code": 0,
+        "git_branch": "feat/gb-199-deps-precision",
+        "head_commit_sha": "cefd8edb9c135a5651adb7f5ad7cfed32738b7be",
+        "repo": null,
+        "summary": "literal and comment stripping in deps scan; 166 engine tests, clippy and fmt clean; suite edge count 132 to 128 with exactly the four fixture-borne edges removed (miter-cli/miter-engine to outfeed and storypole-core); dead-declaration baseline corrected 59 to 62",
+        "verified_at_epoch_ms": 1793334658485,
+        "verifier": "cargo-nextest+dogfood"
+      },
+      "task_id": "df07c9b8-9e1d-4b4f-aa04-b97d29ed9dfa"
+    },
+    {
+      "event": "status_changed",
+      "from": "verified",
+      "reason": "Archived out of active backlog",
+      "task_id": "df07c9b8-9e1d-4b4f-aa04-b97d29ed9dfa",
+      "timestamp_ms": 1793953246071,
+      "to": "archived"
+    },
+    {
+      "event": "task_archived",
+      "status": "verified",
+      "task_id": "df07c9b8-9e1d-4b4f-aa04-b97d29ed9dfa",
+      "timestamp_ms": 1794038016660
+    }
+  ],
+  "ticket": {
+    "acceptance_criteria": [],
+    "active_claim": null,
+    "archived_at_epoch_ms": 1794038016660,
+    "created_at_epoch_ms": 1793330313601,
+    "decisions": [],
+    "description": "miter deps scanning its own tests reports miter-engine -> outfeed and miter-engine -> storypole-core, but both come from string literals in analysis/deps/tests.rs that contain use/mod lines, not from real imports. File is scanned as source, so a fixture that demonstrates parsing becomes evidence of a dependency. Fix: skip raw string literals and #[cfg(test)] modules (or at least skip files whose lines are inside multi-line string literals) when collecting import roots. Found while reading the suite wide dependency graph after GB-198.",
+    "edges": [
+      {
+        "kind": "discovered_from",
+        "target_id": "243b5157-660d-4f1e-847c-3a427282a095"
+      },
+      {
+        "kind": "parent_epic",
+        "target_id": "bb69af13-9c35-438c-befc-82013dba8579",
+        "target_ticket_key": "GB-200"
+      }
+    ],
+    "id": "df07c9b8-9e1d-4b4f-aa04-b97d29ed9dfa",
+    "kind": "bug",
+    "latest_handoff": null,
+    "plan": {
+      "design_markdown": "# Task Plan: MTR-18 — `miter deps` must not count literals as references\n\n> **Scope:** `miter/crates/engine/src/analysis/deps` **Parent:** `GB-200` **Status:** InProgress\n\n## 1. Symptom\n\nReading the suite-wide graph after GB-198 showed two edges that cannot exist:\n\n```\nmiter-engine -> outfeed          1 site\nmiter-engine -> storypole-core   1 site\n```\n\nBoth came from `analysis/deps/tests.rs`, where the *fixture strings* contain lines like\n\n```rust\nlet source = \"pub mod outfeed;\\nuse storypole_core::model::TaskNode;\\n\";\n```\n\nThe scanner read every physical line of every `.rs` file as code, so data became proof of use, and a\nfixture that exists to *test* the parser registered a module (`pub mod outfeed;`) as well.\n\nThis matters beyond two edges: every number produced by `miter deps` feeds the layer gate that\n`MTR-19` will introduce, and a gate built on phantom edges is worse than no gate.\n\n## 2. Fix\n\nA line is passed through `strip::code_only` before anything is matched. It removes:\n\n* `//` line comments and `/* */` block comments (state carried across lines),\n* ordinary string literals with backslash escapes,\n* raw strings `r\"...\"`, `r#\"...\"#`, `r##\"...\"##`, including multi-line ones (state carried).\n\n`declared_modules` uses the same stripper, so a fixture can no longer declare a module either.\n\nDeliberate conservatism: an unterminated raw string or block comment swallows the remainder of the\nfile rather than guessing a close. Guessing is precisely what produced the false edges, and a missed\nreference is cheaper than a fabricated dependency.\n\n## 3. Proof\n\n| Check | Expectation |\n|:--|:--|\n| `test_import_looking_content_inside_strings_is_not_a_reference` | fixture string, raw string and hashed raw string yield no roots and no modules |\n| `test_a_multiline_raw_string_swallows_the_lines_it_covers` | only the `use` after the closing `\"#;` is counted |\n| `test_comments_hide_imports_but_real_code_after_a_block_comment_still_counts` | a trailing `/* */` does not swallow the statement before it |\n| `miter deps --path miter` | `miter-engine -> outfeed` and `-> storypole-core` are gone |\n| `miter deps --path .` | cross-repo edge count drops from 132 |\n\nGates: `cargo nextest run -p miter-engine` (165), `cargo clippy -p miter-engine -p miter-cli\n--all-targets -- -D warnings`, `cargo fmt --all -- --check`.\n\n## 4. Non-goals\n\n* Not changing what counts as *use* otherwise: a dependency used only in `#[cfg(test)]` code still\n  counts as used, because the declaration half of that problem belongs to `GB-201`.\n* Not touching `miter clones`' similarity semantics (`MTR-17`).\n",
+      "plan_file_path": ".gaugeblock/storypole/plans/MTR-18.md",
+      "steps": [
+        {
+          "completed": false,
+          "step_id": "1",
+          "target_files": [],
+          "title": "Strip literals, raw strings and comments in code_only",
+          "verification_gate": "nextest -p miter-engine analysis::deps"
+        },
+        {
+          "completed": false,
+          "step_id": "2",
+          "target_files": [],
+          "title": "Carry unterminated normal strings across lines",
+          "verification_gate": "regression test with trailing-backslash continuation"
+        },
+        {
+          "completed": false,
+          "step_id": "3",
+          "target_files": [],
+          "title": "Prove the phantom edges are gone at the meta-harness root",
+          "verification_gate": "miter deps --path . --why outfeed returns none"
+        }
+      ],
+      "summary": "Strip literals and comments before scanning for crate roots, so fixtures stop manufacturing dependencies",
+      "updated_at_epoch_ms": 1793332012034
+    },
+    "priority": 3,
+    "scope": {
+      "crate_name": "miter-engine",
+      "labels": [],
+      "module_path": null,
+      "repo": null,
+      "target_files": [],
+      "target_symbols": [
+        "miter_engine::analysis::deps::import_roots_in_source"
+      ]
+    },
+    "slug": "miter-deps-counts-test-fixture-strings-as-real-crate-references-df07c9",
+    "status": "verified",
+    "ticket_key": "MTR-18",
+    "title": "miter deps counts test fixture strings as real crate references",
+    "updated_at_epoch_ms": 1794038016660,
+    "verification_receipt": {
+      "base_commit_sha": "c6a9b56938db3628537ede1a1e043c7d28d87bb7",
+      "chain_key": null,
+      "command": "n/a",
+      "commit_shas": [
+        "3d72c4cda7d4d31838e8be51403ea1e4ea0b94e1",
+        "cefd8edb9c135a5651adb7f5ad7cfed32738b7be"
+      ],
+      "diagnostic_count": null,
+      "exit_code": 0,
+      "git_branch": "feat/gb-199-deps-precision",
+      "head_commit_sha": "cefd8edb9c135a5651adb7f5ad7cfed32738b7be",
+      "repo": null,
+      "summary": "literal and comment stripping in deps scan; 166 engine tests, clippy and fmt clean; suite edge count 132 to 128 with exactly the four fixture-borne edges removed (miter-cli/miter-engine to outfeed and storypole-core); dead-declaration baseline corrected 59 to 62",
+      "verified_at_epoch_ms": 1793334658485,
+      "verifier": "cargo-nextest+dogfood"
+    }
+  }
+}

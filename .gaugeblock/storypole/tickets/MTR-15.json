@@ -1,0 +1,67 @@
+{
+  "events": [
+    {
+      "captured_by_agent": "cline",
+      "discovered_from_task_id": null,
+      "event": "deferred_item_captured",
+      "task": {
+        "acceptance_criteria": [],
+        "active_claim": null,
+        "created_at_epoch_ms": 1793285305773,
+        "decisions": [],
+        "description": "Multi-repo indexing already works - miter index takes any path, so indexing the harness root yields one database covering all eleven members. Two gaps stop outfeed gate from using it. FIRST, staleness: the installed binary is 0.1.0-beta.4 and resolves the default database to <cwd>/.miter/miter.redb, while the source documents <workspace_root>/.gaugeblock/miter/miter.redb - miter/.miter/ exists on disk as proof the old path was used, and there is no index at the harness root at all, so the contracts step fails from every member with run miter index first. Rebuild before any sweep. SECOND, path semantics: there is no global -d/--dir and no environment override, so the database location is implicitly cwd-relative; running from a member can never see a suite index. Options, in preference order: a global --dir that sets the workspace root for every subcommand, or a MITER_DB environment variable honoured by every command, or explicit --db on the gate contracts step. Recommend the global --dir for symmetry with outfeed and chalkline, plus outfeed gate gaining an --index-db so the contracts step reads the suite index while gating a single repository. Also worth a convenience: miter index --workspace that indexes every member under a root into one database.",
+        "edges": [],
+        "id": "fc46da76-640c-4820-9168-a4368aebc5e4",
+        "kind": "feature",
+        "latest_handoff": null,
+        "plan": null,
+        "priority": 3,
+        "scope": {
+          "crate_name": "miter-cli",
+          "labels": [],
+          "module_path": null,
+          "repo": null,
+          "target_files": [
+            "miter/src/cli/args.rs,miter/crates/engine/src,outfeed/crates/outfeed-core/src/gate/mod.rs"
+          ],
+          "target_symbols": []
+        },
+        "slug": "give-miter-an-explicit-workspace-root-and-wire-the-gate-contracts-step-to-a-suite-index-fc46da",
+        "status": "deferred",
+        "ticket_key": "MTR-15",
+        "title": "Give miter an explicit workspace root and wire the gate contracts step to a suite index",
+        "updated_at_epoch_ms": 1793285305773,
+        "verification_receipt": null
+      }
+    }
+  ],
+  "ticket": {
+    "acceptance_criteria": [],
+    "active_claim": null,
+    "created_at_epoch_ms": 1793285305773,
+    "decisions": [],
+    "description": "Multi-repo indexing already works - miter index takes any path, so indexing the harness root yields one database covering all eleven members. Two gaps stop outfeed gate from using it. FIRST, staleness: the installed binary is 0.1.0-beta.4 and resolves the default database to <cwd>/.miter/miter.redb, while the source documents <workspace_root>/.gaugeblock/miter/miter.redb - miter/.miter/ exists on disk as proof the old path was used, and there is no index at the harness root at all, so the contracts step fails from every member with run miter index first. Rebuild before any sweep. SECOND, path semantics: there is no global -d/--dir and no environment override, so the database location is implicitly cwd-relative; running from a member can never see a suite index. Options, in preference order: a global --dir that sets the workspace root for every subcommand, or a MITER_DB environment variable honoured by every command, or explicit --db on the gate contracts step. Recommend the global --dir for symmetry with outfeed and chalkline, plus outfeed gate gaining an --index-db so the contracts step reads the suite index while gating a single repository. Also worth a convenience: miter index --workspace that indexes every member under a root into one database.",
+    "edges": [],
+    "id": "fc46da76-640c-4820-9168-a4368aebc5e4",
+    "kind": "feature",
+    "latest_handoff": null,
+    "plan": null,
+    "priority": 3,
+    "scope": {
+      "crate_name": "miter-cli",
+      "labels": [],
+      "module_path": null,
+      "repo": null,
+      "target_files": [
+        "miter/src/cli/args.rs,miter/crates/engine/src,outfeed/crates/outfeed-core/src/gate/mod.rs"
+      ],
+      "target_symbols": []
+    },
+    "slug": "give-miter-an-explicit-workspace-root-and-wire-the-gate-contracts-step-to-a-suite-index-fc46da",
+    "status": "deferred",
+    "ticket_key": "MTR-15",
+    "title": "Give miter an explicit workspace root and wire the gate contracts step to a suite index",
+    "updated_at_epoch_ms": 1793285305773,
+    "verification_receipt": null
+  }
+}

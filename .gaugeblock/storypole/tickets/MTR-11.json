@@ -1,0 +1,71 @@
+{
+  "events": [
+    {
+      "captured_by_agent": "cline",
+      "discovered_from_task_id": null,
+      "event": "deferred_item_captured",
+      "task": {
+        "acceptance_criteria": [],
+        "active_claim": null,
+        "created_at_epoch_ms": 1793248191804,
+        "decisions": [],
+        "description": "Measured with cargo tree: every consumer already reaches miter-engine transitively through chalkline-core (dado 434 crates via chalkline, batten 434, joiner 483, rabbet 591; engine subtree 165). So repointing dado/batten to a lighter crate removes nothing - MTR-10 as scoped has zero dependency and zero compile-time effect and should be rescoped or closed. The edge worth cutting is chalkline-core's use of inspect_workspace: the whole inventory module references no sibling module and none of redb, sqlparser, hcl, dockerfile-parser, serde_yaml, globset or rayon, yet it lives in the crate that pulls all eight. Cheapest lever is feature gating - make storage, the declarative parsers and rayon non-default features so a consumer can take miter-engine with default-features = false plus inventory and language - which needs no new crates; extracting miter-inventory is the cleaner but larger alternative.",
+        "edges": [],
+        "id": "6a9cb9e9-5db5-4c5a-bb4a-9905df360b2a",
+        "kind": "tech_debt",
+        "latest_handoff": null,
+        "plan": null,
+        "priority": 3,
+        "scope": {
+          "crate_name": "miter-engine",
+          "labels": [],
+          "module_path": null,
+          "repo": null,
+          "target_files": [
+            "miter/crates/engine/Cargo.toml,miter/crates/engine/src/inventory,miter/crates/engine/src/lib.rs"
+          ],
+          "target_symbols": [
+            "miter_engine::inspect_workspace"
+          ]
+        },
+        "slug": "feature-gate-miter-engine-s-heavy-subsystems-so-inventory-only-consumers-stop-linking-the-analysis-stack-6a9cb9",
+        "status": "triage",
+        "ticket_key": "MTR-11",
+        "title": "Feature gate miter-engine's heavy subsystems so inventory-only consumers stop linking the analysis stack",
+        "updated_at_epoch_ms": 1793248191804,
+        "verification_receipt": null
+      }
+    }
+  ],
+  "ticket": {
+    "acceptance_criteria": [],
+    "active_claim": null,
+    "created_at_epoch_ms": 1793248191804,
+    "decisions": [],
+    "description": "Measured with cargo tree: every consumer already reaches miter-engine transitively through chalkline-core (dado 434 crates via chalkline, batten 434, joiner 483, rabbet 591; engine subtree 165). So repointing dado/batten to a lighter crate removes nothing - MTR-10 as scoped has zero dependency and zero compile-time effect and should be rescoped or closed. The edge worth cutting is chalkline-core's use of inspect_workspace: the whole inventory module references no sibling module and none of redb, sqlparser, hcl, dockerfile-parser, serde_yaml, globset or rayon, yet it lives in the crate that pulls all eight. Cheapest lever is feature gating - make storage, the declarative parsers and rayon non-default features so a consumer can take miter-engine with default-features = false plus inventory and language - which needs no new crates; extracting miter-inventory is the cleaner but larger alternative.",
+    "edges": [],
+    "id": "6a9cb9e9-5db5-4c5a-bb4a-9905df360b2a",
+    "kind": "tech_debt",
+    "latest_handoff": null,
+    "plan": null,
+    "priority": 3,
+    "scope": {
+      "crate_name": "miter-engine",
+      "labels": [],
+      "module_path": null,
+      "repo": null,
+      "target_files": [
+        "miter/crates/engine/Cargo.toml,miter/crates/engine/src/inventory,miter/crates/engine/src/lib.rs"
+      ],
+      "target_symbols": [
+        "miter_engine::inspect_workspace"
+      ]
+    },
+    "slug": "feature-gate-miter-engine-s-heavy-subsystems-so-inventory-only-consumers-stop-linking-the-analysis-stack-6a9cb9",
+    "status": "triage",
+    "ticket_key": "MTR-11",
+    "title": "Feature gate miter-engine's heavy subsystems so inventory-only consumers stop linking the analysis stack",
+    "updated_at_epoch_ms": 1793248191804,
+    "verification_receipt": null
+  }
+}

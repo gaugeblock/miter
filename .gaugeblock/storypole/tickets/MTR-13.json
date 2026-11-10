@@ -1,0 +1,67 @@
+{
+  "events": [
+    {
+      "captured_by_agent": "cline",
+      "discovered_from_task_id": null,
+      "event": "deferred_item_captured",
+      "task": {
+        "acceptance_criteria": [],
+        "active_claim": null,
+        "created_at_epoch_ms": 1793250777384,
+        "decisions": [],
+        "description": "Tier 2 of miter deps: the flags that turn the audit verdicts into measurements. (1) --what-if <crate::module|path> simulates an extraction from live data - who uses the module and from how many crates, which dependencies those consumers would stop pulling, and whether a cycle would appear - filling in the three-part extract test automatically. Naming: --what-if is primary with --simulate-extract as a visible alias; --extract was rejected because it reads as mutation, deps is read-only, and miter slice already owns how to extract. (2) --layers [--check] reads ordered layers from workspace.metadata.gaugeblock.layers and fails on upward edges - the architectural fitness function that turns crate strategy into a gate. (3) --budget [--max-crates N] fails when a consumer transitive tree grows, so adding regex to a core crate is caught in review. (4) --since <git-ref> reports new crate edges since a tag, making architectural drift visible per release. Depends on MTR-12.",
+        "edges": [],
+        "id": "9bf01ba3-b9c7-4de2-88ac-c8177039f743",
+        "kind": "feature",
+        "latest_handoff": null,
+        "plan": null,
+        "priority": 3,
+        "scope": {
+          "crate_name": "miter-engine",
+          "labels": [],
+          "module_path": null,
+          "repo": null,
+          "target_files": [],
+          "target_symbols": [
+            "miter_cli"
+          ]
+        },
+        "slug": "miter-deps-tier-2-extraction-simulation-layering-fitness-dependency-budgets-and-drift-since-a-ref-9bf01b",
+        "status": "deferred",
+        "ticket_key": "MTR-13",
+        "title": "miter deps tier 2: extraction simulation, layering fitness, dependency budgets and drift since a ref",
+        "updated_at_epoch_ms": 1793250777384,
+        "verification_receipt": null
+      }
+    }
+  ],
+  "ticket": {
+    "acceptance_criteria": [],
+    "active_claim": null,
+    "created_at_epoch_ms": 1793250777384,
+    "decisions": [],
+    "description": "Tier 2 of miter deps: the flags that turn the audit verdicts into measurements. (1) --what-if <crate::module|path> simulates an extraction from live data - who uses the module and from how many crates, which dependencies those consumers would stop pulling, and whether a cycle would appear - filling in the three-part extract test automatically. Naming: --what-if is primary with --simulate-extract as a visible alias; --extract was rejected because it reads as mutation, deps is read-only, and miter slice already owns how to extract. (2) --layers [--check] reads ordered layers from workspace.metadata.gaugeblock.layers and fails on upward edges - the architectural fitness function that turns crate strategy into a gate. (3) --budget [--max-crates N] fails when a consumer transitive tree grows, so adding regex to a core crate is caught in review. (4) --since <git-ref> reports new crate edges since a tag, making architectural drift visible per release. Depends on MTR-12.",
+    "edges": [],
+    "id": "9bf01ba3-b9c7-4de2-88ac-c8177039f743",
+    "kind": "feature",
+    "latest_handoff": null,
+    "plan": null,
+    "priority": 3,
+    "scope": {
+      "crate_name": "miter-engine",
+      "labels": [],
+      "module_path": null,
+      "repo": null,
+      "target_files": [],
+      "target_symbols": [
+        "miter_cli"
+      ]
+    },
+    "slug": "miter-deps-tier-2-extraction-simulation-layering-fitness-dependency-budgets-and-drift-since-a-ref-9bf01b",
+    "status": "deferred",
+    "ticket_key": "MTR-13",
+    "title": "miter deps tier 2: extraction simulation, layering fitness, dependency budgets and drift since a ref",
+    "updated_at_epoch_ms": 1793250777384,
+    "verification_receipt": null
+  }
+}

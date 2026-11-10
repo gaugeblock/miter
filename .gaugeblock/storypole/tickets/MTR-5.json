@@ -1,0 +1,111 @@
+{
+  "events": [
+    {
+      "event": "task_created",
+      "task": {
+        "acceptance_criteria": [
+          "Tier 4 cross-repo verification passes",
+          "Manifest version bumped to 0.1.0-beta.1",
+          "Annotated git tag created"
+        ],
+        "active_claim": null,
+        "created_at_epoch_ms": 1792998848670,
+        "decisions": [],
+        "description": "Automated release ticket for miter v0.1.0-beta.1.\n\nRationale: Explicit version override to 0.1.0-beta.1\nShipped Tasks: None (maintenance/internal commits only)",
+        "edges": [],
+        "id": "a57eaf8a-7577-48e0-af3a-e3aa203b7523",
+        "kind": "refactor",
+        "latest_handoff": null,
+        "plan": null,
+        "priority": 1,
+        "scope": {
+          "crate_name": "miter-core",
+          "labels": [
+            "release"
+          ],
+          "module_path": null,
+          "repo": "miter",
+          "target_files": [],
+          "target_symbols": []
+        },
+        "slug": "chore-release-release-miter-v0-1-0-beta-1-a57eaf",
+        "status": "ready",
+        "ticket_key": "MTR-5",
+        "title": "chore(release): release miter v0.1.0-beta.1",
+        "updated_at_epoch_ms": 1792998848670,
+        "verification_receipt": null
+      }
+    },
+    {
+      "event": "task_verified",
+      "receipt": {
+        "base_commit_sha": null,
+        "chain_key": null,
+        "command": "outfeed apply",
+        "commit_shas": [],
+        "diagnostic_count": 0,
+        "exit_code": 0,
+        "git_branch": null,
+        "head_commit_sha": null,
+        "repo": null,
+        "summary": "Release v0.1.0-beta.1 successfully certified and tagged",
+        "verified_at_epoch_ms": 1792998848698,
+        "verifier": "outfeed"
+      },
+      "task_id": "a57eaf8a-7577-48e0-af3a-e3aa203b7523"
+    },
+    {
+      "event": "task_archived",
+      "status": "verified",
+      "task_id": "a57eaf8a-7577-48e0-af3a-e3aa203b7523",
+      "timestamp_ms": 1794037966634
+    }
+  ],
+  "ticket": {
+    "acceptance_criteria": [
+      "Tier 4 cross-repo verification passes",
+      "Manifest version bumped to 0.1.0-beta.1",
+      "Annotated git tag created"
+    ],
+    "active_claim": null,
+    "archived_at_epoch_ms": 1794037966634,
+    "created_at_epoch_ms": 1792998848670,
+    "decisions": [],
+    "description": "Automated release ticket for miter v0.1.0-beta.1.\n\nRationale: Explicit version override to 0.1.0-beta.1\nShipped Tasks: None (maintenance/internal commits only)",
+    "edges": [],
+    "id": "a57eaf8a-7577-48e0-af3a-e3aa203b7523",
+    "kind": "refactor",
+    "latest_handoff": null,
+    "plan": null,
+    "priority": 1,
+    "scope": {
+      "crate_name": "miter-core",
+      "labels": [
+        "release"
+      ],
+      "module_path": null,
+      "repo": "miter",
+      "target_files": [],
+      "target_symbols": []
+    },
+    "slug": "chore-release-release-miter-v0-1-0-beta-1-a57eaf",
+    "status": "verified",
+    "ticket_key": "MTR-5",
+    "title": "chore(release): release miter v0.1.0-beta.1",
+    "updated_at_epoch_ms": 1794037966634,
+    "verification_receipt": {
+      "base_commit_sha": null,
+      "chain_key": null,
+      "command": "outfeed apply",
+      "commit_shas": [],
+      "diagnostic_count": 0,
+      "exit_code": 0,
+      "git_branch": null,
+      "head_commit_sha": null,
+      "repo": null,
+      "summary": "Release v0.1.0-beta.1 successfully certified and tagged",
+      "verified_at_epoch_ms": 1792998848698,
+      "verifier": "outfeed"
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "events": [
+    {
+      "captured_by_agent": "user",
+      "discovered_from_task_id": null,
+      "event": "deferred_item_captured",
+      "task": {
+        "acceptance_criteria": [],
+        "active_claim": null,
+        "created_at_epoch_ms": 1792729476385,
+        "decisions": [],
+        "description": "sqlparser 0.63 restructures CreateView, IndexColumn.expr, ColumnOption::ForeignKey, and TableConstraint::ForeignKey fields, requiring updates in crates/engine/src/polyglot/sql.rs.",
+        "edges": [],
+        "id": "f1e5e764-0fd9-4b75-a5a6-94b45fbba9fe",
+        "kind": "feature",
+        "latest_handoff": null,
+        "plan": null,
+        "priority": 3,
+        "scope": {
+          "crate_name": "miter-engine",
+          "labels": [
+            "deps,sqlparser,polyglot"
+          ],
+          "module_path": null,
+          "repo": "miter",
+          "target_files": [],
+          "target_symbols": [
+            "miter::engine::polyglot::sql"
+          ]
+        },
+        "slug": "refactor-sql-extractor-for-sqlparser-0-63-ast-breaking-changes-f1e5e7",
+        "status": "deferred",
+        "ticket_key": "MTR-3",
+        "title": "Refactor SQL extractor for sqlparser 0.63 AST breaking changes",
+        "updated_at_epoch_ms": 1792729476385,
+        "verification_receipt": null
+      }
+    },
+    {
+      "acceptance_criteria": null,
+      "description": "Evaluated 2026-10-28: sqlparser 0.63.0 is available (miter pins 0.54). The upgrade is actionable but rewrites the SQL extractor against a breaking AST, and it touches the same polyglot dispatch that MTR-2 defers. Keep deferred until scheduled with MTR-2 so the polyglot extractors move together.",
+      "event": "task_updated",
+      "priority": null,
+      "scope": null,
+      "task_id": "f1e5e764-0fd9-4b75-a5a6-94b45fbba9fe",
+      "timestamp_ms": 1793176861523,
+      "title": null
+    }
+  ],
+  "ticket": {
+    "acceptance_criteria": [],
+    "active_claim": null,
+    "created_at_epoch_ms": 1792729476385,
+    "decisions": [],
+    "description": "Evaluated 2026-10-28: sqlparser 0.63.0 is available (miter pins 0.54). The upgrade is actionable but rewrites the SQL extractor against a breaking AST, and it touches the same polyglot dispatch that MTR-2 defers. Keep deferred until scheduled with MTR-2 so the polyglot extractors move together.",
+    "edges": [],
+    "id": "f1e5e764-0fd9-4b75-a5a6-94b45fbba9fe",
+    "kind": "feature",
+    "latest_handoff": null,
+    "plan": null,
+    "priority": 3,
+    "scope": {
+      "crate_name": "miter-engine",
+      "labels": [
+        "deps,sqlparser,polyglot"
+      ],
+      "module_path": null,
+      "repo": "miter",
+      "target_files": [],
+      "target_symbols": [
+        "miter::engine::polyglot::sql"
+      ]
+    },
+    "slug": "refactor-sql-extractor-for-sqlparser-0-63-ast-breaking-changes-f1e5e7",
+    "status": "deferred",
+    "ticket_key": "MTR-3",
+    "title": "Refactor SQL extractor for sqlparser 0.63 AST breaking changes",
+    "updated_at_epoch_ms": 1793176861523,
+    "verification_receipt": null
+  }
+}

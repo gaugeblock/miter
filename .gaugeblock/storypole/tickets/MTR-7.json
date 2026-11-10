@@ -1,0 +1,131 @@
+{
+  "events": [
+    {
+      "event": "task_created",
+      "task": {
+        "acceptance_criteria": [],
+        "active_claim": null,
+        "created_at_epoch_ms": 1793149822046,
+        "decisions": [],
+        "description": "Bring remaining 6 miter documents to the stellar tier of miter/README.md and miter/AGENTS.md, detailing redb storage layouts, AST slicing invariants, and compiler verification sandboxes",
+        "edges": [],
+        "id": "9b1ba836-d832-4703-9ced-f3c72110f399",
+        "kind": "feature",
+        "latest_handoff": null,
+        "plan": null,
+        "priority": 1,
+        "scope": {
+          "crate_name": "miter-engine",
+          "labels": [],
+          "module_path": null,
+          "repo": "miter",
+          "target_files": [],
+          "target_symbols": []
+        },
+        "slug": "elevate-miter-documentation-across-architecture-spec-design-product-contributing-roadmap-9b1ba8",
+        "status": "ready",
+        "ticket_key": "MTR-7",
+        "title": "Elevate miter documentation across ARCHITECTURE, SPEC, DESIGN, PRODUCT, CONTRIBUTING, ROADMAP",
+        "updated_at_epoch_ms": 1793149822046,
+        "verification_receipt": null
+      }
+    },
+    {
+      "edge": {
+        "kind": "parent_epic",
+        "target_id": "d7468114-0e27-49e0-81d7-06545afdbd7b",
+        "target_repo": "workspace",
+        "target_ticket_key": "GB-106"
+      },
+      "event": "edge_added",
+      "task_id": "9b1ba836-d832-4703-9ced-f3c72110f399",
+      "timestamp_ms": 1793149826040
+    },
+    {
+      "event": "task_verified",
+      "receipt": {
+        "base_commit_sha": "eed78249006ec23d23a2e423990152a4d0eaea8a",
+        "chain_key": null,
+        "command": "n/a",
+        "commit_shas": [
+          "e12bf0cbe3a053df6d9edca07d7ffa20e8457350",
+          "cfc2caffca583376e1f8ff30fe07f2ecab2f7316",
+          "7d1d5229ac573e102172c11f3ccd202799c47cc5",
+          "d16c2e2a9c316ac4e8549a94bdf968269628fd99",
+          "a44f7ec6e5589064e5a3284e22416d565868aa16",
+          "8a4bf9b9d5b6529831545338a88e482811d77856"
+        ],
+        "diagnostic_count": null,
+        "exit_code": 0,
+        "git_branch": "fix/storypole-linked-tasks",
+        "head_commit_sha": "8a4bf9b9d5b6529831545338a88e482811d77856",
+        "repo": null,
+        "summary": "Already shipped: miter/CHANGELOG.md records 'miter: elevate 9-document architecture to gold standard (MTR-7)'. Verified structurally with chalkline docs check -d miter: 9 present, 0 missing, 0 drifted; ARCHITECTURE/SPEC/DESIGN/PRODUCT/CONTRIBUTING/ROADMAP all carry mermaid diagrams, invariants and suite cross-links. Status was stale.",
+        "verified_at_epoch_ms": 1793174806720,
+        "verifier": "cline"
+      },
+      "task_id": "9b1ba836-d832-4703-9ced-f3c72110f399"
+    },
+    {
+      "event": "task_archived",
+      "status": "verified",
+      "task_id": "9b1ba836-d832-4703-9ced-f3c72110f399",
+      "timestamp_ms": 1794037977089
+    }
+  ],
+  "ticket": {
+    "acceptance_criteria": [],
+    "active_claim": null,
+    "archived_at_epoch_ms": 1794037977089,
+    "created_at_epoch_ms": 1793149822046,
+    "decisions": [],
+    "description": "Bring remaining 6 miter documents to the stellar tier of miter/README.md and miter/AGENTS.md, detailing redb storage layouts, AST slicing invariants, and compiler verification sandboxes",
+    "edges": [
+      {
+        "kind": "parent_epic",
+        "target_id": "d7468114-0e27-49e0-81d7-06545afdbd7b",
+        "target_repo": "workspace",
+        "target_ticket_key": "GB-106"
+      }
+    ],
+    "id": "9b1ba836-d832-4703-9ced-f3c72110f399",
+    "kind": "feature",
+    "latest_handoff": null,
+    "plan": null,
+    "priority": 1,
+    "scope": {
+      "crate_name": "miter-engine",
+      "labels": [],
+      "module_path": null,
+      "repo": "miter",
+      "target_files": [],
+      "target_symbols": []
+    },
+    "slug": "elevate-miter-documentation-across-architecture-spec-design-product-contributing-roadmap-9b1ba8",
+    "status": "verified",
+    "ticket_key": "MTR-7",
+    "title": "Elevate miter documentation across ARCHITECTURE, SPEC, DESIGN, PRODUCT, CONTRIBUTING, ROADMAP",
+    "updated_at_epoch_ms": 1794037977089,
+    "verification_receipt": {
+      "base_commit_sha": "eed78249006ec23d23a2e423990152a4d0eaea8a",
+      "chain_key": null,
+      "command": "n/a",
+      "commit_shas": [
+        "e12bf0cbe3a053df6d9edca07d7ffa20e8457350",
+        "cfc2caffca583376e1f8ff30fe07f2ecab2f7316",
+        "7d1d5229ac573e102172c11f3ccd202799c47cc5",
+        "d16c2e2a9c316ac4e8549a94bdf968269628fd99",
+        "a44f7ec6e5589064e5a3284e22416d565868aa16",
+        "8a4bf9b9d5b6529831545338a88e482811d77856"
+      ],
+      "diagnostic_count": null,
+      "exit_code": 0,
+      "git_branch": "fix/storypole-linked-tasks",
+      "head_commit_sha": "8a4bf9b9d5b6529831545338a88e482811d77856",
+      "repo": null,
+      "summary": "Already shipped: miter/CHANGELOG.md records 'miter: elevate 9-document architecture to gold standard (GB-108)'. Verified structurally with chalkline docs check -d miter: 9 present, 0 missing, 0 drifted; ARCHITECTURE/SPEC/DESIGN/PRODUCT/CONTRIBUTING/ROADMAP all carry mermaid diagrams, invariants and suite cross-links. Status was stale.",
+      "verified_at_epoch_ms": 1793174806720,
+      "verifier": "cline"
+    }
+  }
+}

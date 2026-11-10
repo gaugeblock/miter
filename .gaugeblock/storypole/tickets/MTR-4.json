@@ -1,0 +1,111 @@
+{
+  "events": [
+    {
+      "event": "task_created",
+      "task": {
+        "acceptance_criteria": [
+          "Tier 4 cross-repo verification passes",
+          "Manifest version bumped to 0.1.0-alpha.4",
+          "Annotated git tag created"
+        ],
+        "active_claim": null,
+        "created_at_epoch_ms": 1792995415843,
+        "decisions": [],
+        "description": "Automated release ticket for miter v0.1.0-alpha.4.\n\nRationale: New feature detected; incrementing alpha pre-release\nShipped Tasks: GB-42",
+        "edges": [],
+        "id": "04e9b89d-e0f1-404c-a21e-4850910fc90f",
+        "kind": "refactor",
+        "latest_handoff": null,
+        "plan": null,
+        "priority": 1,
+        "scope": {
+          "crate_name": "miter-core",
+          "labels": [
+            "release"
+          ],
+          "module_path": null,
+          "repo": "miter",
+          "target_files": [],
+          "target_symbols": []
+        },
+        "slug": "chore-release-release-miter-v0-1-0-alpha-4-04e9b8",
+        "status": "ready",
+        "ticket_key": "MTR-4",
+        "title": "chore(release): release miter v0.1.0-alpha.4",
+        "updated_at_epoch_ms": 1792995415843,
+        "verification_receipt": null
+      }
+    },
+    {
+      "event": "task_verified",
+      "receipt": {
+        "base_commit_sha": null,
+        "chain_key": null,
+        "command": "outfeed apply",
+        "commit_shas": [],
+        "diagnostic_count": 0,
+        "exit_code": 0,
+        "git_branch": null,
+        "head_commit_sha": null,
+        "repo": null,
+        "summary": "Release v0.1.0-alpha.4 successfully certified and tagged",
+        "verified_at_epoch_ms": 1792995415867,
+        "verifier": "outfeed"
+      },
+      "task_id": "04e9b89d-e0f1-404c-a21e-4850910fc90f"
+    },
+    {
+      "event": "task_archived",
+      "status": "verified",
+      "task_id": "04e9b89d-e0f1-404c-a21e-4850910fc90f",
+      "timestamp_ms": 1794037963204
+    }
+  ],
+  "ticket": {
+    "acceptance_criteria": [
+      "Tier 4 cross-repo verification passes",
+      "Manifest version bumped to 0.1.0-alpha.4",
+      "Annotated git tag created"
+    ],
+    "active_claim": null,
+    "archived_at_epoch_ms": 1794037963204,
+    "created_at_epoch_ms": 1792995415843,
+    "decisions": [],
+    "description": "Automated release ticket for miter v0.1.0-alpha.4.\n\nRationale: New feature detected; incrementing alpha pre-release\nShipped Tasks: GB-42",
+    "edges": [],
+    "id": "04e9b89d-e0f1-404c-a21e-4850910fc90f",
+    "kind": "refactor",
+    "latest_handoff": null,
+    "plan": null,
+    "priority": 1,
+    "scope": {
+      "crate_name": "miter-core",
+      "labels": [
+        "release"
+      ],
+      "module_path": null,
+      "repo": "miter",
+      "target_files": [],
+      "target_symbols": []
+    },
+    "slug": "chore-release-release-miter-v0-1-0-alpha-4-04e9b8",
+    "status": "verified",
+    "ticket_key": "MTR-4",
+    "title": "chore(release): release miter v0.1.0-alpha.4",
+    "updated_at_epoch_ms": 1794037963204,
+    "verification_receipt": {
+      "base_commit_sha": null,
+      "chain_key": null,
+      "command": "outfeed apply",
+      "commit_shas": [],
+      "diagnostic_count": 0,
+      "exit_code": 0,
+      "git_branch": null,
+      "head_commit_sha": null,
+      "repo": null,
+      "summary": "Release v0.1.0-alpha.4 successfully certified and tagged",
+      "verified_at_epoch_ms": 1792995415867,
+      "verifier": "outfeed"
+    }
+  }
+}
