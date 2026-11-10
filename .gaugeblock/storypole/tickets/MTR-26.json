@@ -1,161 +1,167 @@
 {
-  "events": [
-    {
-      "captured_by_agent": "user",
-      "discovered_from_task_id": null,
-      "event": "deferred_item_captured",
-      "task": {
-        "acceptance_criteria": [],
-        "active_claim": null,
-        "created_at_epoch_ms": 1794110408606,
-        "decisions": [],
-        "description": "",
-        "edges": [],
-        "id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29",
-        "kind": "bug",
-        "latest_handoff": null,
-        "plan": null,
-        "priority": 3,
-        "scope": {
-          "crate_name": "miter-cli",
-          "labels": [],
-          "module_path": null,
-          "repo": "miter",
-          "target_files": [],
-          "target_symbols": [
-            "miter_cli::audit"
-          ]
-        },
-        "slug": "every-member-verification-chain-runs-miter-audit-paths-which-requires-a-repo-local-index-that-nothing-creates-4bc73d",
-        "status": "triage",
-        "ticket_key": "MTR-26",
-        "title": "every member verification chain runs miter audit --paths, which requires a repo-local index that nothing creates",
-        "updated_at_epoch_ms": 1794110408606,
-        "verification_receipt": null
-      }
-    },
-    {
-      "acceptance_criteria": null,
-      "description": "OBSERVED 2026-11-07: verifying CO-8 ran the chain `miter contracts && outfeed lockfiles && miter audit --path . --paths && chalkline docs check --workspace` against `common`, which failed with \"miter: no index at common/.gaugeblock/miter/miter.redb: run `miter index <PATH> --db ...` first\". Every member chain begins that way, so a member repository cannot pass its own chain from a clean checkout. Related to GB-288 (a member `miter index` writes to the suite root unless --db is passed), which is why the index is never where the chain looks for it.",
-      "event": "task_updated",
-      "priority": null,
-      "scope": null,
-      "task_id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29",
-      "timestamp_ms": 1794119323873,
-      "title": null
-    },
-    {
-      "acceptance_criteria": null,
-      "description": "OBSERVED 2026-11-07: verifying CO-8 ran the chain `miter contracts && outfeed lockfiles && miter audit --path . --paths && chalkline docs check --workspace` against `common`, which failed with \"miter: no index at common/.gaugeblock/miter/miter.redb: run `miter index <PATH> --db ...` first\". Every member chain begins that way, so a member repository cannot pass its own chain from a clean checkout. Related to GB-288 (a member `miter index` writes to the suite root unless --db is passed), which is why the index is never where the chain looks for it.\n\nCORRECTION 2026-11-07, empirical, run inside common/:\n\n  miter contracts          -> FAILS: no index at common/.gaugeblock/miter/miter.redb\n  miter audit --paths      -> PASSES (audit never touches an index; it reads sources and manifests)\n  outfeed lockfiles        -> PASSES while printing \"All 0 repositories track a fresh Cargo.lock\"\n\nSo the original title blamed the wrong command. Three facts replace it:\n\n1. MEMBER CHAINS ARE NOT AFFECTED. storypole's chain is fmt + clippy + nextest + `miter audit --paths` + docs check, and it runs clean (SP-33 verified against it). The failure I saw was the HARNESS chain running inside a member repo, which was the chain-fallback bug fixed in a626638. Filing it as a member-chain blocker was reading a symptom of that bug.\n\n2. THE HARNESS CHAIN DOES DEPEND ON AN INDEX NOBODY CREATES. `miter contracts` (the first command of the gaugeblock/default chain) needs an index at the repository it runs in, so the chain cannot pass from a fresh clone until someone runs `miter index`. This is real and will bite CI.\n\n3. `outfeed lockfiles` REPORTS SUCCESS ON AN EMPTY SET. Run inside a member repository it finds zero repositories and says so with exit 0 - the same silence this suite keeps removing. Filed separately.\n\nThe fix for (2) should follow GB-237's precedent for reads: a command that needs the index should build it when it is absent rather than instructing the caller to, because an instruction inside a verification chain is a step nobody notices is missing.",
-      "event": "task_updated",
-      "priority": null,
-      "scope": null,
-      "task_id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29",
-      "timestamp_ms": 1794119456030,
-      "title": "miter contracts needs an index nothing creates, so the harness chain cannot pass from a fresh clone"
-    },
-    {
-      "claim": {
-        "agent_id": "cline-agent",
-        "base_commit_sha": "f6d40616dc3d2fad9ce6b1831db125d9c2d3a758",
-        "claimed_at_epoch_ms": 1794120087933,
-        "git_branch": "main",
-        "lease_expires_at_epoch_ms": 1794123687933
-      },
-      "event": "task_claimed",
-      "task_id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29"
-    },
-    {
-      "event": "status_changed",
-      "from": "triage",
-      "reason": "Claimed by cline-agent",
-      "task_id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29",
-      "timestamp_ms": 1794120087933,
-      "to": "in_progress"
-    },
-    {
-      "event": "task_verified",
-      "receipt": {
-        "base_commit_sha": null,
-        "chain_key": "miter",
-        "command": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo nextest run --workspace && miter audit --path . --threshold 250 --paths && chalkline docs check -d .",
-        "commit_shas": [
-          "f6d40616dc3d2fad9ce6b1831db125d9c2d3a758"
-        ],
-        "diagnostic_count": null,
-        "exit_code": 0,
-        "git_branch": "main",
-        "head_commit_sha": "f6d40616dc3d2fad9ce6b1831db125d9c2d3a758",
-        "repo": "miter",
-        "summary": "[window: no base commit could be named, so this receipt covers HEAD only]\nAUDIT PASSED: No files exceed 250 lines in .\nAUDIT PASSED: every crate naming .gaugeblock depends on gaugeblock-workspace\nAUDIT PASSED: every crate resolving the suite has a multi-repository test\n\n=== Gaugeblock 9-Document Architecture Audit ===\nRepository: .\n\n[OK]      Readme           (README.md)\n[OK]      Contributing     (CONTRIBUTING.md)\n[OK]      Product          (docs/PRODUCT.md)\n[OK]      Architecture     (docs/ARCHITECTURE.md)\n[OK]      Spec             (docs/SPEC.md)\n[OK]      Design           (docs/DESIGN.md)\n[OK]      Roadmap          (docs/ROADMAP.md)\n[OK]      Changelog        (CHANGELOG.md)\n[OK]      Agents           (AGENTS.md)\n\nSummary: 9 present, 0 missing, 0 drifted\n\n",
-        "verified_at_epoch_ms": 1794120093438,
-        "verifier": "storypole-verify"
-      },
-      "task_id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29"
-    },
-    {
-      "acceptance_criteria": null,
-      "description": "OBSERVED 2026-11-07: verifying CO-8 ran the chain `miter contracts && outfeed lockfiles && miter audit --path . --paths && chalkline docs check --workspace` against `common`, which failed with \"miter: no index at common/.gaugeblock/miter/miter.redb: run `miter index <PATH> --db ...` first\". Every member chain begins that way, so a member repository cannot pass its own chain from a clean checkout. Related to GB-288 (a member `miter index` writes to the suite root unless --db is passed), which is why the index is never where the chain looks for it.\n\nCORRECTION 2026-11-07, empirical, run inside common/:\n\n  miter contracts          -> FAILS: no index at common/.gaugeblock/miter/miter.redb\n  miter audit --paths      -> PASSES (audit never touches an index; it reads sources and manifests)\n  outfeed lockfiles        -> PASSES while printing \"All 0 repositories track a fresh Cargo.lock\"\n\nSo the original title blamed the wrong command. Three facts replace it:\n\n1. MEMBER CHAINS ARE NOT AFFECTED. storypole's chain is fmt + clippy + nextest + `miter audit --paths` + docs check, and it runs clean (SP-33 verified against it). The failure I saw was the HARNESS chain running inside a member repo, which was the chain-fallback bug fixed in a626638. Filing it as a member-chain blocker was reading a symptom of that bug.\n\n2. THE HARNESS CHAIN DOES DEPEND ON AN INDEX NOBODY CREATES. `miter contracts` (the first command of the gaugeblock/default chain) needs an index at the repository it runs in, so the chain cannot pass from a fresh clone until someone runs `miter index`. This is real and will bite CI.\n\n3. `outfeed lockfiles` REPORTS SUCCESS ON AN EMPTY SET. Run inside a member repository it finds zero repositories and says so with exit 0 - the same silence this suite keeps removing. Filed separately.\n\nThe fix for (2) should follow GB-237's precedent for reads: a command that needs the index should build it when it is absent rather than instructing the caller to, because an instruction inside a verification chain is a step nobody notices is missing.\n\nLIVE PROOF 2026-11-07, against a fixture with no index at all (/tmp/fresh322):\n\n  $ miter find alpha --db .gaugeblock/miter/miter.redb\n  miter: no index at ...miter.redb; built it in 607 ms (1 files). Set MITTER_NO_AUTO_INDEX to forbid this.\n  alpha: 1 hit(s) in 1 file(s), 1 inside a declaration\n\n  second call   -> answers silently, no build\n  MITTER_NO_AUTO_INDEX=1 -> \"no index at ...: run miter index ... first\", the old behaviour\n\nCommitted as f6d4061 and verified with the miter chain.",
-      "event": "task_updated",
-      "priority": null,
-      "scope": null,
-      "task_id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29",
-      "timestamp_ms": 1794120157065,
-      "title": null
-    },
-    {
-      "acceptance_criteria": null,
-      "description": "OBSERVED 2026-11-07: verifying CO-8 ran the chain `miter contracts && outfeed lockfiles && miter audit --path . --paths && chalkline docs check --workspace` against `common`, which failed with \"miter: no index at common/.gaugeblock/miter/miter.redb: run `miter index <PATH> --db ...` first\". Every member chain begins that way, so a member repository cannot pass its own chain from a clean checkout. Related to GB-288 (a member `miter index` writes to the suite root unless --db is passed), which is why the index is never where the chain looks for it.\n\nCORRECTION 2026-11-07, empirical, run inside common/:\n\n  miter contracts          -> FAILS: no index at common/.gaugeblock/miter/miter.redb\n  miter audit --paths      -> PASSES (audit never touches an index; it reads sources and manifests)\n  outfeed lockfiles        -> PASSES while printing \"All 0 repositories track a fresh Cargo.lock\"\n\nSo the original title blamed the wrong command. Three facts replace it:\n\n1. MEMBER CHAINS ARE NOT AFFECTED. storypole's chain is fmt + clippy + nextest + `miter audit --paths` + docs check, and it runs clean (SP-33 verified against it). The failure I saw was the HARNESS chain running inside a member repo, which was the chain-fallback bug fixed in a626638. Filing it as a member-chain blocker was reading a symptom of that bug.\n\n2. THE HARNESS CHAIN DOES DEPEND ON AN INDEX NOBODY CREATES. `miter contracts` (the first command of the gaugeblock/default chain) needs an index at the repository it runs in, so the chain cannot pass from a fresh clone until someone runs `miter index`. This is real and will bite CI.\n\n3. `outfeed lockfiles` REPORTS SUCCESS ON AN EMPTY SET. Run inside a member repository it finds zero repositories and says so with exit 0 - the same silence this suite keeps removing. Filed separately.\n\nThe fix for (2) should follow GB-237's precedent for reads: a command that needs the index should build it when it is absent rather than instructing the caller to, because an instruction inside a verification chain is a step nobody notices is missing.\n\nLIVE PROOF 2026-11-07, against a fixture with no index at all (/tmp/fresh322):\n\n  $ miter find alpha --db .gaugeblock/miter/miter.redb\n  miter: no index at ...miter.redb; built it in 607 ms (1 files). Set MITTER_NO_AUTO_INDEX to forbid this.\n  alpha: 1 hit(s) in 1 file(s), 1 inside a declaration\n\n  second call   -> answers silently, no build\n  MITTER_NO_AUTO_INDEX=1 -> \"no index at ...: run miter index ... first\", the old behaviour\n\nCommitted as f6d4061 and verified with the miter chain.\n\nCORRECTION 2026-11-07: this ticket's earlier notes say `MITTER_NO_AUTO_INDEX`. The variable is `MITER_NO_AUTO_INDEX`, one T - the tool is `miter`, as in a miter joint. The misspelling was in the shipped constant and in this ledger, and was fixed in 57d6fbe with a test that asserts the prefix and asserts the misspelling is absent. Renamed rather than aliased: pre-release, and nobody set the wrong name deliberately.",
-      "event": "task_updated",
-      "priority": null,
-      "scope": null,
-      "task_id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29",
-      "timestamp_ms": 1794120528402,
-      "title": null
-    }
-  ],
   "ticket": {
-    "acceptance_criteria": [],
-    "active_claim": null,
-    "created_at_epoch_ms": 1794110408606,
-    "decisions": [],
-    "description": "OBSERVED 2026-11-07: verifying CO-8 ran the chain `miter contracts && outfeed lockfiles && miter audit --path . --paths && chalkline docs check --workspace` against `common`, which failed with \"miter: no index at common/.gaugeblock/miter/miter.redb: run `miter index <PATH> --db ...` first\". Every member chain begins that way, so a member repository cannot pass its own chain from a clean checkout. Related to GB-288 (a member `miter index` writes to the suite root unless --db is passed), which is why the index is never where the chain looks for it.\n\nCORRECTION 2026-11-07, empirical, run inside common/:\n\n  miter contracts          -> FAILS: no index at common/.gaugeblock/miter/miter.redb\n  miter audit --paths      -> PASSES (audit never touches an index; it reads sources and manifests)\n  outfeed lockfiles        -> PASSES while printing \"All 0 repositories track a fresh Cargo.lock\"\n\nSo the original title blamed the wrong command. Three facts replace it:\n\n1. MEMBER CHAINS ARE NOT AFFECTED. storypole's chain is fmt + clippy + nextest + `miter audit --paths` + docs check, and it runs clean (SP-33 verified against it). The failure I saw was the HARNESS chain running inside a member repo, which was the chain-fallback bug fixed in a626638. Filing it as a member-chain blocker was reading a symptom of that bug.\n\n2. THE HARNESS CHAIN DOES DEPEND ON AN INDEX NOBODY CREATES. `miter contracts` (the first command of the gaugeblock/default chain) needs an index at the repository it runs in, so the chain cannot pass from a fresh clone until someone runs `miter index`. This is real and will bite CI.\n\n3. `outfeed lockfiles` REPORTS SUCCESS ON AN EMPTY SET. Run inside a member repository it finds zero repositories and says so with exit 0 - the same silence this suite keeps removing. Filed separately.\n\nThe fix for (2) should follow GB-237's precedent for reads: a command that needs the index should build it when it is absent rather than instructing the caller to, because an instruction inside a verification chain is a step nobody notices is missing.\n\nLIVE PROOF 2026-11-07, against a fixture with no index at all (/tmp/fresh322):\n\n  $ miter find alpha --db .gaugeblock/miter/miter.redb\n  miter: no index at ...miter.redb; built it in 607 ms (1 files). Set MITTER_NO_AUTO_INDEX to forbid this.\n  alpha: 1 hit(s) in 1 file(s), 1 inside a declaration\n\n  second call   -> answers silently, no build\n  MITTER_NO_AUTO_INDEX=1 -> \"no index at ...: run miter index ... first\", the old behaviour\n\nCommitted as f6d4061 and verified with the miter chain.\n\nCORRECTION 2026-11-07: this ticket's earlier notes say `MITTER_NO_AUTO_INDEX`. The variable is `MITER_NO_AUTO_INDEX`, one T - the tool is `miter`, as in a miter joint. The misspelling was in the shipped constant and in this ledger, and was fixed in 57d6fbe with a test that asserts the prefix and asserts the misspelling is absent. Renamed rather than aliased: pre-release, and nobody set the wrong name deliberately.",
-    "edges": [],
     "id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29",
+    "ticket_key": "MTR-26",
+    "slug": "every-member-verification-chain-runs-miter-audit-paths-which-requires-a-repo-local-index-that-nothing-creates-4bc73d",
+    "title": "miter contracts needs an index nothing creates, so the harness chain cannot pass from a fresh clone",
+    "description": "OBSERVED 2026-11-07: verifying CO-8 ran the chain `miter contracts && outfeed lockfiles && miter audit --path . --paths && chalkline docs check --workspace` against `common`, which failed with \"miter: no index at common/.gaugeblock/miter/miter.redb: run `miter index <PATH> --db ...` first\". Every member chain begins that way, so a member repository cannot pass its own chain from a clean checkout. Related to GB-288 (a member `miter index` writes to the suite root unless --db is passed), which is why the index is never where the chain looks for it.\n\nCORRECTION 2026-11-07, empirical, run inside common/:\n\n  miter contracts          -> FAILS: no index at common/.gaugeblock/miter/miter.redb\n  miter audit --paths      -> PASSES (audit never touches an index; it reads sources and manifests)\n  outfeed lockfiles        -> PASSES while printing \"All 0 repositories track a fresh Cargo.lock\"\n\nSo the original title blamed the wrong command. Three facts replace it:\n\n1. MEMBER CHAINS ARE NOT AFFECTED. storypole's chain is fmt + clippy + nextest + `miter audit --paths` + docs check, and it runs clean (SP-33 verified against it). The failure I saw was the HARNESS chain running inside a member repo, which was the chain-fallback bug fixed in a626638. Filing it as a member-chain blocker was reading a symptom of that bug.\n\n2. THE HARNESS CHAIN DOES DEPEND ON AN INDEX NOBODY CREATES. `miter contracts` (the first command of the gaugeblock/default chain) needs an index at the repository it runs in, so the chain cannot pass from a fresh clone until someone runs `miter index`. This is real and will bite CI.\n\n3. `outfeed lockfiles` REPORTS SUCCESS ON AN EMPTY SET. Run inside a member repository it finds zero repositories and says so with exit 0 - the same silence this suite keeps removing. Filed separately.\n\nThe fix for (2) should follow GB-237's precedent for reads: a command that needs the index should build it when it is absent rather than instructing the caller to, because an instruction inside a verification chain is a step nobody notices is missing.\n\nLIVE PROOF 2026-11-07, against a fixture with no index at all (/tmp/fresh322):\n\n  $ miter find alpha --db .gaugeblock/miter/miter.redb\n  miter: no index at ...miter.redb; built it in 607 ms (1 files). Set MITTER_NO_AUTO_INDEX to forbid this.\n  alpha: 1 hit(s) in 1 file(s), 1 inside a declaration\n\n  second call   -> answers silently, no build\n  MITTER_NO_AUTO_INDEX=1 -> \"no index at ...: run miter index ... first\", the old behaviour\n\nCommitted as f6d4061 and verified with the miter chain.\n\nCORRECTION 2026-11-07: this ticket's earlier notes say `MITTER_NO_AUTO_INDEX`. The variable is `MITER_NO_AUTO_INDEX`, one T - the tool is `miter`, as in a miter joint. The misspelling was in the shipped constant and in this ledger, and was fixed in 57d6fbe with a test that asserts the prefix and asserts the misspelling is absent. Renamed rather than aliased: pre-release, and nobody set the wrong name deliberately.",
     "kind": "bug",
-    "latest_handoff": null,
-    "plan": null,
+    "status": "verified",
     "priority": 3,
     "scope": {
-      "crate_name": "miter-cli",
-      "labels": [],
-      "module_path": null,
       "repo": "miter",
+      "crate_name": "miter-cli",
+      "module_path": null,
       "target_files": [],
       "target_symbols": [
         "miter_cli::audit"
-      ]
+      ],
+      "labels": []
     },
-    "slug": "every-member-verification-chain-runs-miter-audit-paths-which-requires-a-repo-local-index-that-nothing-creates-4bc73d",
-    "status": "verified",
-    "ticket_key": "MTR-26",
-    "title": "miter contracts needs an index nothing creates, so the harness chain cannot pass from a fresh clone",
-    "updated_at_epoch_ms": 1794120528402,
+    "edges": [],
+    "decisions": [],
+    "acceptance_criteria": [],
+    "plan": null,
+    "active_claim": null,
+    "latest_handoff": null,
     "verification_receipt": {
-      "base_commit_sha": null,
-      "chain_key": "miter",
+      "verifier": "storypole-verify",
       "command": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo nextest run --workspace && miter audit --path . --threshold 250 --paths && chalkline docs check -d .",
+      "exit_code": 0,
+      "diagnostic_count": null,
+      "summary": "[window: no base commit could be named, so this receipt covers HEAD only]\nAUDIT PASSED: No files exceed 250 lines in .\nAUDIT PASSED: every crate naming .gaugeblock depends on gaugeblock-workspace\nAUDIT PASSED: every crate resolving the suite has a multi-repository test\n\n=== Gaugeblock 9-Document Architecture Audit ===\nRepository: .\n\n[OK]      Readme           (README.md)\n[OK]      Contributing     (CONTRIBUTING.md)\n[OK]      Product          (docs/PRODUCT.md)\n[OK]      Architecture     (docs/ARCHITECTURE.md)\n[OK]      Spec             (docs/SPEC.md)\n[OK]      Design           (docs/DESIGN.md)\n[OK]      Roadmap          (docs/ROADMAP.md)\n[OK]      Changelog        (CHANGELOG.md)\n[OK]      Agents           (AGENTS.md)\n\nSummary: 9 present, 0 missing, 0 drifted\n\n",
+      "verified_at_epoch_ms": 1794120093438,
+      "git_branch": "main",
+      "base_commit_sha": null,
+      "head_commit_sha": "f6d40616dc3d2fad9ce6b1831db125d9c2d3a758",
       "commit_shas": [
         "f6d40616dc3d2fad9ce6b1831db125d9c2d3a758"
       ],
-      "diagnostic_count": null,
-      "exit_code": 0,
-      "git_branch": "main",
-      "head_commit_sha": "f6d40616dc3d2fad9ce6b1831db125d9c2d3a758",
       "repo": "miter",
-      "summary": "[window: no base commit could be named, so this receipt covers HEAD only]\nAUDIT PASSED: No files exceed 250 lines in .\nAUDIT PASSED: every crate naming .gaugeblock depends on gaugeblock-workspace\nAUDIT PASSED: every crate resolving the suite has a multi-repository test\n\n=== Gaugeblock 9-Document Architecture Audit ===\nRepository: .\n\n[OK]      Readme           (README.md)\n[OK]      Contributing     (CONTRIBUTING.md)\n[OK]      Product          (docs/PRODUCT.md)\n[OK]      Architecture     (docs/ARCHITECTURE.md)\n[OK]      Spec             (docs/SPEC.md)\n[OK]      Design           (docs/DESIGN.md)\n[OK]      Roadmap          (docs/ROADMAP.md)\n[OK]      Changelog        (CHANGELOG.md)\n[OK]      Agents           (AGENTS.md)\n\nSummary: 9 present, 0 missing, 0 drifted\n\n",
-      "verified_at_epoch_ms": 1794120093438,
-      "verifier": "storypole-verify"
+      "chain_key": "miter"
+    },
+    "created_at_epoch_ms": 1794110408606,
+    "updated_at_epoch_ms": 1794120528402
+  },
+  "events": [
+    {
+      "event": "deferred_item_captured",
+      "task": {
+        "id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29",
+        "ticket_key": "MTR-26",
+        "slug": "every-member-verification-chain-runs-miter-audit-paths-which-requires-a-repo-local-index-that-nothing-creates-4bc73d",
+        "title": "every member verification chain runs miter audit --paths, which requires a repo-local index that nothing creates",
+        "description": "",
+        "kind": "bug",
+        "status": "triage",
+        "priority": 3,
+        "scope": {
+          "repo": "miter",
+          "crate_name": "miter-cli",
+          "module_path": null,
+          "target_files": [],
+          "target_symbols": [
+            "miter_cli::audit"
+          ],
+          "labels": []
+        },
+        "edges": [],
+        "decisions": [],
+        "acceptance_criteria": [],
+        "plan": null,
+        "active_claim": null,
+        "latest_handoff": null,
+        "verification_receipt": null,
+        "created_at_epoch_ms": 1794110408606,
+        "updated_at_epoch_ms": 1794110408606
+      },
+      "captured_by_agent": "user",
+      "discovered_from_task_id": null
+    },
+    {
+      "event": "task_updated",
+      "task_id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29",
+      "title": null,
+      "description": "OBSERVED 2026-11-07: verifying CO-8 ran the chain `miter contracts && outfeed lockfiles && miter audit --path . --paths && chalkline docs check --workspace` against `common`, which failed with \"miter: no index at common/.gaugeblock/miter/miter.redb: run `miter index <PATH> --db ...` first\". Every member chain begins that way, so a member repository cannot pass its own chain from a clean checkout. Related to GB-288 (a member `miter index` writes to the suite root unless --db is passed), which is why the index is never where the chain looks for it.",
+      "priority": null,
+      "scope": null,
+      "acceptance_criteria": null,
+      "timestamp_ms": 1794119323873
+    },
+    {
+      "event": "task_updated",
+      "task_id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29",
+      "title": "miter contracts needs an index nothing creates, so the harness chain cannot pass from a fresh clone",
+      "description": "OBSERVED 2026-11-07: verifying CO-8 ran the chain `miter contracts && outfeed lockfiles && miter audit --path . --paths && chalkline docs check --workspace` against `common`, which failed with \"miter: no index at common/.gaugeblock/miter/miter.redb: run `miter index <PATH> --db ...` first\". Every member chain begins that way, so a member repository cannot pass its own chain from a clean checkout. Related to GB-288 (a member `miter index` writes to the suite root unless --db is passed), which is why the index is never where the chain looks for it.\n\nCORRECTION 2026-11-07, empirical, run inside common/:\n\n  miter contracts          -> FAILS: no index at common/.gaugeblock/miter/miter.redb\n  miter audit --paths      -> PASSES (audit never touches an index; it reads sources and manifests)\n  outfeed lockfiles        -> PASSES while printing \"All 0 repositories track a fresh Cargo.lock\"\n\nSo the original title blamed the wrong command. Three facts replace it:\n\n1. MEMBER CHAINS ARE NOT AFFECTED. storypole's chain is fmt + clippy + nextest + `miter audit --paths` + docs check, and it runs clean (SP-33 verified against it). The failure I saw was the HARNESS chain running inside a member repo, which was the chain-fallback bug fixed in a626638. Filing it as a member-chain blocker was reading a symptom of that bug.\n\n2. THE HARNESS CHAIN DOES DEPEND ON AN INDEX NOBODY CREATES. `miter contracts` (the first command of the gaugeblock/default chain) needs an index at the repository it runs in, so the chain cannot pass from a fresh clone until someone runs `miter index`. This is real and will bite CI.\n\n3. `outfeed lockfiles` REPORTS SUCCESS ON AN EMPTY SET. Run inside a member repository it finds zero repositories and says so with exit 0 - the same silence this suite keeps removing. Filed separately.\n\nThe fix for (2) should follow GB-237's precedent for reads: a command that needs the index should build it when it is absent rather than instructing the caller to, because an instruction inside a verification chain is a step nobody notices is missing.",
+      "priority": null,
+      "scope": null,
+      "acceptance_criteria": null,
+      "timestamp_ms": 1794119456030
+    },
+    {
+      "event": "task_claimed",
+      "task_id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29",
+      "claim": {
+        "agent_id": "cline-agent",
+        "claimed_at_epoch_ms": 1794120087933,
+        "lease_expires_at_epoch_ms": 1794123687933,
+        "git_branch": "main",
+        "base_commit_sha": "f6d40616dc3d2fad9ce6b1831db125d9c2d3a758"
+      }
+    },
+    {
+      "event": "status_changed",
+      "task_id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29",
+      "from": "triage",
+      "to": "in_progress",
+      "reason": "Claimed by cline-agent",
+      "timestamp_ms": 1794120087933
+    },
+    {
+      "event": "task_verified",
+      "task_id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29",
+      "receipt": {
+        "verifier": "storypole-verify",
+        "command": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo nextest run --workspace && miter audit --path . --threshold 250 --paths && chalkline docs check -d .",
+        "exit_code": 0,
+        "diagnostic_count": null,
+        "summary": "[window: no base commit could be named, so this receipt covers HEAD only]\nAUDIT PASSED: No files exceed 250 lines in .\nAUDIT PASSED: every crate naming .gaugeblock depends on gaugeblock-workspace\nAUDIT PASSED: every crate resolving the suite has a multi-repository test\n\n=== Gaugeblock 9-Document Architecture Audit ===\nRepository: .\n\n[OK]      Readme           (README.md)\n[OK]      Contributing     (CONTRIBUTING.md)\n[OK]      Product          (docs/PRODUCT.md)\n[OK]      Architecture     (docs/ARCHITECTURE.md)\n[OK]      Spec             (docs/SPEC.md)\n[OK]      Design           (docs/DESIGN.md)\n[OK]      Roadmap          (docs/ROADMAP.md)\n[OK]      Changelog        (CHANGELOG.md)\n[OK]      Agents           (AGENTS.md)\n\nSummary: 9 present, 0 missing, 0 drifted\n\n",
+        "verified_at_epoch_ms": 1794120093438,
+        "git_branch": "main",
+        "base_commit_sha": null,
+        "head_commit_sha": "f6d40616dc3d2fad9ce6b1831db125d9c2d3a758",
+        "commit_shas": [
+          "f6d40616dc3d2fad9ce6b1831db125d9c2d3a758"
+        ],
+        "repo": "miter",
+        "chain_key": "miter"
+      }
+    },
+    {
+      "event": "task_updated",
+      "task_id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29",
+      "title": null,
+      "description": "OBSERVED 2026-11-07: verifying CO-8 ran the chain `miter contracts && outfeed lockfiles && miter audit --path . --paths && chalkline docs check --workspace` against `common`, which failed with \"miter: no index at common/.gaugeblock/miter/miter.redb: run `miter index <PATH> --db ...` first\". Every member chain begins that way, so a member repository cannot pass its own chain from a clean checkout. Related to GB-288 (a member `miter index` writes to the suite root unless --db is passed), which is why the index is never where the chain looks for it.\n\nCORRECTION 2026-11-07, empirical, run inside common/:\n\n  miter contracts          -> FAILS: no index at common/.gaugeblock/miter/miter.redb\n  miter audit --paths      -> PASSES (audit never touches an index; it reads sources and manifests)\n  outfeed lockfiles        -> PASSES while printing \"All 0 repositories track a fresh Cargo.lock\"\n\nSo the original title blamed the wrong command. Three facts replace it:\n\n1. MEMBER CHAINS ARE NOT AFFECTED. storypole's chain is fmt + clippy + nextest + `miter audit --paths` + docs check, and it runs clean (SP-33 verified against it). The failure I saw was the HARNESS chain running inside a member repo, which was the chain-fallback bug fixed in a626638. Filing it as a member-chain blocker was reading a symptom of that bug.\n\n2. THE HARNESS CHAIN DOES DEPEND ON AN INDEX NOBODY CREATES. `miter contracts` (the first command of the gaugeblock/default chain) needs an index at the repository it runs in, so the chain cannot pass from a fresh clone until someone runs `miter index`. This is real and will bite CI.\n\n3. `outfeed lockfiles` REPORTS SUCCESS ON AN EMPTY SET. Run inside a member repository it finds zero repositories and says so with exit 0 - the same silence this suite keeps removing. Filed separately.\n\nThe fix for (2) should follow GB-237's precedent for reads: a command that needs the index should build it when it is absent rather than instructing the caller to, because an instruction inside a verification chain is a step nobody notices is missing.\n\nLIVE PROOF 2026-11-07, against a fixture with no index at all (/tmp/fresh322):\n\n  $ miter find alpha --db .gaugeblock/miter/miter.redb\n  miter: no index at ...miter.redb; built it in 607 ms (1 files). Set MITTER_NO_AUTO_INDEX to forbid this.\n  alpha: 1 hit(s) in 1 file(s), 1 inside a declaration\n\n  second call   -> answers silently, no build\n  MITTER_NO_AUTO_INDEX=1 -> \"no index at ...: run miter index ... first\", the old behaviour\n\nCommitted as f6d4061 and verified with the miter chain.",
+      "priority": null,
+      "scope": null,
+      "acceptance_criteria": null,
+      "timestamp_ms": 1794120157065
+    },
+    {
+      "event": "task_updated",
+      "task_id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29",
+      "title": null,
+      "description": "OBSERVED 2026-11-07: verifying CO-8 ran the chain `miter contracts && outfeed lockfiles && miter audit --path . --paths && chalkline docs check --workspace` against `common`, which failed with \"miter: no index at common/.gaugeblock/miter/miter.redb: run `miter index <PATH> --db ...` first\". Every member chain begins that way, so a member repository cannot pass its own chain from a clean checkout. Related to GB-288 (a member `miter index` writes to the suite root unless --db is passed), which is why the index is never where the chain looks for it.\n\nCORRECTION 2026-11-07, empirical, run inside common/:\n\n  miter contracts          -> FAILS: no index at common/.gaugeblock/miter/miter.redb\n  miter audit --paths      -> PASSES (audit never touches an index; it reads sources and manifests)\n  outfeed lockfiles        -> PASSES while printing \"All 0 repositories track a fresh Cargo.lock\"\n\nSo the original title blamed the wrong command. Three facts replace it:\n\n1. MEMBER CHAINS ARE NOT AFFECTED. storypole's chain is fmt + clippy + nextest + `miter audit --paths` + docs check, and it runs clean (SP-33 verified against it). The failure I saw was the HARNESS chain running inside a member repo, which was the chain-fallback bug fixed in a626638. Filing it as a member-chain blocker was reading a symptom of that bug.\n\n2. THE HARNESS CHAIN DOES DEPEND ON AN INDEX NOBODY CREATES. `miter contracts` (the first command of the gaugeblock/default chain) needs an index at the repository it runs in, so the chain cannot pass from a fresh clone until someone runs `miter index`. This is real and will bite CI.\n\n3. `outfeed lockfiles` REPORTS SUCCESS ON AN EMPTY SET. Run inside a member repository it finds zero repositories and says so with exit 0 - the same silence this suite keeps removing. Filed separately.\n\nThe fix for (2) should follow GB-237's precedent for reads: a command that needs the index should build it when it is absent rather than instructing the caller to, because an instruction inside a verification chain is a step nobody notices is missing.\n\nLIVE PROOF 2026-11-07, against a fixture with no index at all (/tmp/fresh322):\n\n  $ miter find alpha --db .gaugeblock/miter/miter.redb\n  miter: no index at ...miter.redb; built it in 607 ms (1 files). Set MITTER_NO_AUTO_INDEX to forbid this.\n  alpha: 1 hit(s) in 1 file(s), 1 inside a declaration\n\n  second call   -> answers silently, no build\n  MITTER_NO_AUTO_INDEX=1 -> \"no index at ...: run miter index ... first\", the old behaviour\n\nCommitted as f6d4061 and verified with the miter chain.\n\nCORRECTION 2026-11-07: this ticket's earlier notes say `MITTER_NO_AUTO_INDEX`. The variable is `MITER_NO_AUTO_INDEX`, one T - the tool is `miter`, as in a miter joint. The misspelling was in the shipped constant and in this ledger, and was fixed in 57d6fbe with a test that asserts the prefix and asserts the misspelling is absent. Renamed rather than aliased: pre-release, and nobody set the wrong name deliberately.",
+      "priority": null,
+      "scope": null,
+      "acceptance_criteria": null,
+      "timestamp_ms": 1794120528402
+    },
+    {
+      "event": "task_archived",
+      "task_id": "4bc73da4-6ffb-4232-b0ea-e4809d0f1d29",
+      "status": "verified",
+      "timestamp_ms": 1794343395180
     }
-  }
+  ]
 }
