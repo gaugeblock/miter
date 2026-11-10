@@ -39,7 +39,7 @@
         "kind": "related_to",
         "target_id": "4484615a-db81-4bab-9b6c-63b8f5e6be90",
         "target_repo": "storypole",
-        "target_ticket_key": "GB-316"
+        "target_ticket_key": "SP-29"
       },
       "event": "edge_added",
       "task_id": "30875003-d892-40bd-942a-b07b5e96ef62",
@@ -57,7 +57,7 @@
         "kind": "related_to",
         "target_id": "4484615a-db81-4bab-9b6c-63b8f5e6be90",
         "target_repo": "storypole",
-        "target_ticket_key": "GB-316"
+        "target_ticket_key": "SP-29"
       }
     ],
     "id": "30875003-d892-40bd-942a-b07b5e96ef62",

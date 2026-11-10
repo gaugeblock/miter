@@ -64,7 +64,7 @@
       "edge": {
         "kind": "blocked_by",
         "target_id": "13a13060-d732-4272-a610-5285477f7021",
-        "target_ticket_key": "GB-165"
+        "target_ticket_key": "JN-4"
       },
       "event": "edge_added",
       "task_id": "43328122-4635-4fd7-9776-2d9d6ddb6dbf",
@@ -73,7 +73,7 @@
     {
       "event": "status_changed",
       "from": "deferred",
-      "reason": "Blocked by unverified task GB-165",
+      "reason": "Blocked by unverified task JN-4",
       "task_id": "43328122-4635-4fd7-9776-2d9d6ddb6dbf",
       "timestamp_ms": 1793252048250,
       "to": "blocked"
@@ -81,7 +81,7 @@
     {
       "event": "status_changed",
       "from": "blocked",
-      "reason": "Dependency GB-165 verified",
+      "reason": "Dependency JN-4 verified",
       "task_id": "43328122-4635-4fd7-9776-2d9d6ddb6dbf",
       "timestamp_ms": 1793300978366,
       "to": "ready"
@@ -165,7 +165,7 @@
       {
         "kind": "blocked_by",
         "target_id": "13a13060-d732-4272-a610-5285477f7021",
-        "target_ticket_key": "GB-165"
+        "target_ticket_key": "JN-4"
       }
     ],
     "id": "43328122-4635-4fd7-9776-2d9d6ddb6dbf",

@@ -10,7 +10,7 @@
         "active_claim": null,
         "created_at_epoch_ms": 1793307226132,
         "decisions": [],
-        "description": "Run from the 12-repo workspace root, miter audit --threshold 200 prints AUDIT PASSED: No files exceed 200 lines. Run from inside storypole it finds 10 files over 200, and wc -l across the workspace finds 3 files over the hard 250 ceiling plus 60 in the 200-250 band. The tool therefore cannot stand in for the per-repo CI loop, which is the only thing currently catching ceiling violations. Fix: when the target path is not itself a cargo package, discover member repositories (this is gaugeblock-workspace topology, GB-189) and audit each, reporting a per-repo table and a non-zero exit on violations.",
+        "description": "Run from the 12-repo workspace root, miter audit --threshold 200 prints AUDIT PASSED: No files exceed 200 lines. Run from inside storypole it finds 10 files over 200, and wc -l across the workspace finds 3 files over the hard 250 ceiling plus 60 in the 200-250 band. The tool therefore cannot stand in for the per-repo CI loop, which is the only thing currently catching ceiling violations. Fix: when the target path is not itself a cargo package, discover member repositories (this is gaugeblock-workspace topology, CO-7) and audit each, reporting a per-repo table and a non-zero exit on violations.",
         "edges": [],
         "id": "d1ccfb4e-3630-4506-954c-b3e142007e5b",
         "kind": "bug",
@@ -39,7 +39,7 @@
       "edge": {
         "kind": "related_to",
         "target_id": "0ca27004-0ae7-46be-b4c6-65a32efa3779",
-        "target_ticket_key": "GB-189"
+        "target_ticket_key": "CO-7"
       },
       "event": "edge_added",
       "task_id": "d1ccfb4e-3630-4506-954c-b3e142007e5b",
@@ -89,12 +89,12 @@
     "archived_at_epoch_ms": 1794038003787,
     "created_at_epoch_ms": 1793307226132,
     "decisions": [],
-    "description": "Run from the 12-repo workspace root, miter audit --threshold 200 prints AUDIT PASSED: No files exceed 200 lines. Run from inside storypole it finds 10 files over 200, and wc -l across the workspace finds 3 files over the hard 250 ceiling plus 60 in the 200-250 band. The tool therefore cannot stand in for the per-repo CI loop, which is the only thing currently catching ceiling violations. Fix: when the target path is not itself a cargo package, discover member repositories (this is gaugeblock-workspace topology, GB-189) and audit each, reporting a per-repo table and a non-zero exit on violations.",
+    "description": "Run from the 12-repo workspace root, miter audit --threshold 200 prints AUDIT PASSED: No files exceed 200 lines. Run from inside storypole it finds 10 files over 200, and wc -l across the workspace finds 3 files over the hard 250 ceiling plus 60 in the 200-250 band. The tool therefore cannot stand in for the per-repo CI loop, which is the only thing currently catching ceiling violations. Fix: when the target path is not itself a cargo package, discover member repositories (this is gaugeblock-workspace topology, CO-7) and audit each, reporting a per-repo table and a non-zero exit on violations.",
     "edges": [
       {
         "kind": "related_to",
         "target_id": "0ca27004-0ae7-46be-b4c6-65a32efa3779",
-        "target_ticket_key": "GB-189"
+        "target_ticket_key": "CO-7"
       }
     ],
     "id": "d1ccfb4e-3630-4506-954c-b3e142007e5b",

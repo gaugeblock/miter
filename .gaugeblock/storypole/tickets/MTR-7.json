@@ -123,7 +123,7 @@
       "git_branch": "fix/storypole-linked-tasks",
       "head_commit_sha": "8a4bf9b9d5b6529831545338a88e482811d77856",
       "repo": null,
-      "summary": "Already shipped: miter/CHANGELOG.md records 'miter: elevate 9-document architecture to gold standard (GB-108)'. Verified structurally with chalkline docs check -d miter: 9 present, 0 missing, 0 drifted; ARCHITECTURE/SPEC/DESIGN/PRODUCT/CONTRIBUTING/ROADMAP all carry mermaid diagrams, invariants and suite cross-links. Status was stale.",
+      "summary": "Already shipped: miter/CHANGELOG.md records 'miter: elevate 9-document architecture to gold standard (MTR-7)'. Verified structurally with chalkline docs check -d miter: 9 present, 0 missing, 0 drifted; ARCHITECTURE/SPEC/DESIGN/PRODUCT/CONTRIBUTING/ROADMAP all carry mermaid diagrams, invariants and suite cross-links. Status was stale.",
       "verified_at_epoch_ms": 1793174806720,
       "verifier": "cline"
     }
