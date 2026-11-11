@@ -131,6 +131,12 @@
         "repo": "miter",
         "chain_key": "miter"
       }
+    },
+    {
+      "event": "task_archived",
+      "task_id": "9f2b9c8c-676d-43f7-a0eb-57e8d62e5453",
+      "status": "verified",
+      "timestamp_ms": 1794432695215
     }
   ]
 }
