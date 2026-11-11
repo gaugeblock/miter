@@ -45,6 +45,7 @@ pub(super) fn run_paths_audit(
     }
 
     run_multi_repo_audit(root, format)?; // GB-305, the rule's other half
+    super::audit_state::run_state_audit(root, format)?; // MTR-1, deleting state needs a reason
 
     if violations.is_empty() {
         return Ok(());
