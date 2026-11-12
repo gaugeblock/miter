@@ -26,18 +26,18 @@ const MARKER: &str = "multi-repo:";
 ///
 /// An entry is a debt, not a suppression: the crate is doing the thing the rule is about and has no evidence
 /// for it. Short on purpose - if this list grows, the rule is being negotiated with rather than enforced.
-const OWED: [(&str, &str); 4] = [
+/// Two entries left it on 2026-11-10 (`GB-305`):
+///
+/// * `storypole-cli` paid: `config check --workspace` run from a member tested the member, not the suite.
+///   Fixed in storypole `ed38beb`, with three tests that run the built binary from inside a member.
+/// * `sawhorse-core` had stopped being a finding: it no longer calls discovery, because telemetry writes
+///   through `gaugeblock_workspace::sink_path`, which resolves the suite on the caller's behalf. A debt
+///   entry for a call that is not there inflates the register and teaches readers to skim it - the
+///   behavioural test the entry asked for is deferred as SP-54 rather than left implied here.
+const OWED: [(&str, &str); 2] = [
     (
         "benchwork-cli",
         "GB-293: the daemon's telemetry and handler paths need a two-repository test",
-    ),
-    (
-        "storypole-cli",
-        "GB-305: config resolution from a member repository",
-    ),
-    (
-        "sawhorse-core",
-        "GB-305: telemetry writing from a member repository",
     ),
     (
         "rabbet-cli",
