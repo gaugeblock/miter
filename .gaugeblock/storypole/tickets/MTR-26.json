@@ -41,7 +41,8 @@
       "chain_key": "miter"
     },
     "created_at_epoch_ms": 1794110408606,
-    "updated_at_epoch_ms": 1794120528402
+    "updated_at_epoch_ms": 1794343395180,
+    "archived_at_epoch_ms": 1794343395180
   },
   "events": [
     {

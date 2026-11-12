@@ -4,10 +4,10 @@
     "ticket_key": "MTR-1",
     "slug": "miter-audit-should-refuse-a-commit-deleting-tracked-gaugeblock-state-without-citing-a-decision-record-9f2b9c",
     "title": "miter audit should refuse a commit deleting tracked .gaugeblock state without citing a decision record",
-    "description": "The rule that would have prevented this whole line of work, and the last refusal owed on storypole SP-40.\n\nWHAT HAPPENED: on 2026-11-06 ten repositories each committed chore(storypole): retire the legacy repo-local ledger, deleting their .storypole/ledger.jsonl and keeping the bytes at the suite root. It read as routine hygiene. Nobody asked why the files had frozen, and the answer - because nothing wrote to them, because write routing was never wired - was the actual defect. Days of work were spent rediscovering it.\n\nWHAT THE RULE SHOULD DO: a commit that deletes tracked files under .gaugeblock/ must cite a decision record (docs/decisions/NNNN-*.md or an ADR-NNNN reference) in its message. Requiring the ADR forces the sentence that exposes the circularity: an ADR has to say why the state is superseded, and because-nothing-writes-to-it is a statement that invites a second look.\n\nWHERE: src/cli/audit_paths.rs alongside audit_layout_adoption, so it runs in the same --paths gate every repository chain already calls.\n\nTHE HARD PART: the historical commits are already in ten repositories, so a naive rule reports violations from day one and blocks every chain. It needs a baseline - commits reachable from a recorded marker, or an allowlist beside layers-allowlist.toml naming each accepted deletion with its justification. The allowlist is probably right: ten entries, each stating why the deletion was correct, is a durable record rather than an exemption.\n\nTESTS: a fixture repository with a deletion that cites an ADR (passes), one that does not (fails naming the commit), and one that is allowlisted (passes).",
+    "description": "The rule that would have prevented this whole line of work, and the last refusal owed on storypole SP-40.\n\nWHAT HAPPENED: on 2026-11-06 ten repositories each committed chore(storypole): retire the legacy repo-local ledger, deleting their .storypole/ledger.jsonl and keeping the bytes at the suite root. It read as routine hygiene. Nobody asked why the files had frozen, and the answer - because nothing wrote to them, because write routing was never wired - was the actual defect. Days of work were spent rediscovering it.\n\nWHAT THE RULE SHOULD DO: a commit that deletes tracked files under .gaugeblock/ must cite a decision record (docs/decisions/NNNN-*.md or an ADR-NNNN reference) in its message. Requiring the ADR forces the sentence that exposes the circularity: an ADR has to say why the state is superseded, and because-nothing-writes-to-it is a statement that invites a second look.\n\nWHERE: src/cli/audit_paths.rs alongside audit_layout_adoption, so it runs in the same --paths gate every repository chain already calls.\n\nTHE HARD PART: the historical commits are already in ten repositories, so a naive rule reports violations from day one and blocks every chain. It needs a baseline - commits reachable from a recorded marker, or an allowlist beside layers-allowlist.toml naming each accepted deletion with its justification. The allowlist is probably right: ten entries, each stating why the deletion was correct, is a durable record rather than an exemption.\n\nTESTS: a fixture repository with a deletion that cites an ADR (passes), one that does not (fails naming the commit), and one that is allowlisted (passes).\n\nPLACEMENT QUESTIONED 2026-11-08, and the answer is not as clean as the ticket implied.\n\nRaised: audit is a report, verify has gates - so should this rule live in miter verify instead?\n\nMEASURED: neither verb is named for what it does.\n  - `miter verify` is \"run isolated compiler verification on the workspace or crate\". A commit-message policy is\n    not a compiler check, and it is repository-scoped where verify is crate-scoped.\n  - `miter audit` is described as a scan that flags files over a line limit, and it exits non-zero - every\n    repository chain already depends on that exit code, and it blocked work today when a file reached 250 lines.\n\nSo audit is a gate wearing a report's name, and the criticism is correct about the vocabulary.\n\nRECOMMENDATION: implement in `audit --paths`, alongside audit_layout_adoption, because the two existing policy\nrules already live there and all eleven chains call it; a policy rule in `verify` would be the only one of its kind\nand would answer a repo-wide question per crate.\n\nTHE VOCABULARY DECISION IS THIS TICKET'S, and should be made once rather than per rule:\n  a) accept `audit` as the gate surface and say so in its help text - one paragraph;\n  b) split report from gate (audit prints and exits 0, a gate verb exits non-zero) and update eleven chains plus\n     .gaugeblock/config.toml - mechanical, but must cover the three existing rules at the same time.\nEither is fine; adding a fourth rule without choosing is not.\n\nDECIDED BY EVIDENCE 2026-11-08: `audit`, not `verify`.\n\nCounted in .gaugeblock/config.toml, which holds all thirteen verification chains:\n  - `miter audit --path . --threshold 250 --paths` appears in every chain;\n  - `miter verify` appears ZERO times.\n\nSo the vocabulary question has a factual answer. `verify` is not a gate surface in this suite at all: it is the\ncompiler step that storypole's own verification invokes to produce a receipt. `audit` is what every chain actually\ngates on, together with `miter contracts`, `outfeed lockfiles` and `chalkline docs check`.\n\nTherefore this rule goes in `audit --paths`, and the remaining vocabulary work is smaller than option (b) implied: it\nis not a split between report and gate, it is making `miter audit`'s help text say that it exits non-zero and that\n`--paths` runs the policy gates. One paragraph, no chain changes.\n\nThe criticism was still worth making: a command described as a scan, depended on as a gate, is a trap for whoever\nreads the help text instead of the chains.",
     "kind": "feature",
-    "status": "deferred",
-    "priority": 3,
+    "status": "verified",
+    "priority": 1,
     "scope": {
       "repo": "miter",
       "crate_name": "miter-cli",
@@ -24,9 +24,25 @@
     "plan": null,
     "active_claim": null,
     "latest_handoff": null,
-    "verification_receipt": null,
+    "verification_receipt": {
+      "verifier": "storypole-verify",
+      "command": "cargo fmt --all -- --check && cargo clippy --workspace --all-targets -- -D warnings && cargo nextest run --workspace && miter audit --path . --threshold 250 --paths && chalkline docs check -d miter",
+      "exit_code": 0,
+      "diagnostic_count": null,
+      "summary": "state-deletion gate live: reported a real deletion with commit, subject and file; 12 repos pass with zero false positives\nAUDIT PASSED: No files exceed 250 lines in .\nAUDIT PASSED: every crate naming .gaugeblock depends on gaugeblock-workspace\nAUDIT PASSED: every crate resolving the suite has a multi-repository test\n\n=== Gaugeblock 9-Document Architecture Audit ===\nRepository: /Users/wolff/dev2026/neurosymbolic-suite/miter\n\n[OK]      Readme           (README.md)\n[OK]      Contributing     (CONTRIBUTING.md)\n[OK]      Product          (docs/PRODUCT.md)\n[OK]      Architecture     (docs/ARCHITECTURE.md)\n[OK]      Spec             (docs/SPEC.md)\n[OK]      Design           (docs/DESIGN.md)\n[OK]      Roadmap          (docs/ROADMAP.md)\n[OK]      Changelog        (CHANGELOG.md)\n[OK]      Agents           (AGENTS.md)\n\nSummary: 9 present, 0 missing, 0 drifted\n\n",
+      "verified_at_epoch_ms": 1794432589972,
+      "git_branch": "fix/mtr-1-state-gate",
+      "base_commit_sha": "4b93265b6c2a5f5e7dc87e146826e2ecdbcea3d3",
+      "head_commit_sha": "c6370b19cda0987a91735c11ad6f1bae5465cc33",
+      "commit_shas": [
+        "c6370b19cda0987a91735c11ad6f1bae5465cc33"
+      ],
+      "repo": "miter",
+      "chain_key": "miter"
+    },
     "created_at_epoch_ms": 1794245672524,
-    "updated_at_epoch_ms": 1794245672524
+    "updated_at_epoch_ms": 1794432695215,
+    "archived_at_epoch_ms": 1794432695215
   },
   "events": [
     {
