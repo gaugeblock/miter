@@ -607,6 +607,7 @@ dependencies = [
  "miter-storage",
  "redb",
  "serde_json",
+ "tempfile",
  "tokio",
  "tracing-subscriber",
 ]

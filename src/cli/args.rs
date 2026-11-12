@@ -131,6 +131,11 @@ pub enum Command {
         /// Output format (`table` or `json`).
         #[arg(long, default_value = "table")]
         format: String,
+        /// Record the current 200-250 band as the size ratchet baseline (`GB-195`).
+        ///
+        /// Run deliberately and review the diff: every entry added is a file the sweep has not reached.
+        #[arg(long)]
+        write_size_ratchet: bool,
     },
     /// Analyze AST co-reference graphs and generate extraction blueprints.
     Slice {

@@ -141,6 +141,7 @@ tokio = { workspace = true, features = ["rt"] }
 
 [dev-dependencies]
 miter-harness.workspace = true
+tempfile.workspace = true
 redb.workspace = true
 serde_json.workspace = true
 

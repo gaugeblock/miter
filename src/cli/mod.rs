@@ -44,9 +44,11 @@ pub mod audit;
 mod audit_multi_repo;
 mod audit_paths;
 mod audit_paths_report;
+mod audit_size_ratchet;
 mod audit_state;
 pub mod clones;
 pub mod contracts;
+mod db_path;
 pub mod deps;
 pub mod deps_layers;
 mod deps_layers_edit;
@@ -73,20 +75,7 @@ pub use error::CliError;
 
 use clap::Parser;
 
-/// Resolves the workspace database path for one invocation.
-///
-/// An explicit `--db` wins. Otherwise the command works in the root of the current directory —
-/// the nearest `.gaugeblock/` or `.git/` marker at or above it — and opens
-/// `<root>/.gaugeblock/miter/miter.redb` (legacy `<root>/.miter/miter.redb` is still read).
-/// There is one root and one database per invocation: nothing is
-/// registered, attached or kept alive between runs.
-#[must_use]
-pub fn resolve_db(explicit: Option<std::path::PathBuf>) -> std::path::PathBuf {
-    explicit.unwrap_or_else(|| {
-        let start = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
-        miter_storage::default_db_path(&miter_storage::resolve_workspace_root(&start))
-    })
-}
+pub use db_path::resolve_db;
 
 /// Runs the CLI, returning the process exit code.
 pub fn run() -> i32 {
@@ -133,7 +122,8 @@ pub fn execute(cli: Cli) -> Result<(), CliError> {
             path,
             threshold,
             format,
-        } => audit::run_audit(path, threshold, audit::AuditFormat::parse(&format), paths),
+            write_size_ratchet,
+        } => audit::dispatch(path, threshold, &format, paths, write_size_ratchet),
         Command::Slice {
             path,
             target_lines,

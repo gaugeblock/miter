@@ -389,6 +389,19 @@ A top-level `exclude` applies to both passes; `[indexer]` and `[audit]` narrow i
 baseline set of secret/credential globs (`*.pem`, `*.key`, `id_rsa*`, `credentials.json`, …) are
 always applied on top of the configured patterns.
 
+### The 200-line band does not grow
+
+`miter audit --paths` also runs a size ratchet (`GB-195`). Files between 200 and 250 lines are legal
+but are where the next ceiling breach comes from — and two of them crossed 250 in one session by a
+reformat rather than an edit. The recorded sizes live in `.gaugeblock/miter/size-ratchet.txt`; a file
+in the band may shrink or leave it, but not grow, and a new file may not enter without the entry being
+added deliberately:
+
+```bash
+# Record the band as it stands; review the diff, since every entry is a file the sweep has not reached
+miter audit --paths --write-size-ratchet
+```
+
 ### Crates
 
 | Crate | Responsibility |
