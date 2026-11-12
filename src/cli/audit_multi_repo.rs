@@ -25,23 +25,23 @@ const MARKER: &str = "multi-repo:";
 /// Crates that resolve the suite but have no multi-repository test yet, each with the ticket that owes one.
 ///
 /// An entry is a debt, not a suppression: the crate is doing the thing the rule is about and has no evidence
-/// for it. Short on purpose - if this list grows, the rule is being negotiated with rather than enforced.
-/// Three entries have left it on 2026-11-10 (`GB-305`):
+/// for it. It is **empty** as of 2026-11-10, which is the state this list was built to reach (`GB-305`). All
+/// four entries were paid or shown to be wrong, and the last two payments each found a real defect:
 ///
-/// * `storypole-cli` paid: `config check --workspace` run from a member tested the member, not the suite.
-///   Fixed in storypole `ed38beb`, with three tests that run the built binary from inside a member.
-/// * `sawhorse-core` had stopped being a finding: it no longer calls discovery, because telemetry writes
-///   through `gaugeblock_workspace::sink_path`, which resolves the suite on the caller's behalf. A debt
-///   entry for a call that is not there inflates the register and teaches readers to skim it - the
-///   behavioural test the entry asked for is deferred as SH-10 rather than left implied here.
-/// * `rabbet-cli` paid, and it was a defect rather than a gap: `ingest` resolved the spool through
-///   `GaugeblockPaths::discover`, which never leaves the checkout it is in, so from a member it read an empty
-///   spool and exited zero. Fixed in rabbet `3f8ba5d` on `gaugeblock_workspace::outbox_path` (common
-///   `abb7341`), with three tests that ask from inside a member.
-const OWED: [(&str, &str); 1] = [(
-    "benchwork-cli",
-    "GB-293: the daemon's telemetry and handler paths need a two-repository test",
-)];
+/// * `storypole-cli`: `config check --workspace` run from a member tested the member, not the suite
+///   (storypole `ed38beb`).
+/// * `sawhorse-core` was never a finding - it resolves through `sink_path` and calls no discovery function.
+///   Behavioural test deferred as SH-10.
+/// * `rabbet-cli`: `ingest` resolved the spool through `discover`, which never leaves the checkout, so from a
+///   member it read an empty spool and exited zero (rabbet `3f8ba5d`, common `abb7341`).
+/// * `benchwork-cli`: the daemon tailed the member's telemetry log instead of the suite's, and
+///   `tidy --workspace` walked the launch directory's children - zero repositories, exit zero (benchwork
+///   `9592f2a`).
+///
+/// Re-adding an entry should name the ticket that owes the test, and the honest question first is whether the
+/// crate's answer is wrong - three of these four were not missing tests but shipped defects that only a
+/// multi-repository test could fail.
+const OWED: [(&str, &str); 0] = [];
 
 /// One crate that resolves the suite without a multi-repository test.
 #[derive(Debug, Clone, PartialEq, Eq)]
