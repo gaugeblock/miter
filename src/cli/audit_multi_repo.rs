@@ -33,7 +33,7 @@ const MARKER: &str = "multi-repo:";
 /// * `sawhorse-core` had stopped being a finding: it no longer calls discovery, because telemetry writes
 ///   through `gaugeblock_workspace::sink_path`, which resolves the suite on the caller's behalf. A debt
 ///   entry for a call that is not there inflates the register and teaches readers to skim it - the
-///   behavioural test the entry asked for is deferred as SP-54 rather than left implied here.
+///   behavioural test the entry asked for is deferred as SH-10 rather than left implied here.
 const OWED: [(&str, &str); 2] = [
     (
         "benchwork-cli",
