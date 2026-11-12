@@ -26,7 +26,7 @@ const MARKER: &str = "multi-repo:";
 ///
 /// An entry is a debt, not a suppression: the crate is doing the thing the rule is about and has no evidence
 /// for it. Short on purpose - if this list grows, the rule is being negotiated with rather than enforced.
-/// Two entries left it on 2026-11-10 (`GB-305`):
+/// Three entries have left it on 2026-11-10 (`GB-305`):
 ///
 /// * `storypole-cli` paid: `config check --workspace` run from a member tested the member, not the suite.
 ///   Fixed in storypole `ed38beb`, with three tests that run the built binary from inside a member.
@@ -34,16 +34,14 @@ const MARKER: &str = "multi-repo:";
 ///   through `gaugeblock_workspace::sink_path`, which resolves the suite on the caller's behalf. A debt
 ///   entry for a call that is not there inflates the register and teaches readers to skim it - the
 ///   behavioural test the entry asked for is deferred as SH-10 rather than left implied here.
-const OWED: [(&str, &str); 2] = [
-    (
-        "benchwork-cli",
-        "GB-293: the daemon's telemetry and handler paths need a two-repository test",
-    ),
-    (
-        "rabbet-cli",
-        "GB-304: spool resolution after the default became runtime-resolved",
-    ),
-];
+/// * `rabbet-cli` paid, and it was a defect rather than a gap: `ingest` resolved the spool through
+///   `GaugeblockPaths::discover`, which never leaves the checkout it is in, so from a member it read an empty
+///   spool and exited zero. Fixed in rabbet `3f8ba5d` on `gaugeblock_workspace::outbox_path` (common
+///   `abb7341`), with three tests that ask from inside a member.
+const OWED: [(&str, &str); 1] = [(
+    "benchwork-cli",
+    "GB-293: the daemon's telemetry and handler paths need a two-repository test",
+)];
 
 /// One crate that resolves the suite without a multi-repository test.
 #[derive(Debug, Clone, PartialEq, Eq)]
