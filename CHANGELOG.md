@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `miter-engine`: a file whose metadata cannot be read is now re-indexed instead of being treated as unchanged. `detect_dirty_files` answered `unchanged` whenever `mtime` or size could not be stat-ed - a permissions problem, a vanished mount, a clock before the epoch - which is the one answer that cannot be defended: a file we cannot stat is a file we cannot prove is the same file, so skipping it leaves the index describing content that may have been edited or replaced. The comparison is now a named function with tests covering unreadable, identical, and each of the three changed fields (GB-314).
+
 ### Changed
 - Enforce the suite clippy floor (`unwrap_used = "deny"`, `expect_used = "deny"`) across the workspace; the two library-path unwraps in the cycle and clone analysers were replaced with guarded lookups and a NaN-safe comparison (GB-98).
 - Point `repository`/`homepage` at `gaugeblock/miter` and `https://gaugeblock.dev`, add the suite author email and an explicit `readme` key (GB-98).
