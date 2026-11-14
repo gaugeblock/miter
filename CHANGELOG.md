@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- `miter-engine`: `add_universal_symbols` now stores one entry per declaration instead of one per read. A tracked pass appends the files it re-read while a full pass re-reads everything, so the list accumulated duplicates and every consumer walked them - the index reported 7542 universal symbols beside 4868 function records, more declarations than code. Identity is the declaration's location (file, language, span), so the same name in two files remains two symbols (GB-315).
 - `miter-engine`: a file whose metadata cannot be read is now re-indexed instead of being treated as unchanged. `detect_dirty_files` answered `unchanged` whenever `mtime` or size could not be stat-ed - a permissions problem, a vanished mount, a clock before the epoch - which is the one answer that cannot be defended: a file we cannot stat is a file we cannot prove is the same file, so skipping it leaves the index describing content that may have been edited or replaced. The comparison is now a named function with tests covering unreadable, identical, and each of the three changed fields (GB-314).
 
 ### Changed
