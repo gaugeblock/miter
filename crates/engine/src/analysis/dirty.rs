@@ -89,14 +89,7 @@ pub fn detect_dirty_files(root: &Path, indexed_files: &[(String, IndexedFileReco
                     .map(|dur| (meta.len(), dur.as_secs(), dur.subsec_nanos()))
             });
 
-        let is_dirty = match mtime_match {
-            Some((size, secs, nanos)) => {
-                secs != record.mtime_secs
-                    || nanos != record.mtime_nanos
-                    || size != record.size_bytes
-            }
-            None => false,
-        };
+        let is_dirty = needs_reindex(record, mtime_match);
         if is_dirty {
             modified.insert(full);
         }
@@ -119,3 +112,49 @@ mod ingest;
 mod sources;
 
 pub use ingest::ingest_dirty;
+
+/// Whether an indexed file must be re-read, given what the filesystem says about it now.
+///
+/// `None` means the metadata could not be read - a permissions problem, a vanished mount, a clock before the
+/// epoch. It used to count as *unchanged*, which is the one answer that cannot be defended: a file we cannot
+/// stat is a file we cannot prove is the same file, and skipping it leaves the index describing content that
+/// may have been edited or replaced. Re-reading costs a parse; not re-reading costs a wrong answer (`GB-314`).
+fn needs_reindex(record: &IndexedFileRecord, observed: Option<(u64, u64, u32)>) -> bool {
+    match observed {
+        Some((size, secs, nanos)) => {
+            secs != record.mtime_secs || nanos != record.mtime_nanos || size != record.size_bytes
+        }
+        None => true,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #![allow(clippy::unwrap_used, clippy::expect_used)]
+
+    use super::*;
+
+    fn record() -> IndexedFileRecord {
+        IndexedFileRecord::new(1_000, 250, [0u8; 32], 42)
+    }
+
+    #[test]
+    fn an_unreadable_file_is_reindexed_rather_than_trusted() {
+        assert!(
+            needs_reindex(&record(), None),
+            "a file whose metadata cannot be read is not provably unchanged"
+        );
+    }
+
+    #[test]
+    fn an_identical_file_is_not() {
+        assert!(!needs_reindex(&record(), Some((42, 1_000, 250))));
+    }
+
+    #[test]
+    fn a_changed_size_or_time_is() {
+        assert!(needs_reindex(&record(), Some((43, 1_000, 250))));
+        assert!(needs_reindex(&record(), Some((42, 1_001, 250))));
+        assert!(needs_reindex(&record(), Some((42, 1_000, 251))));
+    }
+}
